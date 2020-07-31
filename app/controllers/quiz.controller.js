@@ -18,6 +18,7 @@ exports.create = (req, res) => {
     question.create(quest)
         .then(data => {
             console.log(data)
+            res.send({ message: data });
             return data;
         })
         .catch(err => {
@@ -65,3 +66,13 @@ exports.createReponse = (req, res) => {
             console.log(">> Error while creating comment: ", err);
         });
 };
+exports.findQuestionbyId = (req, res, next) => {
+    return question.findByPk(req.params.id, { include: ["options"] })
+    .then((data) => {
+        res.send({ data: data });
+      return data;
+    })
+    .catch((err) => {
+      console.log(">> Error while finding comment: ", err);
+    });
+  };

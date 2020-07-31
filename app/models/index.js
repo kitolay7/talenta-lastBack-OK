@@ -34,8 +34,11 @@ db.question.belongsTo(db.quiz, {
   foreignKey: "quizId",
   as: "quiz",
 }); */
-db.question.hasMany(db.reponse, { as: "reponse" });;
-
+db.question.hasMany(db.reponse, { as: "options" });;
+db.reponse.belongsTo(db.question, {
+  foreignKey: "questionId",
+  as: "options",
+});
 db.role.belongsToMany(db.user, {
   through: "user_roles",
   foreignKey: "roleId",

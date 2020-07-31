@@ -12,4 +12,5 @@ module.exports = function(app) {
 
   app.post("/quiz", controller.create);
   app.post("/createReponse", controller.createReponse);
+  app.get("/findReponse/:id", controller.findQuestionbyId);
 };
