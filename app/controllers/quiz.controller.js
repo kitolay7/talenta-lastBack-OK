@@ -14,6 +14,7 @@ exports.create = (req, res) => {
     const quest = {
         name: req.body.name,
         type: req.body.type,
+        offreId: req.body.offreId
     };
     question.create(quest)
         .then(data => {

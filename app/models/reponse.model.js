@@ -9,7 +9,7 @@ module.exports = (sequelize, Sequelize) => {
         isAnswer: {
             type: Sequelize.STRING
         },
-    });
+    }, { timestamps: false,});
 
     return reponse;
 };

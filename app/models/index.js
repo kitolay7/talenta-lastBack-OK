@@ -29,12 +29,18 @@ db.role = require("../models/role.model.js")(sequelize, Sequelize);
 db.quiz = require("../models/quiz.model.js")(sequelize, Sequelize);
 db.question = require("../models/question.model.js")(sequelize, Sequelize);
 db.reponse = require("../models/reponse.model.js")(sequelize, Sequelize);
+db.offre = require("../models/offre.model.js")(sequelize, Sequelize);
 /* db.quiz.hasMany(db.question, { as: "quiz" });
 db.question.belongsTo(db.quiz, {
   foreignKey: "quizId",
   as: "quiz",
 }); */
-db.question.hasMany(db.reponse, { as: "options" });;
+db.question.hasMany(db.reponse, { as: "options" });
+db.question.belongsTo(db.offre, {
+  foreignKey: "offreId",
+  as: "questions",
+});
+db.offre.hasMany(db.question, { as: "questions" });
 db.reponse.belongsTo(db.question, {
   foreignKey: "questionId",
   as: "options",
