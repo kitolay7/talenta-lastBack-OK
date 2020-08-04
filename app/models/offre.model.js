@@ -26,6 +26,12 @@ module.exports = (sequelize, Sequelize) => {
         },
         photoAnime: {
             type: Sequelize.STRING
+        },
+        pays: {
+            type: Sequelize.STRING
+        },
+        publier: {
+            type: Sequelize.BOOLEAN
         }
     }, { timestamps: false,});
 

@@ -6,6 +6,7 @@ const offres = db.offre;
 const Reponse = db.reponse;
 const Op = db.Sequelize.Op;
 exports.createOffre = (req, res) => {
+    console.log(req.files)
     const offre = {
         titre: req.body.titre,
         description: req.body.description,
@@ -13,6 +14,7 @@ exports.createOffre = (req, res) => {
         missions: req.body.missions,
         qualification: req.body.qualification,
         messages: req.body.messages,
+        publier: req.body.publier,
         logo: req.files.logo[0].filename,
         video: req.files.video[0].filename,
     };
@@ -30,10 +32,23 @@ exports.createOffre = (req, res) => {
 exports.getOfferById = (req, res) => {
     return offres.findByPk(req.params.id, { include: ["questions"] })
     .then((data) => {
-        res.send({ data: data });
+        console.log(data.get({ publier: false }))
+        res.send({ data: data});
       return data;
     })
     .catch((err) => {
       console.log(">> Error while finding comment: ", err);
     });
 }
+exports.findAllPublished = (req, res) => {
+    offres.findAll({ where: { publier: true } } )
+      .then(data => {
+        res.send(data);
+      })
+      .catch(err => {
+        res.status(500).send({
+          message:
+            err.message || "Some error occurred while retrieving tutorials."
+        });
+      });
+  };

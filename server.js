@@ -15,6 +15,7 @@ const db = require("./app/models");
 const Role = db.role;
 db.sequelize.sync().then(() => {
   console.log("Drop and re-sync db.");
+
 }).catch((err) => {
   console.log(err,"Some problems with database connection!!!");
 });
@@ -29,6 +30,7 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to bezkoder application." });
 });
 
+app.use(express.static('uploads'));
 // routes
 require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);
@@ -37,17 +39,17 @@ require("./app/routes/quiz.routes")(app);
 function initial() {
   Role.create({
     id: 1,
-    name: "user"
+    name: "admin"
   });
  
   Role.create({
     id: 2,
-    name: "moderator"
+    name: "candidat"
   });
  
   Role.create({
     id: 3,
-    name: "admin"
+    name: "recruteur"
   });
 }
 const PORT = process.env.PORT || 8080;

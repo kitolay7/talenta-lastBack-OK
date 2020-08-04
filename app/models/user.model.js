@@ -14,6 +14,18 @@ module.exports = (sequelize, Sequelize) => {
     },
     password: {
       type: Sequelize.STRING
+    },
+    numTel: {
+      type: Sequelize.STRING
+    },
+    pays: {
+      type: Sequelize.STRING
+    },
+    codePostal: {
+      type: Sequelize.STRING
+    },
+    societe: {
+      type: Sequelize.STRING
     }
   }, {
     freezeTableName: true,

@@ -13,14 +13,18 @@ module.exports = function (app) {
   });
   const fileStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, 'uploads/');
+      if (file.mimetype.includes('video')) {
+        cb(null, 'uploads/videos');
+      } else if (file.mimetype.includes('image')) {
+        cb(null, 'uploads/');
+      }
     },
     filename: (req, file, cb) => { // naming file
       cb(null, (new Date).valueOf() + file.originalname);
     }
   });
   app.post("/quiz", controller.create);
-  app.post("/createReponse", controller.createReponse);
+  app.post("/createReponse",controller.createReponse);
   app.post("/createOffre", multer(
     {
       storage: fileStorage,
@@ -34,5 +38,6 @@ module.exports = function (app) {
   }]
   ), offreControler.createOffre);
   app.get("/getOffer/:id", offreControler.getOfferById);
+  app.get("/getAllOffer", offreControler.findAllPublished);
   app.get("/findReponse/:id", controller.findQuestionbyId);
 };
