@@ -15,7 +15,7 @@ exports.create = (req, res) => {
         name: req.body.name,
         type: req.body.type,
         offreId: req.body.offreId,
-        userId: req.body.userId
+        // userId: req.body.userId
     };
     question.create(quest)
         .then(data => {
