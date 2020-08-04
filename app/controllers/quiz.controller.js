@@ -14,7 +14,8 @@ exports.create = (req, res) => {
     const quest = {
         name: req.body.name,
         type: req.body.type,
-        offreId: req.body.offreId
+        offreId: req.body.offreId,
+        userId: req.body.userId
     };
     question.create(quest)
         .then(data => {
@@ -69,11 +70,11 @@ exports.createReponse = (req, res) => {
 };
 exports.findQuestionbyId = (req, res, next) => {
     return question.findByPk(req.params.id, { include: ["options"] })
-    .then((data) => {
-        res.send({ data: data });
-      return data;
-    })
-    .catch((err) => {
-      console.log(">> Error while finding comment: ", err);
-    });
-  };
+        .then((data) => {
+            res.send({ data: data });
+            return data;
+        })
+        .catch((err) => {
+            console.log(">> Error while finding comment: ", err);
+        });
+};
