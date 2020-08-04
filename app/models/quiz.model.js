@@ -9,8 +9,11 @@ module.exports = (sequelize, Sequelize) => {
     type: {
       type: Sequelize.STRING
     },
+    userId: {
+      type: Sequelize.INTEGER
+    }
 
-  }, { timestamps: false,});
+  }, { timestamps: false, });
 
   return Quiz;
 };

@@ -55,6 +55,10 @@ db.user.belongsToMany(db.role, {
   foreignKey: "userId",
   otherKey: "roleId"
 });
+db.user.hasMany(db.quiz, { foreignKey: "userId" })
+db.quiz.belongsTo(db.user, {
+  foreignKey: "userId"
+})
 
 db.ROLES = ["candidat", "admin", "recruteur"];
 

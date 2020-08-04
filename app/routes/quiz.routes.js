@@ -31,10 +31,10 @@ module.exports = function (app) {
     }
   ).fields([{
     name: 'video', maxCount: 1
-  },{
+  }, {
     name: 'logo', maxCount: 1
-  },{
-    name: 'photoAnime', maxCount: 8 
+  }, {
+    name: 'photoAnime', maxCount: 8
   }]
   ), offreControler.createOffre);
   app.get("/getOffer/:id", offreControler.getOfferById);

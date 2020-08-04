@@ -17,7 +17,7 @@ db.sequelize.sync().then(() => {
   console.log("Drop and re-sync db.");
 
 }).catch((err) => {
-  console.log(err,"Some problems with database connection!!!");
+  console.log(err, "Some problems with database connection!!!");
 });
 // force: true will drop the table if it already exists
 // db.sequelize.sync({force: true}).then(() => {
@@ -35,18 +35,19 @@ app.use(express.static('uploads'));
 require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);
 require("./app/routes/quiz.routes")(app);
+require("./app/routes/test_mailer_routes")(app);
 // set port, listen for requests
 function initial() {
   Role.create({
     id: 1,
     name: "admin"
   });
- 
+
   Role.create({
     id: 2,
     name: "candidat"
   });
- 
+
   Role.create({
     id: 3,
     name: "recruteur"
