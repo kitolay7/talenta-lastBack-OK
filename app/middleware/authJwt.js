@@ -3,20 +3,28 @@ const config = require("../config/auth.config.js");
 const db = require("../models");
 const User = db.user;
 
+const HttpStatus = require('http-status-codes');
+
+
 verifyToken = (req, res, next) => {
   let token = req.headers["x-access-token"];
 
   if (!token) {
-    return res.status(403).send({
-      message: "No token provided!"
-    });
+    return res
+      .status(HttpStatus.FORBIDDEN)
+      .send({
+        message: "No token provided!",
+        error: true
+      });
   }
 
   jwt.verify(token, config.secret, (err, decoded) => {
     if (err) {
-      return res.status(401).send({
-        message: "Unauthorized!"
-      });
+      return res
+        .status(HttpStatus.UNAUTHORIZED).send({
+          message: "Unauthorized!",
+          error: true
+        });
     }
     req.userId = decoded.id;
     next();
@@ -33,9 +41,12 @@ isAdmin = (req, res, next) => {
         }
       }
 
-      res.status(403).send({
-        message: "Require Admin Role!"
-      });
+      res
+        .status(HttpStatus.FORBIDDEN)
+        .send({
+          message: "Require Admin Role!",
+          error: true
+        });
       return;
     });
   });
@@ -51,9 +62,12 @@ isModerator = (req, res, next) => {
         }
       }
 
-      res.status(403).send({
-        message: "Require recruteur Role!"
-      });
+      res
+        .status(HttpStatus.FORBIDDEN)
+        .send({
+          message: "Require Moderator Role!",
+          error: true
+        });
     });
   });
 };
@@ -73,8 +87,9 @@ isModeratorOrAdmin = (req, res, next) => {
         }
       }
 
-      res.status(403).send({
-        message: "Require Moderator or Admin Role!"
+      res.status(HttpStatus.FORBIDDEN).send({
+        message: "Require Moderator or Admin Role!",
+        error: true
       });
     });
   });

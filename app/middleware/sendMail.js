@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const HttpStatus = require('http-status-codes');
 require('dotenv/config');
 const sendMail = (req, res, next) => {
   const transporter = nodemailer.createTransport({
@@ -30,13 +31,17 @@ const sendMail = (req, res, next) => {
     if (error) {
       console.log("Erreur lors de l'envoie du mail!");
       console.log(error);
-      res.status(400).json({
-        error: error,
-        message: "Erreur lors de l'envoi du email!"
-      });
+      res
+        .status(HttpStatus.BAD_REQUEST)
+        .send({
+          error: error,
+          message: "Erreur lors de l'envoi du email!"
+        });
     } else {
       console.log("Mail envoyé avec succès!")
-      res.status(200).json({ message: "Mail envoyé avec succès!" });
+      res
+        .status(HttpStatus.OK)
+        .send({ message: "Mail envoyé avec succès!" });
     }
     transporter.close();
   });
