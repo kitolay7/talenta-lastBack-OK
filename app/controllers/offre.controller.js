@@ -32,7 +32,7 @@ exports.createOffre = (req, res) => {
 exports.getOfferById = (req, res) => {
     return offres.findByPk(req.params.id, { include: ["questions"] })
     .then((data) => {
-        console.log(data.get({ publier: false }))
+        console.log(data)
         res.send({ data: data});
       return data;
     })
