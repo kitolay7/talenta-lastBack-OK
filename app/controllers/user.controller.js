@@ -1,15 +1,25 @@
+const HttpStatus = require('http-status-codes');
+
 exports.allAccess = (req, res) => {
-  res.status(200).send("Public Content.");
+  res
+    .status(HttpStatus.OK)
+    .send({ message: "Public Content.", error: false });
 };
 
 exports.userBoard = (req, res) => {
-  res.status(200).send("User Content.");
+  res
+    .status(HttpStatus.OK)
+    .send({ message: "User Content.", error: false });
 };
 
 exports.adminBoard = (req, res) => {
-  res.status(200).send("Admin Content.");
+  res
+    .status(HttpStatus.OK)
+    .send({ message: "Admin Content.", error: false });
 };
 
 exports.moderatorBoard = (req, res) => {
-  res.status(200).send("Moderator Content.");
+  res
+    .status(HttpStatus.OK)
+    .send("Moderator Content.");
 };
