@@ -22,7 +22,7 @@ exports.register = (req, res) => {
     numTel: req.body.numTel,
   })
     .then(user => {
-      console.log(user, req.body)
+      // console.log(user, req.body)
       if (req.body.roles) {
         Role.findAll({
           where: {
@@ -52,7 +52,7 @@ exports.register = (req, res) => {
 };
 
 exports.signin = (req, res) => {
-  console.log(req.body)
+  console.log(`\n\n\n${req.body}\n\n\n`);
   User.findOne({
     where: {
       email: req.body.email
@@ -96,6 +96,10 @@ exports.signin = (req, res) => {
             username: user.username,
             email: user.email,
             roles: authorities,
+            numTel: user.numTel,
+            pays: user.pays,
+            codePostal: user.codePostal,
+            societe: user.societe,
             accessToken: token,
             error: false
           });
