@@ -2,6 +2,7 @@ const db = require("../models");
 const config = require("../config/auth.config");
 const User = db.user;
 const Role = db.role;
+const HttpStatus = require('http-status-codes');
 
 const Op = db.Sequelize.Op;
 
@@ -20,7 +21,7 @@ exports.register = (req, res) => {
     pays: req.body.pays,
     numTel: req.body.numTel,
   })
-    .then(user => { 
+    .then(user => {
       console.log(user, req.body)
       if (req.body.roles) {
         Role.findAll({
@@ -30,20 +31,23 @@ exports.register = (req, res) => {
             }
           }
         }).then(roles => {
-          console.log(roles)
           user.setRoles(roles).then(() => {
-            res.send({ message: "User registered successfully!" });
+            res
+              .status(HttpStatus.CREATED)
+              .send({ message: "User registered successfully!", error: false });
           });
         });
       } else {
         // user role = 1
         user.setRoles([2]).then(() => {
-          res.send({ message: "User registered successfully!" });
+          res
+            .status(HttpStatus.CREATED)
+            .send({ message: "User registered successfully!", error: false });
         });
       }
     })
     .catch(err => {
-      res.status(500).send({ message: err.message });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message, error: true });
     });
 };
 
@@ -56,7 +60,9 @@ exports.signin = (req, res) => {
   })
     .then(user => {
       if (!user) {
-        return res.status(404).send({ message: "User Not found." });
+        return res
+          .status(HttpStatus.NOT_FOUND)
+          .send({ message: "User Not found.", error: true });
       }
 
       var passwordIsValid = bcrypt.compareSync(
@@ -65,10 +71,13 @@ exports.signin = (req, res) => {
       );
 
       if (!passwordIsValid) {
-        return res.status(401).send({
-          message: "Invalid Password!",
-          error: true
-        });
+        return res
+          .status(HttpStatus.UNAUTHORIZED)
+          .send({
+            accessToken: null,
+            message: "Invalid Password!",
+            error: true
+          });
       }
 
       var token = jwt.sign({ id: user.id }, config.secret, {
@@ -80,17 +89,19 @@ exports.signin = (req, res) => {
         for (let i = 0; i < roles.length; i++) {
           authorities.push("ROLE_" + roles[i].name.toUpperCase());
         }
-        res.status(200).send({
-          id: user.id,
-          username: user.username,
-          roles: authorities,
-          accessToken: token,
-          error: false
-        });
+        res
+          .status(HttpStatus.OK)
+          .send({
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            roles: authorities,
+            accessToken: token,
+            error: false
+          });
       });
     })
     .catch(err => {
-      res.status(500).send({ message: err.message,
-        error: true });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message, error: true });
     });
 };
