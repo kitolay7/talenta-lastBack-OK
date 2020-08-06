@@ -1,8 +1,10 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const mysql = require('mysql2');
 const app = express();
+const fs = require("fs");
+const path = require("path");
+const config = require("./app/config/db.config");
 
 app.use(cors());
 app.use(function (req, res, next) {
@@ -31,14 +33,50 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // database
 const db = require("./app/models");
 const Role = db.role;
-db.sequelize.sync().then(() => {
-  console.log("Drop and re-sync db.");
 
-}).catch((err) => {
-  console.log(err, "Some problems with database connection!!!");
-});
+const mkdirpSync = function (dirPath) {
+  const parts = dirPath.split(path.sep)
+  // For every part of our path, call our wrapped mkdirSync()
+  // on the full path until and including that part
+  for (let i = 1; i <= parts.length; i++) {
+    try {
+      fs.mkdirSync(path.join.apply(null, parts.slice(0, i)))
+    } catch (err) {
+      if (err.code !== "EEXIST") throw err
+    }
+  }
+}
+
+
+// CREATE DATABASE IF NOT EXIST
+const mysql_connection = require('mysql2/promise');
+mysql_connection.createConnection({
+  user: config.USER,
+  password: config.PASSWORD
+}).then((connection) => {
+  connection.query(`CREATE DATABASE IF NOT EXISTS ${config.DB};`).then(() => {
+    // Safe to use sequelize now
+    console.info("Database create or successfully checked");
+
+    mkdirpSync('uploads/videos/');
+
+    // CREATE TABLES IF NOT EXIST
+    db.sequelize.sync().then(() => {
+      console.log("re-sync db.");
+    }).catch((err) => {
+      console.log(err, "Some problems with database connection!!!");
+    });
+  })
+}).catch((error) => {
+  console.log(error);
+})
+
+
+
+
+
 // force: true will drop the table if it already exists
-// db.sequelize.sync({force: true}).then(() => {
+// db.sequelize.sync({ force: true }).then(() => {
 //   console.log('Drop and Resync Database with { force: true }');
 //   initial();
 // });
