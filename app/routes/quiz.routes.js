@@ -24,7 +24,7 @@ module.exports = function (app) {
     }
   });
   app.post("/quiz", controller.create);
-  app.post("/createReponse",controller.createReponse);
+  app.post("/createReponse", controller.createReponse);
   app.post("/createOffre", multer(
     {
       storage: fileStorage,
@@ -40,4 +40,6 @@ module.exports = function (app) {
   app.get("/getOffer/:id", offreControler.getOfferById);
   app.get("/getAllOffer", offreControler.findAllPublished);
   app.get("/findReponse/:id", controller.findQuestionbyId);
+  app.get("/getOfferArchived", offreControler.getOfferArchived);
+  app.put("/updateArchive/:id", offreControler.updateOfferStatusArchived);
 };

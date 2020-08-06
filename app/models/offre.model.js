@@ -32,8 +32,20 @@ module.exports = (sequelize, Sequelize) => {
         },
         publier: {
             type: Sequelize.BOOLEAN
+        },
+        archived: {
+            type: Sequelize.BOOLEAN
         }
-    }, { timestamps: false,});
+    }, {
+        timestamps: false,
+        scopes: {
+            archived: {
+                where: {
+                    archived: true
+                }
+            }
+        }
+    });
 
     return offre;
 };
