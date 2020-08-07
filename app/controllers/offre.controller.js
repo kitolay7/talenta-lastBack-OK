@@ -22,6 +22,7 @@ exports.createOffre = (req, res) => {
         qualification: req.body.qualification,
         messages: req.body.messages,
         publier: req.body.publier,
+        archived: req.body.archived,
         logo: req.files.logo[0].filename,
         video: video,
     };
@@ -75,3 +76,46 @@ exports.findAllPublished = (req, res) => {
                 });
         });
 };
+
+exports.getOfferArchived = (req, res) => {
+    offres.scope('archived').findAll()
+        .then(data => {
+            res
+                .status(HttpStatus.OK)
+                .send(data);
+        })
+        .catch(err => {
+            res
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .send({
+                    message:
+                        err.message || "Some error occurred while retrieving tutorials.",
+                    error: true
+                });
+        });
+}
+
+exports.updateOfferStatusArchived = (req, res) => {
+    offres.update(
+        {
+            archived: req.body.archived
+        }, {
+        where: { id: req.params.id },
+        returning: true
+    })
+        .then((result) => {
+            console.log(`\n\n\n${result}\n\n\n`)
+            if (result[1] === 0) throw "Any field is modified"
+            res.status(HttpStatus.OK).json({
+                message: "this offer is updated successfully",
+                error: false
+            })
+        })
+        .catch((error) => {
+            console.log(error);
+            res
+                .status(HttpStatus.NOT_ACCEPTABLE)
+                .send({ message: error, error: true });
+        });
+
+}
