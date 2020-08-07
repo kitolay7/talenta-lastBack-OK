@@ -47,7 +47,7 @@ exports.register = (req, res) => {
       }
     })
     .catch(err => {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message, error: true });
+      res.send({ message: err.message, error: HttpStatus.INTERNAL_SERVER_ERROR });
     });
 };
 
@@ -72,11 +72,10 @@ exports.signin = (req, res) => {
 
       if (!passwordIsValid) {
         return res
-          .status(HttpStatus.UNAUTHORIZED)
           .send({
             accessToken: null,
             message: "Invalid Password!",
-            error: true
+            error: HttpStatus.UNAUTHORIZED
           });
       }
 

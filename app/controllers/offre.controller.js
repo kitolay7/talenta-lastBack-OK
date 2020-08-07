@@ -8,7 +8,12 @@ const offres = db.offre;
 const Reponse = db.reponse;
 const Op = db.Sequelize.Op;
 exports.createOffre = (req, res) => {
-    console.log(req.files)
+ if (req.files.video !== undefined) {
+     var video = req.files.video[0].filename
+ } else {
+     var video = null
+ }
+    console.log(req.files.video)
     const offre = {
         titre: req.body.titre,
         description: req.body.description,
@@ -18,7 +23,7 @@ exports.createOffre = (req, res) => {
         messages: req.body.messages,
         publier: req.body.publier,
         logo: req.files.logo[0].filename,
-        video: req.files.video[0].filename,
+        video: video,
     };
     console.log(req.body)
     offres.create(offre).then((reponse) => {
