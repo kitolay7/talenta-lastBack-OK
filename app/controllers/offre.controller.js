@@ -1,16 +1,16 @@
 const db = require("../models");
 const HttpStatus = require('http-status-codes');
 
-
 const fs = require('fs');
+const { error } = require("console");
 const Quiz = db.quiz;
 const offres = db.offre;
 const Reponse = db.reponse;
 const Op = db.Sequelize.Op;
-exports.createOffre = (req, res) => {
-    console.log(req.files)
+exports.createOffre = async (req, res) => {
+    // console.log(req.files);
     const offre = {
-        titre: req.body.titre,
+        title: req.body.title,
         description: req.body.description,
         contexte: req.body.contexte,
         missions: req.body.missions,
@@ -18,23 +18,103 @@ exports.createOffre = (req, res) => {
         messages: req.body.messages,
         publier: req.body.publier,
         archived: req.body.archived,
-        logo: req.files.logo[0].filename,
-        video: req.files.video[0].filename,
+        // logo: req.files.logo[0].filename,
+        // video: req.files.video[0].filename,
     };
-    console.log(req.body)
-    offres.create(offre).then((reponse) => {
-        console.log(">> Created OFfre: " + JSON.stringify(reponse));
+    // Creation Blob
+    const generateBlob = (req) => {
+        const blobLogo = (req.files.logo && req.files.logo[0]) ? {
+            path: (new Date).valueOf() + req.files.logo[0].originalname,
+            extension: req.files.logo[0].originalname.split('.').pop(),
+            TypeBlobId: 1 // logo
+        } : null
+        console.log(`\n\nblobLogo ${JSON.stringify(blobLogo)}\n\n`);
+        const blobVideo = (req.files.video && req.files.video[0]) ? {
+            path: (new Date).valueOf() + req.files.video[0].originalname,
+            extension: req.files.video[0].originalname.split('.').pop(),
+            TypeBlobId: 2 // video
+        } : null
+        console.log(`\n\nblobVideo ${JSON.stringify(blobVideo)}\n\n`);
+        const blobPhotoAnimes = (req) => {
+            let blobPhotoAnimes = [];
+            req.files.photo_animes && req.files.photo_animes.forEach((photo_anime) => {
+                blobPhotoAnimes.push({
+                    path: (new Date).valueOf() + photo_anime.originalname,
+                    extension: photo_anime.originalname.split('.').pop(),
+                    TypeBlobId: 3 // photo animés
+                })
+            });
+            return blobPhotoAnimes;
+        }
+        console.log(`\n\n blobPhotoAnimes ${JSON.stringify(blobPhotoAnimes(req))}\n\n`);
+        const blobPhotoDiaporamas = (req) => {
+            let blobPhotoDiaporamas = [];
+            req.files.diaporamas && req.files.diaporamas.forEach((photo_diapo) => {
+                blobPhotoDiaporamas.push({
+                    path: (new Date).valueOf() + photo_diapo.originalname,
+                    extension: photo_diapo.originalname.split('.').pop(),
+                    TypeBlobId: 4 // photo diapo
+                })
+            });
+            return blobPhotoDiaporamas;
+        }
+        console.log(`\n\n blobPhotoDiaporamas ${JSON.stringify(blobPhotoDiaporamas(req))}\n\n`);
+
+        // creation blobs for offre
+        return {
+            blobLogo,
+            blobVideo,
+            blobPhotoDiaporamas,
+            blobPhotoAnimes
+        }
+    }
+    // BLOBS CREATION 
+    const { blobLogo, blobVideo, blobPhotoAnimes, blobPhotoDiaporamas } = generateBlob(req);
+
+    const transaction_offer = await db.sequelize.transaction();
+    const bulkMerge = (objectList, object) => {
+        let result = [];
+        objectList.forEach((item) => {
+            result.push({ ...item, ...object });
+        });
+        return result;
+    }
+
+    try {
+        // OFFRE CREATION
+        const current_offer = await offres.create(offre, { transaction: transaction_offer });
+        blobLogo && await db.blob.create({ ...blobLogo, ...{ OffreId: current_offer.id } }, { transaction: transaction_offer });
+        blobVideo && await db.blob.create({ ...blobVideo, ...{ OffreId: current_offer.id } }, { transaction: transaction_offer });
+        blobPhotoAnimes(req) && await db.blob.bulkCreate(bulkMerge(blobPhotoAnimes(req), { OffreId: current_offer.id }), { returning: true, transaction: transaction_offer })
+        blobPhotoDiaporamas(req) && await db.blob.bulkCreate(bulkMerge(blobPhotoDiaporamas(req), { OffreId: current_offer.id }), { returning: true, transaction: transaction_offer });
+        await transaction_offer.commit();
         res
             .status(HttpStatus.CREATED)
-            .send({ message: reponse, error: false });
-        return reponse;
-    })
-        .catch((err) => {
-            console.log(">> Error while creating comment: ", err);
-            res
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .send({ message: err, error: true });
-        });
+            .send({
+                message: "successfully created",
+                data: current_offer.dataValues,
+                error: false
+            })
+    } catch (error) {
+        await transaction_offer.rollback();
+        res
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .send({ message: error, error: true });
+    }
+    // console.log(req.body)
+    // offres.create(offre).then((reponse) => {
+    //     console.log(">> Created OFfre: " + JSON.stringify(reponse));
+    //     res
+    //         .status(HttpStatus.CREATED)
+    //         .send({ message: reponse, error: false });
+    //     return reponse;
+    // })
+    //     .catch((err) => {
+    //         console.log(">> Error while creating comment: ", err);
+    //         res
+    //             .status(HttpStatus.INTERNAL_SERVER_ERROR)
+    //             .send({ message: err, error: true });
+    //     });
 
 };
 exports.getOfferById = (req, res) => {

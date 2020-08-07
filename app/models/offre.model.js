@@ -1,6 +1,6 @@
 module.exports = (sequelize, Sequelize) => {
     const offre = sequelize.define("offres", {
-        titre: {
+        title: {
             type: Sequelize.STRING
         },
         description: {
@@ -15,18 +15,18 @@ module.exports = (sequelize, Sequelize) => {
         qualification: {
             type: Sequelize.STRING
         },
-        logo: {
-            type: Sequelize.STRING
-        },
-        video: {
-            type: Sequelize.STRING
-        },
+        // logo: {
+        //     type: Sequelize.STRING
+        // },
+        // video: {
+        //     type: Sequelize.STRING
+        // },
         messages: {
             type: Sequelize.STRING
         },
-        photoAnime: {
-            type: Sequelize.STRING
-        },
+        // photoAnime: {
+        //     type: Sequelize.STRING
+        // },
         pays: {
             type: Sequelize.STRING
         },

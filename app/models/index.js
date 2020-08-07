@@ -30,6 +30,8 @@ db.quiz = require("../models/quiz.model.js")(sequelize, Sequelize);
 db.question = require("../models/question.model.js")(sequelize, Sequelize);
 db.reponse = require("../models/reponse.model.js")(sequelize, Sequelize);
 db.offre = require("../models/offre.model.js")(sequelize, Sequelize);
+db.blob = require("../models/blob.model.js")(sequelize, Sequelize);
+db.type_blob = require("../models/type_blob.model.js")(sequelize, Sequelize);
 /* db.quiz.hasMany(db.question, { as: "quiz" });
 db.question.belongsTo(db.quiz, {
   foreignKey: "quizId",
@@ -41,6 +43,16 @@ db.question.belongsTo(db.offre, {
   as: "questions",
 });
 db.offre.hasMany(db.question, { as: "questions" });
+db.offre.hasMany(db.blob, {
+  foreignKey: "OffreId"
+});
+db.blob.belongsTo(db.offre, { foreignKey: "OffreId", });
+db.type_blob.hasMany(db.blob, {
+  foreignKey: "TypeBlobId"
+});
+db.blob.belongsTo(db.type_blob, {
+  foreignKey: "TypeBlobId"
+});
 db.reponse.belongsTo(db.question, {
   foreignKey: "questionId",
   as: "options",
