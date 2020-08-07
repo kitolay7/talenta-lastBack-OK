@@ -13,6 +13,8 @@ module.exports = function (app) {
   });
   const fileStorage = multer.diskStorage({
     destination: (req, file, cb) => {
+      console.log(req.files);
+
       if (file.mimetype.includes('video')) {
         cb(null, 'uploads/videos');
       } else if (file.mimetype.includes('image')) {
@@ -34,7 +36,9 @@ module.exports = function (app) {
   }, {
     name: 'logo', maxCount: 1
   }, {
-    name: 'photoAnime', maxCount: 8
+    name: 'photo_animes', maxCount: 8
+  }, {
+    name: 'diaporamas', maxCount: 8
   }]
   ), offreControler.createOffre);
   app.get("/getOffer/:id", offreControler.getOfferById);
