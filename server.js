@@ -33,6 +33,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // database
 const db = require("./app/models");
 const Role = db.role;
+const TypeBlob = db.type_blob;
 
 const mkdirpSync = function (dirPath) {
   const parts = dirPath.split(path.sep)
@@ -50,6 +51,7 @@ const mkdirpSync = function (dirPath) {
 
 // CREATE DATABASE IF NOT EXIST
 const mysql_connection = require('mysql2/promise');
+const { count } = require("console");
 mysql_connection.createConnection({
   user: config.USER,
   password: config.PASSWORD
@@ -59,10 +61,19 @@ mysql_connection.createConnection({
     console.info("Database create or successfully checked");
 
     mkdirpSync('uploads/videos/');
-
     // CREATE TABLES IF NOT EXIST
-    db.sequelize.sync().then(() => {
-      console.log("re-sync db.");
+    db.sequelize.sync().then((result) => {
+      console.log(`\n\nre-sync db.\n\n`);
+      db.type_blob.count().then(count => {
+        if (count < 1) {
+          initalizeBlob();
+        }
+      })
+      db.role.count().then(count => {
+        if (count < 1) {
+          initalizeRole();
+        }
+      })
     }).catch((err) => {
       console.log(err, "Some problems with database connection!!!");
     });
@@ -93,7 +104,7 @@ require('./app/routes/user.routes')(app);
 require("./app/routes/quiz.routes")(app);
 require("./app/routes/test_mailer_routes")(app);
 // set port, listen for requests
-function initial() {
+const initalizeRole = () => {
   Role.create({
     id: 1,
     name: "admin"
@@ -107,6 +118,22 @@ function initial() {
   Role.create({
     id: 3,
     name: "recruteur"
+  });
+}
+
+const initalizeBlob = () => {
+  // intialiser type blob
+  TypeBlob.create({
+    wording: "logo"
+  });
+  TypeBlob.create({
+    wording: "video"
+  });
+  TypeBlob.create({
+    wording: "photo_animés"
+  });
+  TypeBlob.create({
+    wording: "diaporama"
   });
 }
 const PORT = process.env.PORT || 8080;
