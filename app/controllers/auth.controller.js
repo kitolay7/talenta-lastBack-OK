@@ -47,7 +47,7 @@ exports.register = (req, res) => {
       }
     })
     .catch(err => {
-      res.send({ message: err.message, error: HttpStatus.INTERNAL_SERVER_ERROR });
+      res.send({ message: err.message });
     });
 };
 

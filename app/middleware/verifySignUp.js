@@ -14,7 +14,6 @@ checkDuplicateUsernameOrEmail = (req, res, next) => {
   }).then(user => {
     if (user) {
       res
-        .status(HttpStatus.BAD_REQUEST)
         .send({
           message: "Failed! Username is already in use!",
           error: true
@@ -29,7 +28,7 @@ checkDuplicateUsernameOrEmail = (req, res, next) => {
       }
     }).then(user => {
       if (user) {
-        res.status(HttpStatus.BAD_REQUEST).send({
+        res.send({
           message: "Failed! Email is already in use!",
           error: true
         });
@@ -46,7 +45,7 @@ checkRolesExisted = (req, res, next) => {
     console.log(ROLES, req.body.roles[0])
     for (let i = 0; i < req.body.roles.length; i++) {
       if (!ROLES.includes(req.body.roles[i])) {
-        res.status(HttpStatus.BAD_REQUEST).send({
+        res.send({
           message: "Failed! Role does not exist = " + req.body.roles[i],
           error: true
         });
