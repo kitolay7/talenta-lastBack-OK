@@ -42,7 +42,8 @@ module.exports = function (app) {
   }]
   ), offreControler.createOffre);
   app.get("/getOffer/:id", offreControler.getOfferById);
-  app.get("/getAllOffer", offreControler.findAllPublished);
+  app.get("/getAllOfferPubl", offreControler.findAllPublished);
+  app.get("/getAllOffer", offreControler.findAllOffer);
   app.get("/findReponse/:id", controller.findQuestionbyId);
   app.get("/getOfferArchived", offreControler.getOfferArchived);
   app.put("/updateArchive/:id", offreControler.updateOfferStatusArchived);

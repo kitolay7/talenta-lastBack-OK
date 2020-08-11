@@ -8,9 +8,9 @@ const offres = db.offre;
 const Reponse = db.reponse;
 const Op = db.Sequelize.Op;
 exports.createOffre = async (req, res) => {
-    // console.log(req.files);
+     console.log(req.body);
     const offre = {
-        title: req.body.title,
+        titre: req.body.titre,
         description: req.body.description,
         contexte: req.body.contexte,
         missions: req.body.missions,
@@ -89,7 +89,6 @@ exports.createOffre = async (req, res) => {
         blobPhotoDiaporamas(req) && await db.blob.bulkCreate(bulkMerge(blobPhotoDiaporamas(req), { OffreId: current_offer.id }), { returning: true, transaction: transaction_offer });
         await transaction_offer.commit();
         res
-            .status(HttpStatus.CREATED)
             .send({
                 message: "successfully created",
                 data: current_offer.dataValues,
@@ -98,7 +97,6 @@ exports.createOffre = async (req, res) => {
     } catch (error) {
         await transaction_offer.rollback();
         res
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .send({ message: error, error: true });
     }
     // console.log(req.body)
@@ -151,7 +149,21 @@ exports.findAllPublished = (req, res) => {
                 });
         });
 };
-
+exports.findAllOffer = (req, res) => {
+    offres.findAll()
+        .then(data => {
+            res
+                .send(data);
+        })
+        .catch(err => {
+            res
+                .send({
+                    message:
+                        err.message || "Some error occurred while retrieving tutorials.",
+                    error: true
+                });
+        });
+};
 exports.getOfferArchived = (req, res) => {
     offres.scope('archived').findAll()
         .then(data => {
