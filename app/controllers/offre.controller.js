@@ -8,7 +8,7 @@ const offres = db.offre;
 const Reponse = db.reponse;
 const Op = db.Sequelize.Op;
 exports.createOffre = async (req, res) => {
-     console.log(req.body.post);
+    console.log(req.body);
     const offre = {
         titre: req.body.titre,
         description: req.body.description,
@@ -137,7 +137,15 @@ exports.getOfferById = (req, res) => {
         });
 }
 exports.findAllPublished = (req, res) => {
-    offres.findAll({ where: { publier: true } })
+    offres.findAll({
+        include:
+            [{
+                model: db.blob,
+                where: { publier: true },
+                include: [{ model: db.type_blob }]
+            }]
+    })
+
         .then(data => {
             res
                 .status(HttpStatus.OK)
@@ -154,7 +162,13 @@ exports.findAllPublished = (req, res) => {
         });
 };
 exports.findAllOffer = (req, res) => {
-    offres.findAll()
+    offres.findAll({
+        include:
+            [{
+                model: db.blob,
+                include: [{ model: db.type_blob }]
+            }]
+    })
         .then(data => {
             res
                 .send(data);
@@ -185,7 +199,13 @@ exports.getOfferByPays = (req, res) => {
 
 };
 exports.getOfferArchived = (req, res) => {
-    offres.scope('archived').findAll()
+    offres.scope('archived').findAll({
+        include:
+            [{
+                model: db.blob,
+                include: [{ model: db.type_blob }]
+            }]
+    })
         .then(data => {
             res
                 .status(HttpStatus.OK)
