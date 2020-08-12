@@ -20,6 +20,7 @@ exports.createOffre = async (req, res) => {
         archived: req.body.archived,
         pays: req.body.pays,
         post: req.body.post
+        userId: req.body.userId
         // logo: req.files.logo[0].filename,
         // video: req.files.video[0].filename,
     };

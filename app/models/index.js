@@ -46,6 +46,9 @@ db.offre.hasMany(db.question, { as: "questions" });
 db.offre.hasMany(db.blob, {
   foreignKey: "OffreId"
 });
+db.offre.belongsTo(db.user, {
+  foreignKey: "userId"
+})
 db.blob.belongsTo(db.offre, { foreignKey: "OffreId", });
 db.type_blob.hasMany(db.blob, {
   foreignKey: "TypeBlobId"
@@ -68,6 +71,7 @@ db.user.belongsToMany(db.role, {
   otherKey: "roleId"
 });
 db.user.hasMany(db.quiz, { foreignKey: "userId" })
+db.user.hasMany(db.offre, { foreignKey: "userId" })
 db.quiz.belongsTo(db.user, {
   foreignKey: "userId"
 })
