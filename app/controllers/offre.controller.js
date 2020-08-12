@@ -19,7 +19,7 @@ exports.createOffre = async (req, res) => {
         publier: req.body.publier,
         archived: req.body.archived,
         pays: req.body.pays,
-        post: req.body.post
+        post: req.body.post,
         userId: req.body.userId
         // logo: req.files.logo[0].filename,
         // video: req.files.video[0].filename,
@@ -183,7 +183,14 @@ exports.findAllOffer = (req, res) => {
         });
 };
 exports.getOfferByPays = (req, res) => {
-    offres.findAll({ where: { pays: req.params.pays } })
+    offres.findAll({
+        where:{ pays: req.params.pays },
+        include:
+        [{
+            model: db.blob,
+            include: [{ model: db.type_blob }],
+           
+        }]})
         .then(data => {
             res
                 .send(data);

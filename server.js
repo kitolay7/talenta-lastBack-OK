@@ -65,7 +65,7 @@ mysql_connection.createConnection({
 
     mkdirpSync('uploads/videos/');
     // CREATE TABLES IF NOT EXIST
-    db.sequelize.sync({ force: true }).then((result) => {
+    db.sequelize.sync().then((result) => {
       console.log(`\n\nre-sync db.\n\n`);
       db.type_blob.count().then(count => {
         if (count < 1) {
