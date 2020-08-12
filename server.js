@@ -10,6 +10,7 @@ app.use(cors());
 app.use(function (req, res, next) {
 
   // Website you wish to allow to connect
+  // res.setHeader('Access-Control-Allow-Origin', 'http://154.126.92.194:4200/');
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   // Request methods you wish to allow
