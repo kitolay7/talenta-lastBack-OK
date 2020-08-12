@@ -8,7 +8,7 @@ const offres = db.offre;
 const Reponse = db.reponse;
 const Op = db.Sequelize.Op;
 exports.createOffre = async (req, res) => {
-     console.log(req.body);
+     console.log(req.body.post);
     const offre = {
         titre: req.body.titre,
         description: req.body.description,
@@ -18,10 +18,13 @@ exports.createOffre = async (req, res) => {
         messages: req.body.messages,
         publier: req.body.publier,
         archived: req.body.archived,
+        pays: req.body.pays,
+        post: req.body.post
         // logo: req.files.logo[0].filename,
         // video: req.files.video[0].filename,
     };
     // Creation Blob
+    console.log(offre)
     const generateBlob = (req) => {
         const blobLogo = (req.files.logo && req.files.logo[0]) ? {
             path: (new Date).valueOf() + req.files.logo[0].originalname,
@@ -163,6 +166,22 @@ exports.findAllOffer = (req, res) => {
                     error: true
                 });
         });
+};
+exports.getOfferByPays = (req, res) => {
+    offres.findAll({ where: { pays: req.params.pays } })
+        .then(data => {
+            res
+                .send(data);
+        })
+        .catch(err => {
+            res
+                .send({
+                    message:
+                        err.message || "Some error occurred while retrieving tutorials.",
+                    error: true
+                });
+        });
+
 };
 exports.getOfferArchived = (req, res) => {
     offres.scope('archived').findAll()

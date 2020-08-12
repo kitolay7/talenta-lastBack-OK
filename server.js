@@ -52,6 +52,8 @@ const mkdirpSync = function (dirPath) {
 // CREATE DATABASE IF NOT EXIST
 const mysql_connection = require('mysql2/promise');
 const { count } = require("console");
+
+
 mysql_connection.createConnection({
   user: config.USER,
   password: config.PASSWORD
@@ -62,7 +64,7 @@ mysql_connection.createConnection({
 
     mkdirpSync('uploads/videos/');
     // CREATE TABLES IF NOT EXIST
-    db.sequelize.sync().then((result) => {
+    db.sequelize.sync({ force: true }).then((result) => {
       console.log(`\n\nre-sync db.\n\n`);
       db.type_blob.count().then(count => {
         if (count < 1) {
@@ -83,14 +85,11 @@ mysql_connection.createConnection({
 })
 
 
-
-
-
-// force: true will drop the table if it already exists
-// db.sequelize.sync({ force: true }).then(() => {
-//   console.log('Drop and Resync Database with { force: true }');
-//   initial();
-// });
+/* db.sequelize.sync({ force: true }).then(() => {
+  console.log('Drop and Resync Database with { force: true }');
+  initalizeBlob();
+  initalizeRole();
+}); */
 
 // simple route
 app.get("/", (req, res) => {

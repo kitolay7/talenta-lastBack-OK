@@ -42,6 +42,7 @@ module.exports = function (app) {
   }]
   ), offreControler.createOffre);
   app.get("/getOffer/:id", offreControler.getOfferById);
+  app.get("/getofferByPays/:pays", offreControler.getOfferByPays);
   app.get("/getAllOfferPubl", offreControler.findAllPublished);
   app.get("/getAllOffer", offreControler.findAllOffer);
   app.get("/findReponse/:id", controller.findQuestionbyId);
