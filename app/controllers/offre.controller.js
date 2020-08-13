@@ -8,7 +8,6 @@ const offres = db.offre;
 const Reponse = db.reponse;
 const Op = db.Sequelize.Op;
 exports.createOffre = async (req, res) => {
-    console.log(req.body);
     const offre = {
         titre: req.body.titre,
         description: req.body.description,
@@ -28,13 +27,13 @@ exports.createOffre = async (req, res) => {
     console.log(offre)
     const generateBlob = (req) => {
         const blobLogo = (req.files.logo && req.files.logo[0]) ? {
-            path: (new Date).valueOf() + req.files.logo[0].originalname,
+            path: req.files.logo[0].originalname,
             extension: req.files.logo[0].originalname.split('.').pop(),
             TypeBlobId: 1 // logo
         } : null
         console.log(`\n\nblobLogo ${JSON.stringify(blobLogo)}\n\n`);
         const blobVideo = (req.files.video && req.files.video[0]) ? {
-            path: (new Date).valueOf() + req.files.video[0].originalname,
+            path: req.files.video[0].originalname,
             extension: req.files.video[0].originalname.split('.').pop(),
             TypeBlobId: 2 // video
         } : null
@@ -43,7 +42,7 @@ exports.createOffre = async (req, res) => {
             let blobPhotoAnimes = [];
             req.files.photo_animes && req.files.photo_animes.forEach((photo_anime) => {
                 blobPhotoAnimes.push({
-                    path: (new Date).valueOf() + photo_anime.originalname,
+                    path: photo_anime.originalname,
                     extension: photo_anime.originalname.split('.').pop(),
                     TypeBlobId: 3 // photo animés
                 })

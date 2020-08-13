@@ -21,8 +21,8 @@ module.exports = function (app) {
         cb(null, 'uploads/');
       }
     },
-    filename: (req, file, cb) => { // naming file
-      cb(null, (new Date).valueOf() + file.originalname);
+    filename: (req, file, cb) => {
+      cb(null, file.originalname);
     }
   });
   app.post("/quiz", controller.create);
