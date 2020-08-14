@@ -36,9 +36,6 @@ module.exports = (sequelize, Sequelize) => {
         archived: {
             type: Sequelize.BOOLEAN
         },
-        archived: {
-            type: Sequelize.STRING
-        },
         post: {
             type: Sequelize.STRING
         }

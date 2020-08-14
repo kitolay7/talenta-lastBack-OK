@@ -12,7 +12,6 @@ module.exports = (sequelize, Sequelize) => {
     userId: {
       type: Sequelize.INTEGER
     }
-
   }, { timestamps: false, });
 
   return Quiz;

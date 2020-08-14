@@ -45,6 +45,8 @@ module.exports = function (app) {
   app.get("/getofferByPays/:pays", offreControler.getOfferByPays);
   app.get("/getAllOfferPubl", offreControler.findAllPublished);
   app.get("/getAllOffer", offreControler.findAllOffer);
+  app.get("/getAllOfferbyUser/:idUSer", offreControler.findAllOfferbyIdUser);
+  app.get("/getdetailOffer/:idUSer/:idOffer", offreControler.findOneOfferbyId);
   app.get("/findReponse/:id", controller.findQuestionbyId);
   app.get("/getOfferArchived", offreControler.getOfferArchived);
   app.put("/updateArchive/:id", offreControler.updateOfferStatusArchived);

@@ -6,7 +6,13 @@ module.exports = (sequelize, Sequelize) => {
         type: {
             type: Sequelize.STRING
         },
-    }, { timestamps: false,});
+        timer: {
+            type: Sequelize.STRING
+        },
+        point: {
+            type: Sequelize.STRING
+        }
+    }, { timestamps: false, });
 
     return question;
 };

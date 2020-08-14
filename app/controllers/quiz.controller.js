@@ -66,6 +66,8 @@ exports.createReponse = (req, res) => {
     return Reponse.create({
         name: req.body.name,
         isAnswer: req.body.isAnswer,
+        point: req.body.point,
+        timer: req.body.timing,
         questionId: req.body.questionId,
     })
         .then((reponse) => {

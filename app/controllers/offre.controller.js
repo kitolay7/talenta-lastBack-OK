@@ -181,6 +181,55 @@ exports.findAllOffer = (req, res) => {
                 });
         });
 };
+exports.findAllOfferbyIdUser = (req, res) => {
+    offres.findAll({
+        where:{ userId: req.params.idUSer},
+        include:
+        [{
+            model: db.blob,
+            include: [{ model: db.type_blob }],
+           
+        }]
+    })
+        .then(data => {
+            res
+                .send(data);
+        })
+        .catch(err => {
+            res
+                .send({
+                    message:
+                        err.message || "Some error occurred while retrieving tutorials.",
+                    error: true
+                });
+        });
+};
+exports.findOneOfferbyId = (req, res) => {
+    offres.findAll({
+        where:{ userId: req.params.idUSer},
+        where:{ id: req.params.idOffer},
+        include:
+        [{
+            model: db.blob,
+            include: [{ model: db.type_blob }],
+           
+        }]
+    })
+        .then(data => {
+            res
+                .send({
+                    data: data[0]
+                });
+        })
+        .catch(err => {
+            res
+                .send({
+                    message:
+                        err.message || "Some error occurred while retrieving tutorials.",
+                    error: true
+                });
+        });
+};
 exports.getOfferByPays = (req, res) => {
     offres.findAll({
         where:{ pays: req.params.pays },
@@ -229,6 +278,7 @@ exports.getOfferArchived = (req, res) => {
 }
 
 exports.updateOfferStatusArchived = (req, res) => {
+    console.log(req.body, 'sdqsdsq')
     offres.update(
         {
             archived: req.body.archived
