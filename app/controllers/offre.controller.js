@@ -3,6 +3,7 @@ const HttpStatus = require('http-status-codes');
 
 const fs = require('fs');
 const { error } = require("console");
+const { postulation, user } = require("../models");
 const Quiz = db.quiz;
 const offres = db.offre;
 const Reponse = db.reponse;
@@ -94,7 +95,7 @@ exports.createOffre = async (req, res) => {
         res
             .send({
                 message: "successfully created",
-                data: current_offer.dataValues,
+                data: {...current_offer.dataValues, ...{userId: req.body.userId}},
                 error: false
             })
     } catch (error) {
@@ -301,4 +302,71 @@ exports.updateOfferStatusArchived = (req, res) => {
                 .send({ message: error, error: true });
         });
 
+}
+
+
+exports.getOffersByPostulator = (req, res) => {
+    db.postulation.findAll({
+        where: {userId:req.body.idUser},
+        include:[
+            {
+                model: db.user,
+            },{
+                model: db.offre,
+            }
+        ]
+    }).then(data => {
+        res
+            .status(HttpStatus.OK)
+            .send(data);
+    })
+    .catch(err => {
+        res
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .send({
+                message:
+                    err.message || "Some error occurred while retrieving tutorials.",
+                error: true
+            });
+    });
+}
+
+exports.postuleToOffer = async(req,res) => {
+    try {
+        const offre = await db.offre.findByPk(req.params.offreId)
+        .then(offre => {
+            if(!offre) throw "Cet offre n'existe pas";
+            return offre;
+        })
+        .catch(error => {
+            throw error;
+        });
+        db.postulation.create({
+            userId:req.body.userId,
+            offreId: offre.dataValues.id
+        })
+        .then((data) => {
+            res
+                .status(HttpStatus.CREATED)
+                .send({message: "Vous avez postulé à cet offre", error: false});
+        })
+        .catch(err => {
+            console.log(err);
+            res
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .send({
+                    message:
+                        err.message || "Some error occurred while retrieving tutorials.",
+                    error: true
+                });            
+        })   
+    } catch (error) {
+            res
+                .status(HttpStatus.NOT_FOUND)
+                .send({
+                    message:
+                        error || "Some error occurred while retrieving tutorials.",
+                    error: true
+                });
+    }
 }

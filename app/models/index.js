@@ -32,6 +32,7 @@ db.reponse = require("../models/reponse.model.js")(sequelize, Sequelize);
 db.offre = require("../models/offre.model.js")(sequelize, Sequelize);
 db.blob = require("../models/blob.model.js")(sequelize, Sequelize);
 db.type_blob = require("../models/type_blob.model.js")(sequelize, Sequelize);
+db.postulation = require("../models/postulation.model.js")(sequelize, Sequelize);
 /* db.quiz.hasMany(db.question, { as: "quiz" });
 db.question.belongsTo(db.quiz, {
   foreignKey: "quizId",
@@ -47,8 +48,20 @@ db.offre.hasMany(db.blob, {
   foreignKey: "OffreId"
 });
 db.offre.belongsTo(db.user, {
+  as: "creator",
   foreignKey: "userId"
-})
+});
+
+db.offre.belongsToMany(db.user,{
+  as: "offer_postuled",
+  through: db.postulation,
+  foreignKey:"offreId",
+  otherKey:"userId"  
+});
+// postulation
+db.postulation.belongsTo(db.user);
+db.postulation.belongsTo(db.offre);
+
 db.blob.belongsTo(db.offre, { foreignKey: "OffreId", });
 db.type_blob.hasMany(db.blob, {
   foreignKey: "TypeBlobId"
@@ -74,7 +87,14 @@ db.user.hasMany(db.quiz, { foreignKey: "userId" })
 db.user.hasMany(db.offre, { foreignKey: "userId" })
 db.quiz.belongsTo(db.user, {
   foreignKey: "userId"
+});
+db.user.belongsToMany(db.offre,{
+  as:"postulator",
+  through: db.postulation,
+  foreignKey:"userId",
+  otherKey:"offreId"  
 })
+
 
 db.ROLES = ["candidat", "admin", "recruteur"];
 
