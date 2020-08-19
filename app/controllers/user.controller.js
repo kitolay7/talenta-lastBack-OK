@@ -1,5 +1,6 @@
 const HttpStatus = require('http-status-codes');
 const db = require("../models");
+const { reponse } = require('../models');
 const User = db.user;
 const Profile = db.profile
 
@@ -52,6 +53,11 @@ User.findOne({
             pays: response.pays,
             codePostal: response.codePostal,
             societe: response.societe,
+            metier: response.metierActuel,
+            anneesExperiences: response.anneesExperiences,
+            niveauEtudes: response.niveauEtudes,
+            diplomes: response.diplomes,
+            specialisations: reponse.specialisations,
             error: false
           });
       })
