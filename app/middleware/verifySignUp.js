@@ -7,19 +7,19 @@ const HttpStatus = require('http-status-codes');
 
 checkDuplicateUsernameOrEmail = (req, res, next) => {
   // Username
-  User.findOne({
-    where: {
-      username: req.body.username
-    }
-  }).then(user => {
-    if (user) {
-      res
-        .send({
-          message: "Failed! Username is already in use!",
-          error: true
-        });
-      return;
-    }
+  // User.findOne({
+  //   where: {
+  //     username: req.body.username
+  //   }
+  // }).then(user => {
+  //   if (user) {
+  //     res
+  //       .send({
+  //         message: "Failed! Username is already in use!",
+  //         error: true
+  //       });
+  //     return;
+  //   }
 
     // Email
     User.findOne({
@@ -37,7 +37,7 @@ checkDuplicateUsernameOrEmail = (req, res, next) => {
 
       next();
     });
-  });
+  // });
 };
 
 checkRolesExisted = (req, res, next) => {

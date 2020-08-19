@@ -54,6 +54,9 @@ exports.register = async (req, res) => {
     const response_roles = await current_user.getRoles()
     .then(roles =>{return roles})
     .catch(err => {throw err});
+    var token = jwt.sign({ id: current_user.id }, config.secret, {
+      expiresIn: 86400 // 24 hours
+    });
     res
             .status(HttpStatus.CREATED)
             .send({
@@ -63,6 +66,7 @@ exports.register = async (req, res) => {
                 profile:{...current_profile.dataValues},
                 roles:response_roles
               },
+              accessToken: token,
               error: false
           })
   } catch (err) {
