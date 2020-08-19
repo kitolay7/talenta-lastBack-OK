@@ -65,7 +65,7 @@ isModerator = (req, res, next) => {
       res
         .status(HttpStatus.FORBIDDEN)
         .send({
-          message: "Require Moderator Role!",
+          message: "Require Rectuteur Role!",
           error: true
         });
     });

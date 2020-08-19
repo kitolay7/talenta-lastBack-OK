@@ -7,20 +7,11 @@ const Op = db.Sequelize.Op;
 const HttpStatus = require('http-status-codes');
 
 exports.create = (req, res) => {
-    if (!req.body.name) {
-        res
-            .status(HttpStatus.BAD_REQUEST)
-            .send({
-                message: "Content can not be empty!",
-                error: true
-            });
-        return;
-    }
     const quest = {
         name: req.body.name,
         type: req.body.type,
         offreId: req.body.offreId,
-        // userId: req.body.userId
+        userId: req.body.userId
     };
     question.create(quest)
         .then(data => {

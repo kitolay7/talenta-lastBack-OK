@@ -13,7 +13,7 @@ const { profile, user, role } = require("../models");
 
 // Save User to Database
 exports.register = async (req, res) => {
-
+console.log(req.body)
   // create transaction for users and profiles creation
   const transaction_user_profile = await db.sequelize.transaction();
   try {
