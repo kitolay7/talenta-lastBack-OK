@@ -17,7 +17,11 @@ module.exports = function (app) {
     [authJwt.verifyToken],
     controller.userBoard
   );
-
+  app.get(
+    "/api/test/userinfo/:idUser",
+    [authJwt.verifyToken],
+    controller.userInfo
+  );
   app.get(
     "/api/test/mod",
     [authJwt.verifyToken, authJwt.isModerator],
