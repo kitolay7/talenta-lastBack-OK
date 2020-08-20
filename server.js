@@ -29,6 +29,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const db = require("./app/models");
 const Role = db.role;
 const TypeBlob = db.type_blob;
+const TypeQuestion = db.type_question;
 
 const mkdirpSync = function (dirPath) {
   const parts = dirPath.split(path.sep)
@@ -69,6 +70,11 @@ mysql_connection.createConnection({
       db.role.count().then(count => {
         if (count < 1) {
           initalizeRole();
+        }
+      })
+      db.type_question.count().then(count => {
+        if (count < 1) {
+          initalizeTypeQuestion();
         }
       })
     }).catch((err) => {
@@ -130,6 +136,26 @@ const initalizeBlob = () => {
     wording: "diaporama"
   });
 }
+
+const initalizeTypeQuestion = () => {
+  // intialiser type blob
+  TypeQuestion.create({
+    wording: "Vrai ou Faux"
+  });
+  TypeQuestion.create({
+    wording: "Choix multiple"
+  });
+  TypeQuestion.create({
+    wording: "Classement hiérarchique"
+  });
+  TypeQuestion.create({
+    wording: "Rédaction"
+  });
+  TypeQuestion.create({
+    wording: "Audio"
+  });
+}
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);

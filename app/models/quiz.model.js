@@ -2,15 +2,15 @@ var DataTypes = require('sequelize/lib/data-types');
 const dataTypes = require('sequelize/lib/dialects/postgres/data-types');
 console.log(dataTypes)
 module.exports = (sequelize, Sequelize) => {
-  const Quiz = sequelize.define("quizz", {
-    question: {
+  const Quiz = sequelize.define("quizzs", {
+    name: {
       type: Sequelize.STRING
     },
-    type: {
+    fiche_dir: {
       type: Sequelize.STRING
     },
-    userId: {
-      type: Sequelize.INTEGER
+    author_dir:{
+      type: Sequelize.STRING
     }
   }, { timestamps: false, });
 

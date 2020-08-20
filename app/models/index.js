@@ -34,17 +34,24 @@ db.offre = require("../models/offre.model.js")(sequelize, Sequelize);
 db.blob = require("../models/blob.model.js")(sequelize, Sequelize);
 db.type_blob = require("../models/type_blob.model.js")(sequelize, Sequelize);
 db.postulation = require("../models/postulation.model.js")(sequelize, Sequelize);
+db.type_question = require("../models/type_question.model.js")(sequelize, Sequelize);
+db.criteria_point_question = require("../models/criteria_point_question.model.js")(sequelize, Sequelize);
 
-/* db.quiz.hasMany(db.question, { as: "quiz" });
-db.question.belongsTo(db.quiz, {
-  foreignKey: "quizId",
-  as: "quiz",
-}); */
+db.quiz.belongsTo(db.offre, {foreignKey:"offreId"});
+db.quiz.belongsTo(db.user, {
+  foreignKey: "userId"
+});
+// db.quiz.hasMany(db.question, { foreignKey:"quizId" });
+// db.question.belongsTo(db.quiz, {
+//   foreignKey: "quizId",
+// });
 db.question.hasMany(db.reponse, { as: "options" });
 db.question.belongsTo(db.offre, {
   foreignKey: "offreId",
   as: "questions",
 });
+db.question.belongsTo(db.type_question, { foreignKey: "TypeQuestionId" });
+db.question.hasMany(db.criteria_point_question, {foreignKey: "questionId"});
 db.offre.hasMany(db.question, { as: "questions" });
 db.offre.hasMany(db.blob, {
   foreignKey: "OffreId"
@@ -60,6 +67,7 @@ db.offre.belongsToMany(db.user,{
   foreignKey:"offreId",
   otherKey:"userId"  
 });
+db.offre.hasMany(db.quiz,{foreignKey:"offreId"});
 // postulation
 db.postulation.belongsTo(db.user);
 db.postulation.belongsTo(db.offre);
@@ -90,9 +98,7 @@ db.user.belongsToMany(db.role, {
 });
 db.user.hasMany(db.quiz, { foreignKey: "userId" })
 db.user.hasMany(db.offre, { foreignKey: "userId" })
-db.quiz.belongsTo(db.user, {
-  foreignKey: "userId"
-});
+
 db.user.belongsToMany(db.offre,{
   as:"postulator",
   through: db.postulation,
@@ -101,6 +107,8 @@ db.user.belongsToMany(db.offre,{
 });
 db.profile.belongsTo(db.user, {foreignKey: "userId"});
 
+db.type_question.hasMany(db.question,{foreignKey: "TypeQuestionId"});
+db.criteria_point_question.belongsTo(db.question, {foreignKey: "questionId"});
 
 db.ROLES = ["candidat", "admin", "recruteur"];
 
