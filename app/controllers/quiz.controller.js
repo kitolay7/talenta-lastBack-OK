@@ -92,51 +92,30 @@ exports.create = async (req, res) => {
             error: true
         });
     }
-    // questions 1,2,3,4
-    // user creator
-    // criteria_point_question
-    // response
-    
-    
-    
-    // if (!req.body.name) {
-    //     res
-    //         .status(HttpStatus.BAD_REQUEST)
-    //         .send({
-    //             message: "Content can not be empty!",
-    //             error: true
-    //         });
-    //     return;
-    // }
-    // const quest = {
-    //     name: req.body.name,
-    //     type: req.body.type,
-    //     offreId: req.body.offreId,
-    //     // userId: req.body.userId
-    // };
-    // question.create(quest)
-    //     .then(data => {
-    //         console.log(data)
-    //         res
-    //             .status(HttpStatus.CREATED)
-    //             .send({ message: data });
-    //         return data;
-    //     })
-    //     .catch(err => {
-            // res
-            //     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            //     .send({
-            //         message: err.message || "Some error occurred while creating the Quiz.",
-            //         error: true
-            //     });
-    //     });
+
 };
 exports.findAll = (req, res) => {
 
 };
 
 exports.findOne = (req, res) => {
-
+  return Question.findAll({
+    where: {
+      offreId: req.params.id,
+    },
+    include: ["options"]
+  })
+        .then((data) => {
+            res
+                .send({ data: data, error: false });
+            return data;
+        })
+        .catch((err) => {
+            console.log(">> Error while finding comment: ", err);
+            res
+                .status(HttpStatus.NOT_FOUND)
+                .send({ data: data, error: true });
+        });
 };
 
 exports.update = (req, res) => {

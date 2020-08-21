@@ -13,7 +13,7 @@ const { profile, user, role } = require("../models");
 
 // Save User to Database
 exports.register = async (req, res) => {
-console.log(req.body)
+  console.log(req.body)
   // create transaction for users and profiles creation
   const transaction_user_profile = await db.sequelize.transaction();
   try {
@@ -21,17 +21,18 @@ console.log(req.body)
       username: req.body.username,
       email: req.body.email,
       password: bcrypt.hashSync(req.body.password, 8),
-    },{transaction: transaction_user_profile});
+    }, { transaction: transaction_user_profile });
     const all_roles = await Role.findAll({
       where: {
         name: {
           [Op.or]: req.body.roles
         }
-      }})
+      }
+    })
     if (req.body.roles) {
-      await current_user.setRoles(all_roles, {transaction: transaction_user_profile}).catch( err => {throw err})
+      await current_user.setRoles(all_roles, { transaction: transaction_user_profile }).catch(err => { throw err })
     } else {
-      await current_user.setRoles([2], {transaction:transaction_user_profile}).catch(err => {throw err})
+      await current_user.setRoles([2], { transaction: transaction_user_profile }).catch(err => { throw err })
     }
     // profile's creation
     const current_profile = await Profile.create({
@@ -49,26 +50,26 @@ console.log(req.body)
       codePostal: req.body.codePostal,
       societe: req.body.societe,
       userId: await current_user.id
-    },{transaction: transaction_user_profile});
+    }, { transaction: transaction_user_profile });
     await transaction_user_profile.commit();
     const response_roles = await current_user.getRoles()
-    .then(roles =>{return roles})
-    .catch(err => {throw err});
+      .then(roles => { return roles })
+      .catch(err => { throw err });
     var token = jwt.sign({ id: current_user.id }, config.secret, {
       expiresIn: 86400 // 24 hours
     });
     res
-            .status(HttpStatus.CREATED)
-            .send({
-              message: "successfully created",
-              data: {
-                user:{...current_user.dataValues},
-                profile:{...current_profile.dataValues},
-                roles:response_roles
-              },
-              accessToken: token,
-              error: false
-          })
+      .status(HttpStatus.CREATED)
+      .send({
+        message: "successfully created",
+        data: {
+          user: { ...current_user.dataValues },
+          profile: { ...current_profile.dataValues },
+          roles: response_roles
+        },
+        accessToken: token,
+        error: false
+      })
   } catch (err) {
     await transaction_user_profile.rollback();
     res

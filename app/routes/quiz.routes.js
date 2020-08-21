@@ -48,6 +48,7 @@ module.exports = function (app) {
   app.get("/getAllOfferbyUser/:idUSer", offreControler.findAllOfferbyIdUser);
   app.get("/getdetailOffer/:idUSer/:idOffer", offreControler.findOneOfferbyId);
   app.get("/findReponse/:id", controller.findQuestionbyId);
+  app.get("/findOffer/:id", controller.findOne);
   app.get("/getOfferArchived", offreControler.getOfferArchived);
   app.put("/updateArchive/:id", offreControler.updateOfferStatusArchived);
   app.post("/offre/:offreId/postule", offreControler.postuleToOffer);

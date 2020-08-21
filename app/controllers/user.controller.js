@@ -46,7 +46,7 @@ User.findOne({
           .status(HttpStatus.OK)
           .send({
             id: current_user.id,
-            username: response.username,
+            username: current_user.username,
             email: current_user.email,
             roles: authorities,
             numTel: response.numTel,
@@ -58,6 +58,7 @@ User.findOne({
             niveauEtudes: response.niveauEtudes,
             diplomes: response.diplomes,
             specialisations: reponse.specialisations,
+            profile: response,
             error: false
           });
       })
