@@ -234,6 +234,8 @@ exports.findOneOfferbyId = (req, res) => {
 exports.getOfferByPays = (req, res) => {
     offres.findAll({
         where:{ pays: req.params.pays },
+        where: { archived: false },
+        where: { publier: true },
         include:
         [{
             model: db.blob,
@@ -279,7 +281,6 @@ exports.getOfferArchived = (req, res) => {
 }
 
 exports.updateOfferStatusArchived = (req, res) => {
-    console.log(req.body, 'sdqsdsq')
     offres.update(
         {
             archived: req.body.archived
@@ -304,7 +305,30 @@ exports.updateOfferStatusArchived = (req, res) => {
 
 }
 
+exports.updateOfferStatusPublished = (req, res) => {
+    offres.update(
+        {
+            publier: req.body.publier
+        }, {
+        where: { id: req.params.id },
+        returning: true
+    })
+        .then((result) => {
+            console.log(`\n\n\n${result}\n\n\n`)
+            if (result[1] === 0) throw "Any field is modified"
+            res.status(HttpStatus.OK).json({
+                message: "this offer is updated successfully",
+                error: false
+            })
+        })
+        .catch((error) => {
+            console.log(error);
+            res
+                .status(HttpStatus.NOT_ACCEPTABLE)
+                .send({ message: error, error: true });
+        });
 
+}
 exports.getOffersByPostulator = (req, res) => {
     db.postulation.findAll({
         where: {userId:req.body.idUser},

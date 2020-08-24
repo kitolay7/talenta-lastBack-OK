@@ -51,6 +51,7 @@ module.exports = function (app) {
   app.get("/findOffer/:id", controller.findOne);
   app.get("/getOfferArchived", offreControler.getOfferArchived);
   app.put("/updateArchive/:id", offreControler.updateOfferStatusArchived);
+  app.put("/updatePublier/:id", offreControler.updateOfferStatusPublished);
   app.post("/offre/:offreId/postule", offreControler.postuleToOffer);
   app.get("/offrePostuled", offreControler.getOffersByPostulator);
 };
