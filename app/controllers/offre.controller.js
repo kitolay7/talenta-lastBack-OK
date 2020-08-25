@@ -340,6 +340,7 @@ exports.getOffersByPostulator = (req, res) => {
             }
         ]
     }).then(data => {
+        console.log(data)
         res
             .status(HttpStatus.OK)
             .send(data);

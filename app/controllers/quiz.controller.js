@@ -156,7 +156,7 @@ exports.createReponse = (req, res) => {
         });
 };
 exports.findQuestionbyId = (req, res, next) => {
-    return question.findByPk(req.params.id, { include: ["options"] })
+    return Question.findByPk(req.params.id, { include: ["options"] })
         .then((data) => {
             res
                 .status(HttpStatus.OK)
