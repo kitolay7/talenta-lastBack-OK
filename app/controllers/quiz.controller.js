@@ -8,6 +8,7 @@ const Op = db.Sequelize.Op;
 
 const HttpStatus = require('http-status-codes');
 const { response } = require("express");
+const options = require("dotenv/lib/env-options");
 
 exports.create = async (req, res) => {
     // offres id
@@ -48,7 +49,7 @@ exports.create = async (req, res) => {
                 await CriteriaPointQuestion.create(newCritere,{transaction_quiz}).catch(error => {throw error});
                 for(index=0;index<questionClassementRequest.responses.choices.length; index++) {                                        
                     // await Reponse.create({choices:questionClassementRequest.responses.choices[index],rang:questionClassementRequest.responses.rang[index], questionId:questionClassementResponse.id},{transaction_quiz}).catch(error => {throw error});
-                    await Reponse.create({choices:questionClassementRequest.responses.choices[index], questionId:questionClassementResponse.id},{transaction_quiz}).catch(error => {throw error});
+                    await Reponse.create({choices:questionClassementRequest.responses.choices[index], rang:index, questionId:questionClassementResponse.id},{transaction_quiz}).catch(error => {throw error});
                 }
             }
         };
@@ -92,7 +93,6 @@ exports.create = async (req, res) => {
             error: true
         });
     }
-
 };
 exports.findAll = (req, res) => {
 
@@ -116,6 +116,41 @@ exports.findOne = (req, res) => {
                 .status(HttpStatus.NOT_FOUND)
                 .send({ data: data, error: true });
         });
+};
+
+exports.findOneByOffer = async (req, res) => {
+    console.log(`OFFFER ID ${JSON.stringify(req.body)}`);
+    const current_quiz = await Quiz.findOne({
+        where: {offreId:req.params.id},
+        include:[
+            {
+                model: db.offre,
+                include:[
+                    {
+                        model:Question, as: "questions",
+                        include:[
+                            {model: db.criteria_point_question},
+                            {model: db.reponse, as:"options"},
+                        ]
+                    }
+                ]
+            }
+        ]
+    })
+    .then(data => {
+        res
+            .status(HttpStatus.OK)
+            .send(data);
+    })
+    .catch(err => {
+        res
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .send({
+                message:
+                    err.message || "Some error occurred while retrieving tutorials.",
+                error: true
+            });
+    })
 };
 
 exports.update = (req, res) => {
