@@ -1,6 +1,7 @@
 const { verifySignUp } = require("../middleware");
 const controller = require("../controllers/quiz.controller");
 const offreControler = require("../controllers/offre.controller");
+const quizControler = require("../controllers/quiz.controller");
 const multer = require('multer');
 const upload = multer({ dest: './uploads/' });
 module.exports = function (app) {
@@ -54,4 +55,5 @@ module.exports = function (app) {
   app.put("/updatePublier/:id", offreControler.updateOfferStatusPublished);
   app.post("/offre/:offreId/postule", offreControler.postuleToOffer);
   app.get("/offrePostuled", offreControler.getOffersByPostulator);
+  app.get("/offer/:id/quiz/", quizControler.findOneByOffer);
 };

@@ -9,9 +9,9 @@ module.exports = (sequelize, Sequelize) => {
         type_audio: {
             type: Sequelize.INTEGER
         },
-        // rang: {
-        //     type: Sequelize.INTEGER
-        // },
+        rang: {
+            type: Sequelize.INTEGER
+        },
     }, { timestamps: false,});
 
     return reponse;
