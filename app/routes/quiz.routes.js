@@ -54,6 +54,7 @@ module.exports = function (app) {
   app.put("/updateArchive/:id", offreControler.updateOfferStatusArchived);
   app.put("/updatePublier/:id", offreControler.updateOfferStatusPublished);
   app.post("/offre/:offreId/postule", offreControler.postuleToOffer);
+  app.get("/offre/:offreId/users", offreControler.getUsersByOffer);
   app.get("/offrePostuled", offreControler.getOffersByPostulator);
   app.get("/offer/:id/quiz/", quizControler.findOneByOffer);
 };

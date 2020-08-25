@@ -38,9 +38,12 @@ module.exports = (sequelize, Sequelize) => {
         },
         post: {
             type: Sequelize.STRING
+        },
+        publicationDate:{
+            type: Sequelize.DATE
         }
     }, {
-        timestamps: false,
+        timestamps: true,
         scopes: {
             archived: {
                 where: {

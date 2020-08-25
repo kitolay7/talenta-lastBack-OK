@@ -3,10 +3,13 @@ const HttpStatus = require('http-status-codes');
 
 const fs = require('fs');
 const { error } = require("console");
-const { postulation, user } = require("../models");
+const { postulation, user, profile } = require("../models");
 const Quiz = db.quiz;
 const offres = db.offre;
+const User = db.user;
 const Reponse = db.reponse;
+const Postulation = db.postulation;
+const Profile = db.profile;
 const Op = db.Sequelize.Op;
 exports.createOffre = async (req, res) => {
     const offre = {
@@ -20,7 +23,8 @@ exports.createOffre = async (req, res) => {
         archived: req.body.archived,
         pays: req.body.pays,
         post: req.body.post,
-        userId: req.body.userId
+        userId: req.body.userId,
+        publicationDate: req.body.publicationDate 
         // logo: req.files.logo[0].filename,
         // video: req.files.video[0].filename,
     };
@@ -368,7 +372,9 @@ exports.postuleToOffer = async(req,res) => {
         });
         db.postulation.create({
             userId:req.body.userId,
-            offreId: offre.dataValues.id
+            offreId: offre.dataValues.id,
+            // dans 5 jours
+            testDate: new Date(new Date().getTime()+(5*24*60*60*1000))
         })
         .then((data) => {
             res
@@ -394,4 +400,44 @@ exports.postuleToOffer = async(req,res) => {
                     error: true
                 });
     }
+}
+
+exports.getUsersByOffer = async (req, res) => {
+  try {    
+    await Postulation.findAll({
+      where: {offreId: req.params.offreId},
+      include:
+      [{
+          model: User,
+          attributes: ['id'],
+          include: [{
+            model: Profile,
+            attributes: ['firstName','lastName']
+          }]
+      },
+      {model: offres,
+      attributes: ['post', 'publicationDate']
+    }
+      ]
+    })
+    .then(data => {
+      res
+          .status(HttpStatus.OK)
+          .send({
+            data: data,
+            error:false
+          });
+    })
+    .catch(err => {
+        throw err;
+    })
+  } catch (error) {
+    res
+                .status(HttpStatus.NOT_FOUND)
+                .send({
+                    message:
+                        error.message || "Some error occurred while retrieving tutorials.",
+                    error: true
+                });
+  }
 }
