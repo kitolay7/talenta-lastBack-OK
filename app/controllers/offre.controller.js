@@ -237,9 +237,7 @@ exports.findOneOfferbyId = (req, res) => {
 };
 exports.getOfferByPays = (req, res) => {
     offres.findAll({
-        where:{ pays: req.params.pays },
-        where: { archived: false },
-        where: { publier: true },
+        where:{ pays: req.params.pays, archived: false, publier: true},
         include:
         [{
             model: db.blob,
@@ -247,6 +245,7 @@ exports.getOfferByPays = (req, res) => {
            
         }]})
         .then(data => {
+            console.log(data)
             res
                 .send(data);
         })
