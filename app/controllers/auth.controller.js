@@ -138,55 +138,69 @@ exports.signin = (req, res) => {
 
 // Update Profile to Database
 exports.updateProfile = async (req, res) => {
-  console.log(req.body + 'azearzetzeraert')
+  console.log(req + 'azearzetzeraert')
   if (!req.body) {
     return res.status(400).send({
       message: "Data to update can not be empty!"
     });
   }
   
-  console.log(req.params + 'ballbalfzhelzhglz')
-  const id = req.params.id;
-  // create transaction for profiles update
-  const transaction_user_profile = await db.sequelize.transaction();
-  try {
-  
-    const current_user = await User.update({
-      updatedAt: new Date("2020-08-26 08:13:02"),
-    }, {where: {id: req.params.id} }, { transaction: transaction_user_profile });
-    console.log(current_user.updatedAt + 'qskjfghqlkjghqr')
-    // profile's update
-    const current_profile = await Profile.update({
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      numTel: req.body.numTel,
-      ville: req.body.ville,
-      pays: req.body.pays,
-      metierActuel: req.body.metierActuel,
-      anneesExperiences: req.body.anneesExperiences,
-      niveauEtudes: req.body.niveauEtudes,
-      diplomes: req.body.diplomes,
-      specialisations: req.body.specialisations,
-      codePostal: req.body.codePostal,
-      societe: req.body.societe,
-      userId: await id
-    }, {where: {id: req.params.id} }, { transaction: transaction_user_profile });
-    await transaction_user_profile.commit();
+  Profile.findOne({
+    where: {
+      id:req.body.userId
+    }
+  }).then (current_user => {
+  	console.log(current_user)
+    if (current_user === null) {
+      return res
+        .status(HttpStatus.NOT_FOUND)
+        .send({ message: "User Not found.", error: true });
+    } else {
     
-    var token = jwt.sign({ id: id }, config.secret, {
-      expiresIn: 86400 // 24 hours
-    });
-    res
-      .status(HttpStatus.CREATED)
-      .send({
-        message: "successfully update",
-        error: false
-      })
-  } catch (err) {
-    await transaction_user_profile.rollback();
-    res
-      .status(HttpStatus.INTERNAL_SERVER_ERROR)
-      .send({ message: err, error: true });
-    console.log(">> Error while finding comment: ", err);
+  		//console.log(req.params + 'ballbalfzhelzhglz');
+  		const date = new Date("2020-08-26 08:13:02");
+  		const id = req.body.userId;
+  		// create transaction for profiles update
+  		const transaction_user_profile = await db.sequelize.transaction();
+  		try {
+    		const current_user = await User.update({
+      		updatedAt: date,
+    		}, {where: {id: id} }, { transaction: transaction_user_profile });
+    		console.log(current_user.updatedAt + 'qskjfghqlkjghqr')
+    		// profile's update
+    		const current_profile = await Profile.update({
+      		firstName: req.body.firstName,
+      		lastName: req.body.lastName,
+      		numTel: req.body.numTel,
+      		ville: req.body.ville,
+      		pays: req.body.pays,
+      		metierActuel: req.body.metierActuel,
+      		anneesExperiences: req.body.anneesExperiences,
+      		niveauEtudes: req.body.niveauEtudes,
+      		diplomes: req.body.diplomes,
+      		specialisations: req.body.specialisations,
+      		codePostal: req.body.codePostal,
+      		societe: req.body.societe,
+      		userId: await id
+    		}, {where: {id: id} }, { transaction: transaction_user_profile });
+    		await transaction_user_profile.commit();
+    		
+    		var token = jwt.sign({ id: id }, config.secret, {
+      		expiresIn: 86400 // 24 hours
+    		});
+    		res
+      		.status(HttpStatus.CREATED)
+      		.send({
+        		message: "successfully update",
+        		error: false
+      		})
+  		} catch (err) {
+    		await transaction_user_profile.rollback();
+    		res
+      		.status(HttpStatus.INTERNAL_SERVER_ERROR)
+      		.send({ message: err, error: true });
+    		console.log(">> Error while finding comment: ", err);
+  		}
+    }
   }
 };
