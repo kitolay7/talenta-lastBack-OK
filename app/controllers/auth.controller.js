@@ -158,16 +158,8 @@ exports.updateProfile = async (req, res) => {
     }
   })
     
-  //console.log(req.params + 'ballbalfzhelzhglz');
-  const date = new Date("2020-08-26 08:13:02");
   const id = req.body.userId;
-  // create transaction for profiles update
-  const transaction_user_profile = await db.sequelize.transaction();
   try {
-    const current_user = await User.update({
-      updatedAt: date,
-    }, {where: {id: id} }, { transaction: transaction_user_profile });
-    console.log(current_user.updatedAt + 'qskjfghqlkjghqr')
     // profile's update
     const current_profile = await Profile.update({
       firstName: req.body.firstName,
@@ -183,12 +175,7 @@ exports.updateProfile = async (req, res) => {
       codePostal: req.body.codePostal,
       societe: req.body.societe,
       userId: await id
-    }, {where: {id: id} }, { transaction: transaction_user_profile });
-    await transaction_user_profile.commit();
-    
-    var token = jwt.sign({ id: id }, config.secret, {
-      expiresIn: 86400 // 24 hours
-    });
+    }, {where: {id: id} });;
     res
       .status(HttpStatus.CREATED)
       .send({
