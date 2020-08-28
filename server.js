@@ -5,6 +5,8 @@ const app = express();
 const fs = require("fs");
 const path = require("path");
 const config = require("./app/config/db.config");
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
 
 app.use(cors());
 app.use(function (req, res, next) {
@@ -48,6 +50,8 @@ const mkdirpSync = function (dirPath) {
 // CREATE DATABASE IF NOT EXIST
 const mysql_connection = require('mysql2/promise');
 const { count } = require("console");
+const { response } = require("express");
+const { resolve } = require("path");
 
 
 mysql_connection.createConnection({
@@ -157,7 +161,15 @@ const initalizeTypeQuestion = () => {
 }
 
 const PORT = process.env.PORT || 8181;
-app.listen(PORT, () => {
+const server = http.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
-
+io.on("connection", (socket) => {
+  console.log('Client connected at '+new Date()+' with socket ID: '+ socket.client.id);
+  // io.emit('socketClientID', socket.client.id);
+  socket.on('update_postulation', (response) => {
+    // broadcastena any @dashboard
+      // console.log(response);
+      io.emit(`alert_update${response.data.offreId}`, JSON.stringify(response));
+  });
+});

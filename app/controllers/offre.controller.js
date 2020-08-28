@@ -1,5 +1,6 @@
 const db = require("../models");
 const HttpStatus = require('http-status-codes');
+const io = require("socket.io-client");
 
 const fs = require('fs');
 const { error } = require("console");
@@ -438,5 +439,55 @@ exports.getUsersByOffer = async (req, res) => {
                         error.message || "Some error occurred while retrieving tutorials.",
                     error: true
                 });
+  }
+};
+
+exports.updatePostulation = async (req, res) => {
+  try {
+    await Postulation.update(
+       {
+         testDate: req.body.testDate,
+         testPassed: req.body.testPassed,
+         admissibility: req.body.admissibility,
+         note: req.body.note,
+         decision: req.body.decision,
+         observation: req.body.observation,
+       },{
+         where:{
+           [Op.and]:[
+              {userId: req.body.userId},
+              {offreId: req.body.offreId}
+            ]
+          },
+          returning: true
+       })
+    .then(async (result) => {
+      if (result[1] === 0) throw "Any field is modified"
+    //   const ioClient = io.connect("http://192.168.1.1:8080");
+    //   ioClient.emit('update_postulation', {message:"Quelqu'un a modifié la postulation",offreId: req.body.offreId, userId: req.body.userId});
+      // ioClient.on('socketClientID', (socketClientID)=> {
+        // console.log('Connection to server established. SocketID is',socketClientID);
+      // });
+      // ioClient.emit('postulation_update', {offreId: req.body.offreId, userId: req.body.userId});
+      res.status(HttpStatus.OK).json({
+        data: await Postulation.findOne({where:{
+          [Op.and]:[
+             {userId: req.body.userId},
+             {offreId: req.body.offreId}
+           ]
+         }
+        }),
+        message: "this postulation is updated successfully",
+        error: false
+      })
+     })
+     .catch((error) => {
+       throw error;
+     })
+  } catch (error) {
+    console.log(error);
+       res
+                .status(HttpStatus.NOT_ACCEPTABLE)
+                .send({ message: error, error: true });
   }
 }

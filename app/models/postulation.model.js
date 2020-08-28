@@ -25,11 +25,11 @@ module.exports = (sequelize, Sequelize) => {
 				type: Sequelize.INTEGER,
 				defaultValue: 0
 			},
-			Decision: {
+			decision: {
 				type: Sequelize.STRING,
 				defaultValue: "En attente"
 			},
-			Observation: {
+			observation: {
 				type: Sequelize.STRING
 			}
     }, {

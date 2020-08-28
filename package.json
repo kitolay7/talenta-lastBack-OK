@@ -17,12 +17,14 @@
   "author": "bezkoder",
   "license": "ISC",
   "dependencies": {
+    "@types/socket.io": "^2.1.11",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "fs": "^0.0.1-security",
+    "http": "^0.0.1-security",
     "http-status-codes": "^1.4.0",
     "jsonwebtoken": "^8.5.1",
     "multer": "^1.4.2",
@@ -30,6 +32,8 @@
     "nodemailer": "^6.4.11",
     "nodemon": "^2.0.4",
     "path": "^0.12.7",
-    "sequelize": "^5.21.3"
+    "sequelize": "^5.21.3",
+    "socket.io": "^2.3.0",
+    "socket.io-client": "^2.3.0"
   }
 }

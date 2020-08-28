@@ -57,4 +57,5 @@ module.exports = function (app) {
   app.get("/offre/:offreId/users", offreControler.getUsersByOffer);
   app.get("/offrePostuled", offreControler.getOffersByPostulator);
   app.get("/offer/:id/quiz/", quizControler.findOneByOffer);
+  app.put("/postulation/update", offreControler.updatePostulation);
 };
