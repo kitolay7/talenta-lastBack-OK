@@ -157,11 +157,9 @@ exports.updateProfile = async (req, res) => {
         .send({ message: "User Not found.", error: true });
     }
   })
-    
-  //console.log(req.params + 'ballbalfzhelzhglz');
+
   const id = req.body.userId;
   try {
-    
     // profile's update
     const current_profile = await Profile.update({
       firstName: req.body.firstName,
@@ -178,7 +176,6 @@ exports.updateProfile = async (req, res) => {
       societe: req.body.societe,
       userId: await id
     }, {where: {id: id} });
-    
     res
       .status(HttpStatus.CREATED)
       .send({
