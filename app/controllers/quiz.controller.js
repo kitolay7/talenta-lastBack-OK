@@ -65,6 +65,7 @@ exports.create = async (req, res) => {
                 await Reponse.create({choices:questionRedactionRequest.responses.choices[index],isAnswers:questionRedactionRequest.responses.isAnswers[index], questionId:questionRedactionResponse.id},{transaction_quiz}).catch(error => {throw error});
             }
         }
+        console.log(req.body.listAudio);
         const listAudio = req.body.listAudio || null;
         for(const questionAudioRequest of listAudio){
             // console.log(`\n\n${JSON.stringify(questionRedactionRequest)}\n\n`);
@@ -75,6 +76,19 @@ exports.create = async (req, res) => {
             };
             await Reponse.create({type_audio:questionAudioRequest.responses.type_audio, questionId:questionAudioResponse.id},{transaction_quiz}).catch(error => {throw error});
         }
+        const listVideo = req.body.listVideo || null;
+        for(const questionVideoRequest of listVideo){
+            console.log(`\n\n${JSON.stringify(questionVideoRequest)}\n\n`);
+            let questionVideoResponse = await Question.create(questionVideoRequest,{transaction_quiz}).catch(error => {throw error});
+            console.log(JSON.stringify(questionVideoResponse));
+            for((critere) of questionVideoRequest.criteres){
+                const newCritere = {...critere,...{questionId:questionVideoResponse.id}};
+                await CriteriaPointQuestion.create(newCritere,{transaction_quiz}).catch(error => {throw error});
+            };
+            await Reponse.create({type_audio:questionVideoRequest.responses.type_audio, questionId:questionVideoResponse.id},{transaction_quiz}).catch(error => {throw error});
+        }
+
+
         await transaction_quiz.commit();
         res
         .status(HttpStatus.OK)
