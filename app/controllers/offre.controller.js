@@ -244,6 +244,10 @@ exports.getOfferByPays = (req, res) => {
             model: db.blob,
             include: [{ model: db.type_blob }],
            
+        },{
+            model:db.user, 
+            through:db.postulation,
+            as:'offer_postuled'
         }]})
         .then(data => {
             console.log(data)

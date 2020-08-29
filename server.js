@@ -158,6 +158,9 @@ const initalizeTypeQuestion = () => {
   TypeQuestion.create({
     wording: "Audio"
   });
+  TypeQuestion.create({
+    wording: "Video"
+  });
 }
 
 const PORT = process.env.PORT || 8181;
