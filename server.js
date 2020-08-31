@@ -7,6 +7,7 @@ const path = require("path");
 const config = require("./app/config/db.config");
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
+const Importer = require('mysql-import');
 
 app.use(cors());
 app.use(function (req, res, next) {
@@ -53,41 +54,64 @@ const { count } = require("console");
 const { response } = require("express");
 const { resolve } = require("path");
 
-
-mysql_connection.createConnection({
-  user: config.USER,
-  password: config.PASSWORD
-}).then((connection) => {
-  connection.query(`CREATE DATABASE IF NOT EXISTS ${config.DB};`).then(() => {
-    // Safe to use sequelize now
-    console.info("Database create or successfully checked");
-
-    mkdirpSync('uploads/videos/');
-    // CREATE TABLES IF NOT EXIST
-    db.sequelize.sync().then((result) => {
-      console.log(`\n\nre-sync db.\n\n`);
-      db.type_blob.count().then(count => {
-        if (count < 1) {
-          initalizeBlob();
-        }
-      })
-      db.role.count().then(count => {
-        if (count < 1) {
-          initalizeRole();
-        }
-      })
-      db.type_question.count().then(count => {
-        if (count < 1) {
-          initalizeTypeQuestion();
-        }
-      })
-    }).catch((err) => {
-      console.log(err, "Some problems with database connection!!!");
-    });
+try {
+  mysql_connection.createConnection({
+    user: config.USER,
+    password: config.PASSWORD,
+    multipleStatements: true
+  }).then(async (connection) => {
+    connection.query(`CREATE DATABASE IF NOT EXISTS ${config.DB};`).then(async (connection) => {
+      const host = 'localhost';
+      const user = config.USER;
+      const password = config.PASSWORD;
+      const database = config.DB;
+      const importer = new Importer({host, user, password, database});
+      // Safe to use sequelize now
+      console.info("Database create or successfully checked");
+      
+      importer.import('script.sequence.sql').then(async()=>{
+        var files_imported = importer.getImported();
+        console.log(`${files_imported.length} SQL file(s) imported.`);
+        await db.sequelize.query("CALL CreateSequence( :sSeqName, :iSeqValue )",{replacements:{sSeqName:"postulation_sequence",iSeqValue:0}}).then(response => {
+          console.log(`\n\nCREATION postulation's index\n\n`);
+        });
+      }).catch((err)=>{
+        console.error(err);
+        throw err;
+      });
+            
+      // connection.query(`CREATE SEQUENCE postulation_sequence_id IF NOT EXISTS;`)
+      mkdirpSync('uploads/videos/');
+      // CREATE TABLES IF NOT EXIST
+      db.sequelize.sync().then((result) => {
+        console.log(`\n\nre-sync db.\n\n`);
+        db.type_blob.count().then(count => {
+          if (count < 1) {
+            initalizeBlob();
+          }
+        })
+        db.role.count().then(count => {
+          if (count < 1) {
+            initalizeRole();
+          }
+        })
+        db.type_question.count().then(count => {
+          if (count < 1) {
+            initalizeTypeQuestion();
+          }
+        })
+      }).catch((err) => {
+        console.log(err, "Some problems with database connection!!!");
+        throw err;
+      });
+    })
+  }).catch((error) => {
+    throw error
   })
-}).catch((error) => {
+} catch (error) {
   console.log(error);
-})
+  throw error;
+}
 
 
 /* db.sequelize.sync({ force: true }).then(() => {
