@@ -1,5 +1,11 @@
+const db = require("../models");
+const { QueryTypes } = require('sequelize');
 module.exports = (sequelize, Sequelize) => {
     const Postulation = sequelize.define("postulations", {
+			index:{
+				type: Sequelize.INTEGER,
+				unique:true
+			},
 			testDate: {
 				type: Sequelize.DATE
 			},
@@ -36,6 +42,13 @@ module.exports = (sequelize, Sequelize) => {
         timestamps: false,
         freezeTableName: true,
     });
-  
+	
+		Postulation.beforeCreate(async postulation => {
+			await sequelize.query("select GetSequenceVal(?,?) as index_postulation",{replacements:['postulation_sequence',1], type:QueryTypes.SELECT})
+			.then(response => {
+				console.log(`\n\nRESPONSE ${JSON.stringify(response)}\n\n`);
+				postulation.index = response[0].index_postulation
+			});
+		})
     return Postulation;
   };
