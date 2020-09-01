@@ -39,6 +39,9 @@ module.exports = (sequelize, Sequelize) => {
         post: {
             type: Sequelize.STRING
         },
+        secteur: {
+            type: Sequelize.STRING
+        },
         publicationDate:{
             type: Sequelize.DATE
         }

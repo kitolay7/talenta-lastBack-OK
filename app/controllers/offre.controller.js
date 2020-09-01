@@ -24,6 +24,7 @@ exports.createOffre = async (req, res) => {
         archived: req.body.archived,
         pays: req.body.pays,
         post: req.body.post,
+        secteur: req.body.secteur,
         userId: req.body.userId,
         publicationDate: req.body.publicationDate 
         // logo: req.files.logo[0].filename,
@@ -316,7 +317,8 @@ exports.updateOfferStatusArchived = (req, res) => {
 exports.updateOfferStatusPublished = (req, res) => {
     offres.update(
         {
-            publier: req.body.publier
+            publier: req.body.publier,
+            publicationDate: req.body.publicationDate,
         }, {
         where: { id: req.params.id },
         returning: true
