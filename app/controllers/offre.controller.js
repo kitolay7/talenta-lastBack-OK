@@ -3,7 +3,7 @@ const HttpStatus = require('http-status-codes');
 const io = require("socket.io-client");
 
 const fs = require('fs');
-const { error } = require("console");
+const { error, count } = require("console");
 const { postulation, user, profile } = require("../models");
 const Quiz = db.quiz;
 const offres = db.offre;
@@ -341,7 +341,7 @@ exports.updateOfferStatusPublished = (req, res) => {
 }
 exports.getOffersByPostulator = (req, res) => {
     db.postulation.findAll({
-        where: {userId:req.body.idUser},
+        where: {userId:req.params.idUser},
         include:[
             {
                 model: db.user,
@@ -380,7 +380,7 @@ exports.postuleToOffer = async(req,res) => {
             userId:req.body.userId,
             offreId: offre.dataValues.id,
             // dans 5 jours
-            testDate: new Date(new Date().getTime()+(5*24*60*60*1000))
+            // testDate: new Date(new Date().getTime()+(5*24*60*60*1000))
         })
         .then((data) => {
             res
@@ -402,7 +402,7 @@ exports.postuleToOffer = async(req,res) => {
                 .status(HttpStatus.NOT_FOUND)
                 .send({
                     message:
-                        error || "Some error occurred while retrieving tutorials.",
+                        error.message || "Some error occurred while retrieving tutorials.",
                     error: true
                 });
     }
@@ -496,4 +496,71 @@ exports.updatePostulation = async (req, res) => {
                 .status(HttpStatus.NOT_ACCEPTABLE)
                 .send({ message: error, error: true });
   }
+}
+
+exports.findOneOfferById = async (req, res) => {
+    try {        
+        await offres.findOne({where: {id: req.params.id}})
+        .then((offre) => {
+            res
+                .status(HttpStatus.OK)
+                .send({ data: offre, error: false });
+        })
+        .catch(error => {
+            throw error;
+        })
+    } catch (error) {
+        res
+                 .status(HttpStatus.NOT_FOUND)
+                 .send({ message: error.message, error: true });
+    }
+}
+
+exports.getPostulationById = async (req, res) => {
+    try {
+        await Postulation.findOne({where:{
+            [Op.and]:[
+               {userId: req.params.userId},
+               {offreId: req.params.offreId}
+             ]
+           },
+           returning: true
+        })
+        .then((postulation) => {
+            res
+                .status(HttpStatus.OK)
+                .send({ data: postulation, error: false });
+        })
+        .catch((error) => {
+            throw error;
+        })
+    } catch (error) {
+        res
+                 .status(HttpStatus.NOT_FOUND)
+                 .send({ message: error.message, error: true });
+    }
+}
+
+exports.checkUserHaveTestedOffer = async (req, res) => {
+    try {
+        await Postulation.count({where:{
+            [Op.and]:[
+               {userId: req.params.userId},
+               {offreId: req.params.offreId},
+               {testPassed:{[Op.gt]:0}}
+             ]
+           }})
+           .then(count => {
+            res
+                .status(HttpStatus.OK)
+                .send({ data: count, error: false });
+           })
+           .catch(error => {
+               throw error;
+           })
+    } catch (error) {
+        res
+                 .status(HttpStatus.NOT_FOUND)
+                 .send({ message: error.message, error: true });
+    }
 }

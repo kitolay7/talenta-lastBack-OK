@@ -132,6 +132,8 @@ exports.findOne = (req, res) => {
         });
 };
 
+
+
 exports.findOneByOffer = async (req, res) => {
     console.log(`OFFFER ID ${JSON.stringify(req.body)}`);
     const current_quiz = await Quiz.findOne({

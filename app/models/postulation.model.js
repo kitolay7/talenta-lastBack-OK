@@ -13,13 +13,14 @@ module.exports = (sequelize, Sequelize) => {
 				// 0: user will pass
 				// 1: user passing
 				// 2: user will passed
-				type:Sequelize.BOOLEAN,
-				defaultValue: false
+				type:Sequelize.INTEGER,
+				defaultValue: 0
 			},
 			// notation:{
 			// abort|will passed|passing
 			// 	type: Sequelize.INTEGER
 			// },
+			
 			admissibility:{
 				type:Sequelize.INTEGER,
 				defaultValue: 2

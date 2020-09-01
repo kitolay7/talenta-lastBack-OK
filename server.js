@@ -61,7 +61,7 @@ try {
     multipleStatements: true
   }).then(async (connection) => {
     connection.query(`CREATE DATABASE IF NOT EXISTS ${config.DB};`).then(async (connection) => {
-      const host = 'localhost';
+      const host = config.HOST;
       const user = config.USER;
       const password = config.PASSWORD;
       const database = config.DB;
@@ -197,6 +197,6 @@ io.on("connection", (socket) => {
   socket.on('update_postulation', (response) => {
     // broadcastena any @dashboard
       // console.log(response);
-      io.emit(`alert_update${response.data.offreId}`, JSON.stringify(response));
+      io.emit(`alert_update_offre_${response.data.offreId}`, JSON.stringify(response));
   });
 });
