@@ -500,7 +500,15 @@ exports.updatePostulation = async (req, res) => {
 
 exports.findOneOfferById = async (req, res) => {
     try {        
-        await offres.findOne({where: {id: req.params.id}})
+        await offres.findOne({
+        	where: {id: req.params.id},
+        	include:
+        	[{
+            	model: db.blob,
+            	include: [{ model: db.type_blob }],
+           	
+        	}]
+        })
         .then((offre) => {
             res
                 .status(HttpStatus.OK)
