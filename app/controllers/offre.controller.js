@@ -142,6 +142,27 @@ exports.getOfferById = (req, res) => {
             console.log(">> Error while finding comment: ", err);
         });
 }
+
+exports.getOfferByCreator = async (req, res) => {
+  try {
+    await offres.findAll({
+        where: {
+          userId: req.params.userId
+        }
+      },
+    ).then(data => {
+      res
+        .status(HttpStatus.OK)
+        .send({ data: data, error: false });
+    }).catch(error => {
+      throw error;
+    })
+  } catch (error) {
+    res
+                .status(HttpStatus.NOT_FOUND)
+                .send({ message: err.message, error: true });
+  }
+}
 exports.findAllPublished = (req, res) => {
     offres.findAll({
         include:
@@ -251,7 +272,7 @@ exports.getOfferByPays = (req, res) => {
             as:'offer_postuled'
         }]})
         .then(data => {
-            console.log(data)
+            // console.log(data)
             res
                 .send(data);
         })
@@ -298,7 +319,7 @@ exports.updateOfferStatusArchived = (req, res) => {
         returning: true
     })
         .then((result) => {
-            console.log(`\n\n\n${result}\n\n\n`)
+            // console.log(`\n\n\n${result}\n\n\n`)
             if (result[1] === 0) throw "Any field is modified"
             res.status(HttpStatus.OK).json({
                 message: "this offer is updated successfully",
@@ -306,7 +327,7 @@ exports.updateOfferStatusArchived = (req, res) => {
             })
         })
         .catch((error) => {
-            console.log(error);
+            // console.log(error);
             res
                 .status(HttpStatus.NOT_ACCEPTABLE)
                 .send({ message: error, error: true });
@@ -350,7 +371,7 @@ exports.getOffersByPostulator = (req, res) => {
             }
         ]
     }).then(data => {
-        console.log(data)
+        // console.log(data)
         res
             .status(HttpStatus.OK)
             .send(data);
@@ -385,7 +406,7 @@ exports.postuleToOffer = async(req,res) => {
         .then((data) => {
             res
                 .status(HttpStatus.CREATED)
-                .send({message: "Vous avez postulé à cet offre", error: false});
+                .send({data:data, message: "Vous avez postulé à cet offre", error: false});
         })
         .catch(err => {
             console.log(err);
@@ -413,17 +434,19 @@ exports.getUsersByOffer = async (req, res) => {
     await Postulation.findAll({
       where: {offreId: req.params.offreId},
       include:
-      [{
+      [
+        {
           model: User,
           attributes: ['id'],
           include: [{
             model: Profile,
             attributes: ['firstName','lastName']
           }]
-      },
-      {model: offres,
-      attributes: ['post', 'publicationDate']
-    }
+        },
+        {
+          model: offres,
+          attributes: ['post', 'publicationDate']
+        }
       ]
     })
     .then(data => {
@@ -455,6 +478,7 @@ exports.updatePostulation = async (req, res) => {
          testDate: req.body.testDate,
          testPassed: req.body.testPassed,
          admissibility: req.body.admissibility,
+         totalPoint: req.body.totalPoint,
          note: req.body.note,
          decision: req.body.decision,
          observation: req.body.observation,
@@ -476,12 +500,28 @@ exports.updatePostulation = async (req, res) => {
       // });
       // ioClient.emit('postulation_update', {offreId: req.body.offreId, userId: req.body.userId});
       res.status(HttpStatus.OK).json({
-        data: await Postulation.findOne({where:{
-          [Op.and]:[
+        data: await Postulation.findOne({
+          where:{
+            [Op.and]:[
              {userId: req.body.userId},
              {offreId: req.body.offreId}
            ]
-         }
+         },
+         include:
+      [
+        {
+          model: User,
+          attributes: ['id'],
+          include: [{
+            model: Profile,
+            attributes: ['firstName','lastName']
+          }]
+        },
+        {
+          model: offres,
+          attributes: ['post', 'publicationDate']
+        }
+      ]
         }),
         message: "this postulation is updated successfully",
         error: false
@@ -526,27 +566,42 @@ exports.findOneOfferById = async (req, res) => {
 
 exports.getPostulationById = async (req, res) => {
     try {
-        await Postulation.findOne({where:{
+        await Postulation.findOne({
+            where:{
             [Op.and]:[
                {userId: req.params.userId},
                {offreId: req.params.offreId}
              ]
-           },
-           returning: true
-        })
-        .then((postulation) => {
+            },
+            include:
+            [
+              {
+                model: User,
+                attributes: ['id'],
+                include: [{
+                  model: Profile,
+                  attributes: ['firstName','lastName']
+                }]
+              },
+              {
+                  model: offres,
+                  attributes: ['post', 'publicationDate']
+              }
+            ]
+              })
+            .then((postulation) => {
+                res
+                    .status(HttpStatus.OK)
+                    .send({ data: postulation, error: false });
+            })
+            .catch((error) => {
+                throw error;
+            })
+        } catch (error) {
             res
-                .status(HttpStatus.OK)
-                .send({ data: postulation, error: false });
-        })
-        .catch((error) => {
-            throw error;
-        })
-    } catch (error) {
-        res
-                 .status(HttpStatus.NOT_FOUND)
-                 .send({ message: error.message, error: true });
-    }
+                    .status(HttpStatus.NOT_FOUND)
+                    .send({ message: error.message, error: true });
+        }
 }
 
 exports.checkUserHaveTestedOffer = async (req, res) => {
