@@ -477,7 +477,7 @@ exports.updatePostulation = async (req, res) => {
        {
          testDate: req.body.testDate,
          testPassed: req.body.testPassed,
-         admissibility: req.body.admissibility,
+         step: req.body.step,
          totalPoint: req.body.totalPoint,
          note: req.body.note,
          decision: req.body.decision,

@@ -22,9 +22,9 @@ module.exports = (sequelize, Sequelize) => {
 				defaultValue: 0
 			},
 			
-			admissibility:{
+			step:{
 				type:Sequelize.INTEGER,
-				defaultValue: 2
+				defaultValue: 0
 				// 2: user will pass (en attente)
 				// 1: user passing
 				// 0: aborting
