@@ -26,6 +26,7 @@ exports.createOffre = async (req, res) => {
         post: req.body.post,
         secteur: req.body.secteur,
         userId: req.body.userId,
+        dossier: req.body.dossier,
         publicationDate: req.body.publicationDate 
         // logo: req.files.logo[0].filename,
         // video: req.files.video[0].filename,
@@ -193,7 +194,8 @@ exports.findAllOffer = (req, res) => {
         include:
             [{
                 model: db.blob,
-                include: [{ model: db.type_blob }]
+                include: [{ model: db.type_blob }],
+                   
             }]
     })
         .then(data => {
@@ -211,11 +213,12 @@ exports.findAllOffer = (req, res) => {
 };
 exports.findAllOfferbyIdUser = (req, res) => {
     offres.findAll({
-        where:{ userId: req.params.idUSer},
+        where:{ userId: req.params.idUSer, publier: true, dossier: false},
         include:
         [{
             model: db.blob,
             include: [{ model: db.type_blob }],
+
            
         }]
     })
@@ -627,3 +630,27 @@ exports.checkUserHaveTestedOffer = async (req, res) => {
                  .send({ message: error.message, error: true });
     }
 }
+exports.updateOffreDossier = async (req, res) => {
+    offres.update(
+        {
+            dossier: req.body.dossier
+        }, {
+        where: { id: req.params.id },
+        returning: true
+    }).then((result) => {
+        console.log(`\n\n\n${result}\n\n\n`)
+        if (result[1] === 0) throw "Any field is modified"
+        res.status(HttpStatus.OK).json({
+            message: "this offer is updated successfully",
+            error: false
+        })
+    })
+    .catch((error) => {
+        console.log(error);
+        res
+            .status(HttpStatus.NOT_ACCEPTABLE)
+            .send({ message: error, error: true });
+    });
+     
+  };
+  

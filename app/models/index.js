@@ -35,6 +35,7 @@ db.blob = require("../models/blob.model.js")(sequelize, Sequelize);
 db.type_blob = require("../models/type_blob.model.js")(sequelize, Sequelize);
 db.postulation = require("../models/postulation.model.js")(sequelize, Sequelize);
 db.type_question = require("../models/type_question.model.js")(sequelize, Sequelize);
+db.dossier = require("../models/dossier.model.js")(sequelize, Sequelize);
 db.criteria_point_question = require("../models/criteria_point_question.model.js")(sequelize, Sequelize);
 
 db.quiz.belongsTo(db.offre, {foreignKey:"offreId"});
@@ -49,6 +50,12 @@ db.question.hasMany(db.reponse, { as: "options" });
 db.question.belongsTo(db.offre, {
   foreignKey: "offreId",
   as: "questions",
+});
+db.dossier.belongsTo(db.offre, {
+  foreignKey: "offreId",  
+});
+db.dossier.belongsTo(db.user, {
+  foreignKey: "userId",  
 });
 db.question.belongsTo(db.type_question, { foreignKey: "TypeQuestionId" });
 db.question.hasMany(db.criteria_point_question, {foreignKey: "questionId"});

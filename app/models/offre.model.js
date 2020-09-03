@@ -44,7 +44,10 @@ module.exports = (sequelize, Sequelize) => {
         },
         publicationDate:{
             type: Sequelize.DATE
-        }
+        },
+        dossier: {
+            type: Sequelize.BOOLEAN
+        },
     }, {
         timestamps: true,
         scopes: {

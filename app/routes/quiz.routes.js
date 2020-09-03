@@ -2,6 +2,7 @@ const { verifySignUp } = require("../middleware");
 const controller = require("../controllers/quiz.controller");
 const offreControler = require("../controllers/offre.controller");
 const quizControler = require("../controllers/quiz.controller");
+const folderController = require("../controllers/dossier.controller");
 const multer = require('multer');
 const upload = multer({ dest: './uploads/' });
 module.exports = function (app) {
@@ -28,6 +29,7 @@ module.exports = function (app) {
   });
   app.post("/quiz", controller.create);
   app.post("/createReponse", controller.createReponse);
+  app.post("/createFolder", folderController.addFolder);
   app.post("/createOffre", multer(
     {
       storage: fileStorage,
@@ -60,5 +62,10 @@ module.exports = function (app) {
   app.put("/postulation/update", offreControler.updatePostulation);
   app.get("/postulation/users/:userId/offres/:offreId", offreControler.getPostulationById);
   app.get("/checktest/users/:userId/offres/:offreId", offreControler.checkUserHaveTestedOffer);
+  app.get("/getAllFolder/:idUser", folderController.getAllFolderUser);
+  app.get("/findFolder/:id", folderController.getOneFolder);
+  app.put("/offerFolder", offreControler.updateOffreDossier);
+  app.put("/offreRemarque", folderController.updateRemarque);
+  
   // app.get("/users/:userId/offres", offreControler.getOfferByCreator);
 };
