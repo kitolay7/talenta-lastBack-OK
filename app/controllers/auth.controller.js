@@ -55,7 +55,7 @@ exports.register = async (req, res) => {
       .then(roles => { return roles })
       .catch(err => { throw err });
     var token = jwt.sign({ id: current_user.id }, config.secret, {
-      expiresIn: 86400 // 24 hours
+      expiresIn: 864000 // 24 hours
     });
     res
       .status(HttpStatus.CREATED)
@@ -107,7 +107,7 @@ exports.signin = (req, res) => {
       }
 
       var token = jwt.sign({ id: user.id }, config.secret, {
-        expiresIn: 86400 // 24 hours
+        expiresIn: 864000 // 24 hours
       });
 
       var authorities = [];
