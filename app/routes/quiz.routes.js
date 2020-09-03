@@ -47,7 +47,7 @@ module.exports = function (app) {
   app.get("/getAllOfferPubl", offreControler.findAllPublished);
   app.get("/getAllOffer", offreControler.findAllOffer);
   app.get("/getAllOfferbyUser/:idUSer", offreControler.findAllOfferbyIdUser);
-   app.get("/getdetailOffer/:idUSer/:idOffer", offreControler.findOneOfferbyId);
+  app.get("/getdetailOffer/:idUSer/:idOffer", offreControler.findOneOfferbyId);
   app.get("/findReponse/:id", controller.findQuestionbyId);
   app.get("/findOffer/:id", offreControler.findOneOfferById);
   app.get("/getOfferArchived", offreControler.getOfferArchived);
@@ -60,4 +60,5 @@ module.exports = function (app) {
   app.put("/postulation/update", offreControler.updatePostulation);
   app.get("/postulation/users/:userId/offres/:offreId", offreControler.getPostulationById);
   app.get("/checktest/users/:userId/offres/:offreId", offreControler.checkUserHaveTestedOffer);
+  // app.get("/users/:userId/offres", offreControler.getOfferByCreator);
 };

@@ -24,7 +24,7 @@ User.findOne({
     },
   })
     .then((current_user) => {
-      console.log(current_user)
+      // console.log(current_user)
       if (current_user === null) {
         return res
           .status(HttpStatus.NOT_FOUND)
@@ -41,7 +41,7 @@ User.findOne({
             id:req.params.idUser
           }
         }).then ((response) => {
-          console.log(response)
+          // console.log(response)
           res
           .status(HttpStatus.OK)
           .send({

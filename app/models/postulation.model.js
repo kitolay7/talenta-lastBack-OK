@@ -16,10 +16,11 @@ module.exports = (sequelize, Sequelize) => {
 				type:Sequelize.INTEGER,
 				defaultValue: 0
 			},
-			// notation:{
+			totalPoint:{
 			// abort|will passed|passing
-			// 	type: Sequelize.INTEGER
-			// },
+				type: Sequelize.INTEGER,
+				defaultValue: 0
+			},
 			
 			admissibility:{
 				type:Sequelize.INTEGER,

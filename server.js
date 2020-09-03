@@ -199,4 +199,8 @@ io.on("connection", (socket) => {
       // console.log(response);
       io.emit(`alert_update_offre_${response.data.offreId}`, JSON.stringify(response));
   });
+  socket.on('user_postule', (response) => {
+    console.log(`\nquelqu'un a postulé\n`);
+    io.emit(`user_postuled_offer_${response.offreId}`, JSON.stringify(response));
+  })
 });
