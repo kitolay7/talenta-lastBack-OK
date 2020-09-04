@@ -40,7 +40,7 @@ db.criteria_point_question = require("../models/criteria_point_question.model.js
 
 db.quiz.belongsTo(db.offre, {foreignKey:"offreId"});
 db.quiz.belongsTo(db.user, {
-  foreignKey: "userId"
+  through: db.offre
 });
 // db.quiz.hasMany(db.question, { foreignKey:"quizId" });
 // db.question.belongsTo(db.quiz, {
