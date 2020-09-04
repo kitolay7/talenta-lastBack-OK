@@ -655,11 +655,12 @@ exports.checkUserHaveTestedOffer = async (req, res) => {
     }
 }
 exports.updateOffreDossier = async (req, res) => {
+    console.log(req.body)
     offres.update(
         {
             dossier: req.body.dossier
         }, {
-        where: { id: req.params.id },
+        where: { id: req.body.offreId },
         returning: true
     }).then((result) => {
         console.log(`\n\n\n${result}\n\n\n`)

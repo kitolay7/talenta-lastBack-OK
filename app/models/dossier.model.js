@@ -10,7 +10,8 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING
       },
       remarque: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: null
       },
     }, { timestamps: false, });
   

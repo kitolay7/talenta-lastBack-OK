@@ -10,11 +10,16 @@ exports.addFolder =  (req, res) => {
         fiche: req.body.fiche,
         auteur: req.body.auteur,
         offreId: req.body.offreId,
-        userId: req.body.idUser
+        userId: req.body.idUser,
+        remarque: ''
     }).then((data) => {
         res
             .send({data:data, message: "Dossier create successfully", error: false});
-    })
+    })        .catch((err) => {
+        res
+            .send({ message: err, error: true });
+        console.log(">> Error while finding comment: ", err);
+    });
   };
   exports.getAllFolderUser = (req, res) => {
     dossier.findAll({
@@ -26,7 +31,7 @@ exports.addFolder =  (req, res) => {
     })
 }
 exports.getOneFolder = (req, res) => {
-    return dossier.findByPk(req.params.id)
+    return dossier.findOne(req.params.id)
         .then((data) => {
             res
                 .send({ data: data, error: false });
@@ -39,7 +44,7 @@ exports.getOneFolder = (req, res) => {
         });
 }
 exports.updateRemarque = (req, res) => {
-    console.log(req.body)
+    console.log(req.body, 'remarqueremarqueremarqueremarqueremarqueremarqueremarque')
     dossier.update(
         {
             remarque: req.body.remarque
