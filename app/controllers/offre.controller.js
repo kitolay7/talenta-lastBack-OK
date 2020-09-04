@@ -235,6 +235,30 @@ exports.findAllOfferbyIdUser = (req, res) => {
                 });
         });
 };
+exports.findAllOfferIdUser = (req, res) => {
+    offres.findAll({
+        where:{ userId: req.params.idUSer},
+        include:
+        [{
+            model: db.blob,
+            include: [{ model: db.type_blob }],
+
+           
+        }]
+    })
+        .then(data => {
+            res
+                .send(data);
+        })
+        .catch(err => {
+            res
+                .send({
+                    message:
+                        err.message || "Some error occurred while retrieving tutorials.",
+                    error: true
+                });
+        });
+};
 exports.findOneOfferbyId = (req, res) => {
     offres.findAll({
         where:{ userId: req.params.idUSer},
