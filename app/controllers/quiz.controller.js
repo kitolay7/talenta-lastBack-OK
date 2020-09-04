@@ -1,6 +1,7 @@
 const db = require("../models");
 const Quiz = db.quiz;
 const Offre = db.offre;
+const Dossier = db.dossier;
 const CriteriaPointQuestion = db.criteria_point_question;
 const Question = db.question;
 const Reponse = db.reponse;
@@ -14,8 +15,10 @@ exports.create = async (req, res) => {
     // offres id
     const transaction_quiz = await db.sequelize.transaction();
     try{
-        const quiz = await Quiz.create({name:req.body.name,fiche_dir:req.body.fiche_dir,author_dir:req.body.fiche_dir,offreId:req.body.offer});
+        const quiz = await Quiz.create({name:req.body.name,fiche_dir:req.body.fiche_dir,author_dir:req.body.author_dir,offreId:req.body.offer});
         const offre = await Offre.findByPk(quiz.offreId).catch(error => {throw error});
+        Quiz.update({userId:offre.userId},{where:{id:quiz.id}}).catch(error => {throw error});
+        const dossier = await Dossier.create({titre:offre.titre,fiche:req.body.fiche_dir,auteur:req.body.author_dir,offreId:offre.id,userId: offre.userId}).catch(error => {throw error}); 
         const listTrueOrFalseRequest = req.body.listTrueOrFalse || null;
         for(const questionTrueFalseRequest of listTrueOrFalseRequest) {
             let questionTrueFalseResponse = await Question.create(questionTrueFalseRequest,{transaction_quiz}).catch(error => {throw error});
