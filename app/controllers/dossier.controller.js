@@ -31,7 +31,7 @@ exports.addFolder =  (req, res) => {
     })
 }
 exports.getOneFolder = (req, res) => {
-    return dossier.findOne(req.params.id)
+    return dossier.findByPk(req.params.id)
         .then((data) => {
             res
                 .send({ data: data, error: false });

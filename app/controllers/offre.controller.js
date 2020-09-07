@@ -213,7 +213,7 @@ exports.findAllOffer = (req, res) => {
 };
 exports.findAllOfferbyIdUser = (req, res) => {
     offres.findAll({
-        where:{ userId: req.params.idUSer, publier: true, dossier: false},
+        where:{ userId: req.params.idUSer, publier: false, dossier: false},
         include:
         [{
             model: db.blob,
@@ -223,8 +223,10 @@ exports.findAllOfferbyIdUser = (req, res) => {
         }]
     })
         .then(data => {
+            console.log(data, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
             res
                 .send(data);
+    
         })
         .catch(err => {
             res
