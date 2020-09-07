@@ -187,7 +187,7 @@ const initalizeTypeQuestion = () => {
   });
 }
 
-const PORT = process.env.PORT || 8181;
+const PORT = process.env.PORT || 8080;
 const server = http.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });

@@ -11,8 +11,11 @@ module.exports = (sequelize, Sequelize) => {
     },
     author_dir:{
       type: Sequelize.STRING
+    },
+    date_publication:{
+      type: Sequelize.DATE
     }
-  }, { timestamps: false, });
+  }, { timestamps: true, });
 
   return Quiz;
 };

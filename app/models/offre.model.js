@@ -31,10 +31,12 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING
         },
         publier: {
-            type: Sequelize.BOOLEAN
+            type: Sequelize.BOOLEAN,
+            defaultValue: false
         },
         archived: {
-            type: Sequelize.BOOLEAN
+            type: Sequelize.BOOLEAN,
+            defaultValue: false
         },
         post: {
             type: Sequelize.STRING
@@ -46,7 +48,8 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.DATE
         },
         dossier: {
-            type: Sequelize.BOOLEAN
+            type: Sequelize.BOOLEAN,
+            defaultValue: false
         },
     }, {
         timestamps: true,

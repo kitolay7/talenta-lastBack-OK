@@ -224,3 +224,21 @@ exports.findQuestionbyId = (req, res, next) => {
                 .send({ data: data, error: true });
         });
 };
+exports.findAllQuiz = (req,res) => {
+  try {
+    Quiz.findAll({include: [{model: db.offre}]})
+    .then(data => {
+      res
+        .status(HttpStatus.OK)
+        .send({data:data, error: false});
+    })
+    .catch(error => {
+      throw error;
+    })
+  } catch (error) {
+      console.log(">> Error while finding comment: ", error);
+            res
+                .status(HttpStatus.NOT_FOUND)
+                .send({ message: error.message, error: true });
+  }
+}

@@ -67,6 +67,7 @@ module.exports = function (app) {
   app.get("/findFolder/:id", folderController.getOneFolder);
   app.put("/offerFolder", offreControler.updateOffreDossier);
   app.put("/offreRemarque", folderController.updateRemarque);
+  app.get("/quizs",controller.findAllQuiz);
   
   // app.get("/users/:userId/offres", offreControler.getOfferByCreator);
 };
