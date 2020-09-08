@@ -68,6 +68,6 @@ module.exports = function (app) {
   app.put("/offerFolder", offreControler.updateOffreDossier);
   app.put("/offreRemarque", folderController.updateRemarque);
   app.get("/quizs",controller.findAllQuiz);
-  
+  app.get("/quiz/:userId", controller.findOneQuizById)  
   // app.get("/users/:userId/offres", offreControler.getOfferByCreator);
 };

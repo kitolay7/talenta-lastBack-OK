@@ -10,6 +10,7 @@ const Op = db.Sequelize.Op;
 const HttpStatus = require('http-status-codes');
 const { response } = require("express");
 const options = require("dotenv/lib/env-options");
+const { quiz } = require("../models");
 
 exports.create = async (req, res) => {
     // offres id
@@ -18,7 +19,7 @@ exports.create = async (req, res) => {
         const quiz = await Quiz.create({name:req.body.name,fiche_dir:req.body.fiche_dir,author_dir:req.body.author_dir,offreId:req.body.offer});
         const offre = await Offre.findByPk(quiz.offreId).catch(error => {throw error});
         Quiz.update({userId:offre.userId},{where:{id:quiz.id}}).catch(error => {throw error});
-        const dossier = await Dossier.create({titre:offre.titre,fiche:req.body.fiche_dir,auteur:req.body.author_dir,offreId:offre.id,userId: offre.userId}).catch(error => {throw error}); 
+        // const dossier = await Dossier.create({titre:offre.titre,fiche:req.body.fiche_dir,auteur:req.body.author_dir,offreId:offre.id,userId: offre.userId}).catch(error => {throw error}); 
         const listTrueOrFalseRequest = req.body.listTrueOrFalse || null;
         for(const questionTrueFalseRequest of listTrueOrFalseRequest) {
             let questionTrueFalseResponse = await Question.create(questionTrueFalseRequest,{transaction_quiz}).catch(error => {throw error});
@@ -241,4 +242,31 @@ exports.findAllQuiz = (req,res) => {
                 .status(HttpStatus.NOT_FOUND)
                 .send({ message: error.message, error: true });
   }
+}
+exports.findOneQuizById = (req, res) => {
+    try {
+        Quiz.findOne({
+            where:{id: req.params.userId},
+            include:
+            [{
+                model: Offre,
+                include:
+                [{
+                    model: Question,as: "questions",
+                    include:
+                    [{model:CriteriaPointQuestion},{model:Reponse ,as: "options"}]
+                }]
+            }]
+        })
+        .then(quiz => {
+            res
+                .status(HttpStatus.OK)
+                .send({data:quiz, error: false});
+        })
+    } catch (error) {
+        console.log(">> Error while finding project: ", error);
+        res
+            .status(HttpStatus.NOT_FOUND)
+            .send({ message: error.message, error: true });
+    }
 }
