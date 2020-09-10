@@ -10,7 +10,7 @@ const Op = db.Sequelize.Op;
 const HttpStatus = require('http-status-codes');
 const { response } = require("express");
 const options = require("dotenv/lib/env-options");
-const { quiz } = require("../models");
+const { quiz, question } = require("../models");
 
 exports.create = async (req, res) => {
     // offres id
@@ -178,12 +178,22 @@ exports.updateQuizContent = async (req, res) => {
         const quizId = req.params.quizId;
         // True or False
         const listTrueOrFalseRequest = req.body.listTrueOrFalse || null;
+        const listIds = req.body.listIds;
         let questionTrueFalseResponse;
         for(const questionTrueFalseRequest of listTrueOrFalseRequest) {
             if (questionTrueFalseRequest.id && questionTrueFalseRequest.id !== null && questionTrueFalseRequest.id !== '') {                
                 questionTrueFalseResponse = await Question.update(questionTrueFalseRequest,
                     {where:{id: questionTrueFalseRequest.id}
-                }).catch(error => {throw error});
+                })
+                .then(() => {
+                    // remove this id in the listIds.questions
+                    const index = listIds.questions.indexOf(questionTrueFalseRequest.id);
+                    if (index > -1) {
+                        listIds.questions.splice(index,1);
+                    }
+                    return {id: questionTrueFalseRequest.id}
+                })
+                .catch(error => {throw error});
             }
             else{
                 questionTrueFalseResponse = await Question.create(questionTrueFalseRequest)
@@ -194,7 +204,15 @@ exports.updateQuizContent = async (req, res) => {
                 if (newCritere.id && newCritere.id !== null && newCritere.id !== '' ) {                    
                     await CriteriaPointQuestion.update(newCritere,
                         {where:{id: newCritere.id }
-                    }).catch(error => {throw error});
+                    })
+                    .then(() => {
+                        // remove this id in the listIds.criteres
+                        const index = listIds.criteres.indexOf(newCritere.id);
+                        if (index > -1) {
+                            listIds.criteres.splice(index,1);
+                        }
+                    })
+                    .catch(error => {throw error});
                 }
                 else{
                     await CriteriaPointQuestion.create(newCritere).catch(error => {throw error});
@@ -203,7 +221,15 @@ exports.updateQuizContent = async (req, res) => {
             // console.log(`\n\n${JSON.stringify(questionTrueFalseRequest.responses)}\n\n`);
             if (questionTrueFalseRequest.responses.id[0] && questionTrueFalseRequest.responses.id[0] !== null && questionTrueFalseRequest.responses.id[0] !== '' ) {
                 await Reponse.update({isAnswers:questionTrueFalseRequest.responses.isAnswers[0], questionId:questionTrueFalseResponse.id},
-                    {where: {id:questionTrueFalseRequest.responses.id[0]}});
+                    {where: {id:questionTrueFalseRequest.responses.id[0]}})
+                    .then(()=>{
+                        // remove this id in the listIds.responses
+                        const index = listIds.responses.indexOf(questionTrueFalseRequest.responses.id[0]);
+                        if (index > -1) {
+                            listIds.responses.splice(index,1);
+                        }
+                    })
+                    .catch(error => {throw error});
             }
             else{
                 await Reponse.create({isAnswers:questionTrueFalseRequest.responses.isAnswers[0], questionId:questionTrueFalseResponse.id});
@@ -217,7 +243,16 @@ exports.updateQuizContent = async (req, res) => {
             if (questionMultipleRequest.id && questionMultipleRequest.id !== null && questionMultipleRequest.id !== '') {
                 questionMultipleResponse = await Question.update(questionMultipleRequest,
                     {where:{id: questionMultipleRequest.id}
-                }).catch(error => {throw error});
+                })
+                .then(() => {
+                    // remove this id in the listIds.questions
+                    const index = listIds.questions.indexOf(questionMultipleRequest.id);
+                    if (index > -1) {
+                        listIds.questions.splice(index,1);
+                    }
+                    return {id: questionMultipleRequest.id} 
+                })
+                .catch(error => {throw error});
             } else {
                 questionMultipleResponse = await Question.create(questionMultipleRequest)
                 .catch(error => {throw error});
@@ -226,14 +261,30 @@ exports.updateQuizContent = async (req, res) => {
             if (newCritere.id && newCritere.id !== null && newCritere.id !== '') {
                 await CriteriaPointQuestion.update(newCritere,
                     {where:{id: newCritere.id }
-                }).catch(error => {throw error});
+                })
+                .then(() => {
+                    // remove this id in the listIds.criteres
+                    const index = listIds.criteres.indexOf(newCritere.id);
+                    if (index > -1) {
+                        listIds.criteres.splice(index,1);
+                    }
+                })
+                .catch(error => {throw error});
             } else {
                 await CriteriaPointQuestion.create(newCritere).catch(error => {throw error});
             }
                 for(index=0;index<questionMultipleRequest.responses.choices.length;index++)
                 {
                     if (questionMultipleRequest.responses.id[index] && questionMultipleRequest.responses.id[index]!==null && questionMultipleRequest.responses.id[index]!=='' ) {
-                        await Reponse.update({choices:questionMultipleRequest.responses.choices[index],isAnswers:questionMultipleRequest.responses.isAnswers[index], questionId:questionMultipleResponse.id},{where:{id:questionMultipleRequest.responses.id[index]}}).catch(error => {throw error});
+                        await Reponse.update({choices:questionMultipleRequest.responses.choices[index],isAnswers:questionMultipleRequest.responses.isAnswers[index], questionId:questionMultipleResponse.id},{where:{id:questionMultipleRequest.responses.id[index]}})
+                        .then(()=>{
+                            // remove this id in the listIds.responses
+                            const indexToDelete = listIds.responses.indexOf(questionMultipleRequest.responses.id[index]);
+                            if (indexToDelete > -1) {
+                                listIds.responses.splice(indexToDelete,1);
+                            }
+                        })
+                        .catch(error => {throw error});
                     } else {
                         await Reponse.create({choices:questionMultipleRequest.responses.choices[index],isAnswers:questionMultipleRequest.responses.isAnswers[index], questionId:questionMultipleResponse.id}).catch(error => {throw error});
                     }
@@ -248,16 +299,30 @@ exports.updateQuizContent = async (req, res) => {
                 questionClassementResponse = await Question.update(questionClassementRequest,
                     {where:{id:questionClassementRequest.id}
                 })
+                .then(()=>{
+                    // remove this id in the listIds.questions
+                    const index = listIds.questions.indexOf(questionClassementRequest.id);
+                    if (index > -1) {
+                        listIds.questions.splice(index,1);
+                    }
+                    return {id: questionClassementRequest.id}
+                })
                 .catch(error => {throw error});
             } else {
                 questionClassementResponse = await Question.create(questionClassementRequest)
                 .catch(error => {throw error});
             }
             const newCritere = questionClassementRequest.criteres[0];
-            console.log(`\n\n${newCritere}\n\n`);
             if (newCritere.id && newCritere.id !== null && newCritere.id !== '') {
                 await CriteriaPointQuestion.update(newCritere,
                     {where:{id: newCritere.id }
+                })
+                .then(()=>{
+                    // remove this id in the listIds.criteres
+                    const index = listIds.criteres.indexOf(newCritere.id);
+                    if (index > -1) {
+                        listIds.criteres.splice(index,1);
+                    }
                 })
                 .catch(error => {throw error});
             } else {
@@ -266,6 +331,13 @@ exports.updateQuizContent = async (req, res) => {
                 for(index=0;index<questionClassementRequest.responses.choices.length; index++) {                                        
                     if (questionClassementRequest.responses.id[index] && questionClassementRequest.responses.id[index]!==null && questionClassementRequest.responses.id[index]!=='' ) {
                         await Reponse.update({choices:questionClassementRequest.responses.choices[index], rang:index, questionId:questionClassementResponse.id},{where:{id:questionClassementRequest.responses.id[index]}})
+                        .then(()=>{
+                            // remove this id in the listIds.responses
+                            const indexToDelete = listIds.responses.indexOf(questionClassementRequest.responses.id[index]);
+                            if (indexToDelete > -1) {
+                                listIds.responses.splice(indexToDelete,1);
+                            } 
+                        })
                         .catch(error => {throw error});
                     }
                     else{
@@ -279,20 +351,45 @@ exports.updateQuizContent = async (req, res) => {
         let questionRedactionResponse;
         for(const questionRedactionRequest of listRedactionRequest) {
             if (questionRedactionRequest.id && questionRedactionRequest.id !== null && questionRedactionRequest.id !== '') {
-                questionRedactionResponse = await Question.update(questionRedactionRequest,{where:{id:questionRedactionRequest.id}}).catch(error => {throw error});
+                questionRedactionResponse = await Question.update(questionRedactionRequest,{where:{id:questionRedactionRequest.id}})
+                .then(()=>{
+                    // remove this id in the listIds.questions
+                    const index = listIds.questions.indexOf(questionRedactionRequest.id);
+                    if (index > -1) {
+                        listIds.questions.splice(index,1);
+                    }
+                    return {id: questionRedactionRequest.id}
+                })
+                .catch(error => {throw error});
             } else {
                 questionRedactionResponse = await Question.create(questionRedactionRequest).catch(error => {throw error});
             }
             for(critere of questionRedactionRequest.criteres) {
                 if (critere.id && critere.id !== null && critere.id !== '') {
-                    await CriteriaPointQuestion.update(critere,{where:{id:critere.id}}).catch(error => {throw error});
+                    await CriteriaPointQuestion.update(critere,{where:{id:critere.id}})
+                    .then(()=>{
+                        // remove this id in the listIds.criteres
+                        const index = listIds.criteres.indexOf(critere.id);
+                        if (index > -1) {
+                            listIds.criteres.splice(index,1);
+                        }                
+                    })
+                    .catch(error => {throw error});
                 } else {
                     await CriteriaPointQuestion.create(critere).catch(error => {throw error});
                 }
             }
             for(index=0;index<questionRedactionRequest.responses.choices.length;index++){
                 if (questionRedactionRequest.responses.id[index] && questionRedactionRequest.responses.id[index] !== null && questionRedactionRequest.responses.id[index] !== '') {
-                    await Reponse.update({choices:questionRedactionRequest.responses.choices[index],isAnswers:questionRedactionRequest.responses.isAnswers[index], questionId:questionRedactionResponse.id},{where:{id:questionRedactionRequest.responses.id[index]}}).catch(error => {throw error});
+                    await Reponse.update({choices:questionRedactionRequest.responses.choices[index],isAnswers:questionRedactionRequest.responses.isAnswers[index], questionId:questionRedactionResponse.id},{where:{id:questionRedactionRequest.responses.id[index]}})
+                    .then(()=>{
+                        // remove this id in the listIds.responses
+                        const indexToDelete = listIds.responses.indexOf(questionRedactionRequest.responses.id[index]);
+                        if (indexToDelete > -1) {
+                            listIds.responses.splice(indexToDelete,1);
+                        }
+                    })
+                    .catch(error => {throw error});
                 } else {
                     await Reponse.create({choices:questionRedactionRequest.responses.choices[index],isAnswers:questionRedactionRequest.responses.isAnswers[index], questionId:questionRedactionResponse.id}).catch(error => {throw error});
                 }    
@@ -303,20 +400,45 @@ exports.updateQuizContent = async (req, res) => {
         let questionAudioResponse;
         for(const questionAudioRequest of listAudio){
             if (questionAudioRequest.id && questionAudioRequest.id!==null && questionAudioRequest.id!=='') {
-                questionAudioResponse = await Question.update(questionAudioRequest, {where:{id: questionAudioRequest.id}}).catch(error => {throw error});
+                questionAudioResponse = await Question.update(questionAudioRequest, {where:{id: questionAudioRequest.id}})
+                .then(()=>{
+                    // remove this id in the listIds.questions
+                    const index = listIds.questions.indexOf(questionAudioRequest.id);
+                    if (index > -1) {
+                        listIds.questions.splice(index,1);
+                    }
+                    return {id: questionAudioRequest.id}
+                })
+                .catch(error => {throw error});
             } else {
                 questionAudioResponse = await Question.create(questionAudioRequest).catch(error => {throw error});
             }
             for(critere of questionAudioRequest.criteres) {
                 if (critere.id && critere.id !== null && critere.id !== '') {
-                    await CriteriaPointQuestion.update(critere,{where:{id:critere.id}}).catch(error => {throw error});
+                    await CriteriaPointQuestion.update(critere,{where:{id:critere.id}})
+                    .then(() => {
+                        // remove this id in the listIds.criteres
+                        const index = listIds.criteres.indexOf(critere.id);
+                        if (index > -1) {
+                            listIds.criteres.splice(index,1);
+                        }
+                    })
+                    .catch(error => {throw error});
                 } else {
                     await CriteriaPointQuestion.create(critere).catch(error => {throw error});
                 }
             }
             for(index=0;index<questionAudioRequest.responses.id.length;index++){
                 if (questionAudioRequest.responses.id[index] && questionAudioRequest.responses.id[index] !== null && questionAudioRequest.responses.id[index] !== '') {
-                    await Reponse.update({type_audio:questionAudioRequest.responses.type_audio, questionId:questionAudioResponse.id},{where:{id:questionAudioRequest.responses.id[index]}}).catch(error => {throw error});
+                    await Reponse.update({type_audio:questionAudioRequest.responses.type_audio, questionId:questionAudioResponse.id},{where:{id:questionAudioRequest.responses.id[index]}})
+                    .then(()=>{
+                        // remove this id in the listIds.responses
+                        const indexToDelete = listIds.responses.indexOf(questionAudioRequest.responses.id[index]);
+                        if (indexToDelete > -1) {
+                            listIds.responses.splice(indexToDelete,1);
+                        }
+                    })
+                    .catch(error => {throw error});
                 } else {
                     await Reponse.create({type_audio:questionAudioRequest.responses.type_audio, questionId:questionAudioResponse.id}).catch(error => {throw error});
                 }
@@ -328,25 +450,84 @@ exports.updateQuizContent = async (req, res) => {
         let questionVideoResponse;
         for(const questionVideoRequest of listVideo){
             if (questionVideoRequest.id && questionVideoRequest.id!==null && questionVideoRequest.id!=='') {
-                questionVideoResponse = await Question.update(questionVideoRequest, {where:{id: questionVideoRequest.id}}).catch(error => {throw error});
+                questionVideoResponse = await Question.update(questionVideoRequest, {where:{id: questionVideoRequest.id}})
+                .then(()=>{
+                    // remove this id in the listIds.questions
+                    const index = listIds.questions.indexOf(questionVideoRequest.id);
+                    if (index > -1) {
+                        listIds.questions.splice(index,1);
+                    }
+                    return {id: questionVideoRequest.id}
+                })
+                .catch(error => {throw error});
             } else {
                 questionVideoResponse = await Question.create(questionVideoRequest).catch(error => {throw error});
             }
             for(critere of questionVideoRequest.criteres) {
                 if (critere.id && critere.id !== null && critere.id !== '') {
-                    await CriteriaPointQuestion.update(critere,{where:{id:critere.id}}).catch(error => {throw error});
+                    await CriteriaPointQuestion.update(critere,{where:{id:critere.id}})
+                    .then(() => {
+                        // remove this id in the listIds.criteres
+                        const index = listIds.criteres.indexOf(critere.id);
+                        if (index > -1) {
+                            listIds.criteres.splice(index,1);
+                        }
+                    })
+                    .catch(error => {throw error});
                 } else {
                     await CriteriaPointQuestion.create(critere).catch(error => {throw error});
                 }
             }
             for(index=0;index<questionVideoRequest.responses.id.length;index++){
                 if (questionVideoRequest.responses.id[index] && questionVideoRequest.responses.id[index] !== null && questionVideoRequest.responses.id[index] !== '') {
-                    await Reponse.update({type_audio:questionVideoRequest.responses.type_audio, questionId:questionVideoResponse.id},{where:{id:questionVideoRequest.responses.id[index]}}).catch(error => {throw error});
+                    await Reponse.update({type_audio:questionVideoRequest.responses.type_audio, questionId:questionVideoResponse.id},{where:{id:questionVideoRequest.responses.id[index]}})
+                    .then(()=>{
+                       // remove this id in the listIds.responses
+                       const indexToDelete = listIds.responses.indexOf(questionVideoRequest.responses.id[index]);
+                       if (indexToDelete > -1) {
+                           listIds.responses.splice(indexToDelete,1);
+                       } 
+                    })
+                    .catch(error => {throw error});
                 } else {
                     await Reponse.create({type_audio:questionVideoRequest.responses.type_audio, questionId:questionVideoResponse.id}).catch(error => {throw error});
                 }
             }
         }
+        for (let indexQuestionToDelete = 0; indexQuestionToDelete < listIds.questions.length; indexQuestionToDelete++) {
+            Question.findOne({where:{id:listIds.questions[indexQuestionToDelete]}})
+            .then((question) =>{
+                if(question.id){
+                    Question.destroy({where:{id:question.id}}).catch(error => {throw error});
+                }
+            })
+            .catch(error => {
+                throw error;
+            })
+        }
+        for (let indexCritereToDelete = 0; indexCritereToDelete < listIds.criteres.length; indexCritereToDelete++) {
+            CriteriaPointQuestion.findOne({where:{id:listIds.criteres[indexCritereToDelete]}})
+            .then((critere) =>{
+                if(critere.id){
+                    CriteriaPointQuestion.destroy({where:{id:critere.id}}).catch(error => {throw error});
+                }
+            })
+            .catch(error => {
+                throw error;
+            })
+        }
+        for (let indexResponseToDelete = 0; indexResponseToDelete < listIds.responses.length; indexResponseToDelete++) {
+            db.reponse.findOne({where:{id:listIds.responses[indexResponseToDelete]}})
+            .then((response) =>{
+                if(response.id){
+                    db.reponse.destroy({where:{id:response.id}}).catch(error => {throw error});
+                }
+            })
+            .catch(error => {
+                throw error;
+            })
+        }
+        console.log(`\n\n\n${JSON.stringify(listIds)}\n\n\n`);
         res
             .status(HttpStatus.OK)
             .send({message: "success",error:false});
