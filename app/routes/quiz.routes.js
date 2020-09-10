@@ -70,5 +70,6 @@ module.exports = function (app) {
   app.get("/quizs",controller.findAllQuiz);
   app.get("/quiz/:userId", controller.findOneQuizById);
   app.put("/quizs/:quizId/update", controller.updateQuizContent);
+  app.get("/users/:userId/offresPublished", offreControler.getOfferByCreatorPublished);
   // app.get("/users/:userId/offres", offreControler.getOfferByCreator);
 };

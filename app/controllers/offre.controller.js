@@ -164,6 +164,27 @@ exports.getOfferByCreator = async (req, res) => {
                 .send({ message: err.message, error: true });
   }
 }
+exports.getOfferByCreatorPublished = async (req, res) => {
+  try {
+    await offres.findAll({
+        where:{ 
+        	userId: req.params.userId, 
+        	archived: false, 
+        	publier: true
+        },
+    }).then(data => {
+      	res
+        .status(HttpStatus.OK)
+        .send({ data: data, error: false });
+    }).catch(error => {
+      throw error;
+    })
+  } catch (error) {
+    	res
+        .status(HttpStatus.NOT_FOUND)
+        .send({ message: err.message, error: true });
+  }
+}
 exports.findAllPublished = (req, res) => {
     offres.findAll({
         include:
