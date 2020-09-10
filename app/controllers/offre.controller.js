@@ -474,7 +474,7 @@ exports.getUsersByOffer = async (req, res) => {
         },
         {
           model: offres,
-          attributes: ['titre','secteur', 'publicationDate']
+          attributes: ['post','titre', 'publicationDate']
         }
       ]
     })
