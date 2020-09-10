@@ -349,7 +349,7 @@ exports.updateQuizContent = async (req, res) => {
         }
         res
             .status(HttpStatus.OK)
-            .send({message: "atr@farany",error:false});
+            .send({message: "success",error:false});
         // console.log(`\n\n\n${JSON.stringify(listTrueOrFalseRequest)}\n\n\n`);
         
         // const listMultipleRequest = req.body.listMultiple || null;
