@@ -14,7 +14,11 @@ module.exports = (sequelize, Sequelize) => {
     },
     date_publication:{
       type: Sequelize.DATE
-    }
+    },
+    publier: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false
+  },
   }, { timestamps: true, });
 
   return Quiz;

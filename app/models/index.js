@@ -42,15 +42,11 @@ db.quiz.belongsTo(db.offre, {foreignKey:"offreId"});
 db.quiz.belongsTo(db.user, {
   through: db.offre
 });
-// db.quiz.hasMany(db.question, { foreignKey:"quizId" });
-// db.question.belongsTo(db.quiz, {
-//   foreignKey: "quizId",
-// });
-db.question.hasMany(db.reponse, {onDelete:"CASCADE", as: "options" });
-db.question.belongsTo(db.offre, {
-  foreignKey: "offreId",
-  as: "questions",
+db.quiz.hasMany(db.question, { foreignKey:"quizId" });
+db.question.belongsTo(db.quiz, {
+  foreignKey: "quizId",
 });
+db.question.hasMany(db.reponse, {onDelete:"CASCADE", as: "options" });
 db.dossier.belongsTo(db.offre, {
   foreignKey: "offreId",  
 });
@@ -59,7 +55,7 @@ db.dossier.belongsTo(db.user, {
 });
 db.question.belongsTo(db.type_question, { foreignKey: "TypeQuestionId" });
 db.question.hasMany(db.criteria_point_question, {foreignKey: "questionId", onDelete:"CASCADE"});
-db.offre.hasMany(db.question, { as: "questions" });
+// db.offre.hasMany(db.question, { as: "questions" });
 db.offre.hasMany(db.blob, {
   foreignKey: "OffreId"
 });

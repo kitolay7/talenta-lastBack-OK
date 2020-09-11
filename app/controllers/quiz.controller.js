@@ -16,13 +16,10 @@ exports.create = async (req, res) => {
     // offres id
     const transaction_quiz = await db.sequelize.transaction();
     try{
-        const quiz = await Quiz.create({name:req.body.name,fiche_dir:req.body.fiche_dir,author_dir:req.body.author_dir,offreId:req.body.offer});
-        const offre = await Offre.findByPk(quiz.offreId).catch(error => {throw error});
-        Quiz.update({userId:offre.userId},{where:{id:quiz.id}}).catch(error => {throw error});
-        // const dossier = await Dossier.create({titre:offre.titre,fiche:req.body.fiche_dir,auteur:req.body.author_dir,offreId:offre.id,userId: offre.userId}).catch(error => {throw error}); 
+        const quiz = await Quiz.create({name:req.body.name,fiche_dir:req.body.fiche_dir,author_dir:req.body.author_dir,offreId:req.body.offer,userId:req.body.idUser,publier:req.body.publier});
         const listTrueOrFalseRequest = req.body.listTrueOrFalse || null;
         for(const questionTrueFalseRequest of listTrueOrFalseRequest) {
-            let questionTrueFalseResponse = await Question.create(questionTrueFalseRequest,{transaction_quiz}).catch(error => {throw error});
+            let questionTrueFalseResponse = await Question.create({...questionTrueFalseRequest,...{quizId:quiz.id}},{transaction_quiz}).catch(error => {throw error});
             for( const critere of questionTrueFalseRequest.criteres) {
                 const newCritere = {...critere,...{questionId:questionTrueFalseResponse.id}};
                 await CriteriaPointQuestion.create(newCritere,{transaction_quiz}).catch(error => {throw error});
@@ -33,7 +30,7 @@ exports.create = async (req, res) => {
         const listMultipleRequest = req.body.listMultiple || null;
         for(const questionMultipleRequest of listMultipleRequest) 
         {
-            let questionMultipleResponse = await Question.create(questionMultipleRequest,{transaction_quiz}).catch(error => {throw error});
+            let questionMultipleResponse = await Question.create({...questionMultipleRequest,...{quizId:quiz.id}},{transaction_quiz}).catch(error => {throw error});
             for( const critere of questionMultipleRequest.criteres) 
             {
                 const newCritere = {...critere,...{questionId:questionMultipleResponse.id}};
@@ -47,20 +44,20 @@ exports.create = async (req, res) => {
         const listClassementRequest = req.body.listClassement || null;
         for(const questionClassementRequest of listClassementRequest) {
             // console.log(`\n\n${JSON.stringify(questionClassementRequest)}\n\n`);
-            let questionClassementResponse = await Question.create(questionClassementRequest,{transaction_quiz}).catch(error => {throw error});
+            let questionClassementResponse = await Question.create({...questionClassementRequest,...{quizId:quiz.id}},{transaction_quiz}).catch(error => {throw error});
             for(const critere of questionClassementRequest.criteres) {
                 const newCritere = {...critere,...{questionId:questionClassementResponse.id}};
                 await CriteriaPointQuestion.create(newCritere,{transaction_quiz}).catch(error => {throw error});
                 for(index=0;index<questionClassementRequest.responses.choices.length; index++) {                                        
                     // await Reponse.create({choices:questionClassementRequest.responses.choices[index],rang:questionClassementRequest.responses.rang[index], questionId:questionClassementResponse.id},{transaction_quiz}).catch(error => {throw error});
-                    await Reponse.create({choices:questionClassementRequest.responses.choices[index], rang:index, questionId:questionClassementResponse.id},{transaction_quiz}).catch(error => {throw error});
+                    await Reponse.create({choices:questionClassementRequest.responses.choices[index], rang:index+1, questionId:questionClassementResponse.id},{transaction_quiz}).catch(error => {throw error});
                 }
             }
         };
         const listRedactionRequest = req.body.listRedaction || null;
         for(const questionRedactionRequest of listRedactionRequest) {
             // console.log(`\n\n${JSON.stringify(questionRedactionRequest)}\n\n`);
-            let questionRedactionResponse = await Question.create(questionRedactionRequest,{transaction_quiz}).catch(error => {throw error});
+            let questionRedactionResponse = await Question.create({...questionRedactionRequest,...{quizId:quiz.id}},{transaction_quiz}).catch(error => {throw error});
             for(critere of questionRedactionRequest.criteres) {
                 const newCritere = {...critere,...{questionId:questionRedactionResponse.id}};
                 await CriteriaPointQuestion.create(newCritere,{transaction_quiz}).catch(error => {throw error});
@@ -73,7 +70,7 @@ exports.create = async (req, res) => {
         const listAudio = req.body.listAudio || null;
         for(const questionAudioRequest of listAudio){
             // console.log(`\n\n${JSON.stringify(questionRedactionRequest)}\n\n`);
-            let questionAudioResponse = await Question.create(questionAudioRequest,{transaction_quiz}).catch(error => {throw error});
+            let questionAudioResponse = await Question.create({...questionAudioRequest,...{quizId: quiz.id}},{transaction_quiz}).catch(error => {throw error});
             for((critere) of questionAudioRequest.criteres){
                 const newCritere = {...critere,...{questionId:questionAudioResponse.id}};
                 await CriteriaPointQuestion.create(newCritere,{transaction_quiz}).catch(error => {throw error});
@@ -83,7 +80,7 @@ exports.create = async (req, res) => {
         const listVideo = req.body.listVideo || null;
         for(const questionVideoRequest of listVideo){
             console.log(`\n\n${JSON.stringify(questionVideoRequest)}\n\n`);
-            let questionVideoResponse = await Question.create(questionVideoRequest,{transaction_quiz}).catch(error => {throw error});
+            let questionVideoResponse = await Question.create({...questionVideoRequest,...{quizId:quiz.id}},{transaction_quiz}).catch(error => {throw error});
             console.log(JSON.stringify(questionVideoResponse));
             for((critere) of questionVideoRequest.criteres){
                 const newCritere = {...critere,...{questionId:questionVideoResponse.id}};
@@ -674,16 +671,12 @@ exports.findAllQuiz = (req,res) => {
 exports.findOneQuizById = (req, res) => {
     try {
         Quiz.findOne({
-            where:{id: req.params.userId},
+            where:{id: req.params.quizId},
             include:
-            [{
-                model: Offre,
+            [
+             {model: Question,as: "questions",
                 include:
-                [{
-                    model: Question,as: "questions",
-                    include:
-                    [{model:CriteriaPointQuestion},{model:Reponse ,as: "options"}]
-                }]
+                [{model:CriteriaPointQuestion},{model:Reponse ,as: "options"}]
             }]
         })
         .then(quiz => {
