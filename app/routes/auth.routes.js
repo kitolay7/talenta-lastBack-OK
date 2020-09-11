@@ -21,4 +21,11 @@ module.exports = function (app) {
 
   app.post("/api/auth/signin", controller.signin);
   app.put("/api/auth/updateprofile", controller.updateProfile);
+  
+  
+  // ********** ESSAI CONFIRM MAIL ***************
+  app.post("/signup", controller.reg );
+  app.post("/signin", controller.log );
+  app.get("/confirmation/:token", controller.confirm );
+  
 };

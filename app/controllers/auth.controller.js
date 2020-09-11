@@ -4,6 +4,7 @@ const User = db.user;
 const Profile = db.profile;
 const Role = db.role;
 const HttpStatus = require('http-status-codes');
+const { sendMail } = require("../middleware");
 
 const Op = db.Sequelize.Op;
 
@@ -189,3 +190,135 @@ exports.updateProfile = async (req, res) => {
     
   
 };
+
+
+// ********** ESSAI CONFIRM MAIL ***************
+
+exports.log = async (req, res) => {
+
+  console.log(req.body)
+  
+  User.findOne({
+    where: {
+      email: req.body.email
+    }
+  })
+    .then(user => {
+      if (!user) {
+        return res
+          .status(HttpStatus.NOT_FOUND)
+          .send({ message: "User Not found.", error: true });
+      }
+      if (!user.confirmed) {
+        return res
+          .status(HttpStatus.NOT_FOUND)
+          .send({ message: "Confirmez votre email", error: true });
+      }
+
+      var passwordIsValid = bcrypt.compareSync(
+        req.body.password,
+        user.password
+      );
+
+      if (!passwordIsValid) {
+        return res
+          .send({
+            accessToken: null,
+            message: "Invalid Password!",
+            error: HttpStatus.UNAUTHORIZED
+          });
+      }
+
+      var token = jwt.sign({ id: user.id }, config.secret, {
+        expiresIn: 864000 // 24 hours
+      });
+
+      var authorities = [];
+      user.getRoles().then(roles => {
+        for (let i = 0; i < roles.length; i++) {
+          authorities.push("ROLE_" + roles[i].name.toUpperCase());
+        }
+        res
+          .status(HttpStatus.OK)
+          .send({
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            roles: authorities,
+            numTel: user.numTel,
+            pays: user.pays,
+            codePostal: user.codePostal,
+            societe: user.societe,
+            accessToken: token,
+            error: false
+          });
+      });
+    })
+    .catch(err => {
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message, error: true });
+    });
+};
+
+//
+
+exports.reg = async (req, res) => {
+
+  console.log(req.body)
+  
+  try {
+    const current_user = await User.create({
+      username: req.body.username,
+      email: req.body.email,
+      password: bcrypt.hashSync(req.body.password, 8),
+    });
+    
+    var token = jwt.sign({ id: current_user.id }, config.secret, {
+      expiresIn: 864000 // 24 hours
+    });
+    
+    console.log(token)
+    
+    const url = `http://localhost:4200/confirmation/${token}`
+    
+    const mail = {
+    	body: {
+    		email_recipient: req.body.email,
+    		email_subject: 'Confirm email',
+    		email_content: `Please click this url to confirm your email address : <a href="${url}">${url}</a>`
+    	}
+    }
+    
+    sendMail(mail, res, {});
+    
+    res
+      .status(HttpStatus.CREATED)
+      .send({
+        message: "successfully created",
+        data: {
+          user: { ...current_user.dataValues },
+        },
+        accessToken: token,
+        error: false
+      })
+  } catch (err) {
+    res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .send({ message: err, error: true });
+    console.log(">> Error while finding comment: ", err);
+  }
+};
+
+//
+
+exports.confirm = async (req, res) => {
+	console.log(req);
+  	try {
+  		const {user: {id} } = jwt.verify(req.param.token, config.secret);
+  		await User.update({confirmed: true}, {where: {id}});
+  	} catch (e) {
+  		res.send('Error')
+  	}
+};
+
+
+  	
