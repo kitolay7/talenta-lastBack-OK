@@ -5,6 +5,7 @@ const Dossier = db.dossier;
 const CriteriaPointQuestion = db.criteria_point_question;
 const Question = db.question;
 const Reponse = db.reponse;
+const QuizToOffer = db.quiz_to_offer;
 const Op = db.Sequelize.Op;
 
 const HttpStatus = require('http-status-codes');
@@ -16,7 +17,10 @@ exports.create = async (req, res) => {
     // offres id
     const transaction_quiz = await db.sequelize.transaction();
     try{
-        const quiz = await Quiz.create({name:req.body.name,fiche_dir:req.body.fiche_dir,author_dir:req.body.author_dir,offreId:req.body.offer,userId:req.body.idUser,publier:req.body.publier});
+        const quiz = await Quiz.create({name:req.body.name,fiche_dir:req.body.fiche_dir,author_dir:req.body.author_dir,offreId:req.body.offer,userId:req.body.idUser,publier:req.body.publier, date_publication:(req.body.publier ? new Date() : null)},{transaction_quiz});
+        if (req.body.offer) {
+            await QuizToOffer.create({offreId:req.body.offer,quizId:quiz.id},{transaction_quiz});
+        }
         const listTrueOrFalseRequest = req.body.listTrueOrFalse || null;
         for(const questionTrueFalseRequest of listTrueOrFalseRequest) {
             let questionTrueFalseResponse = await Question.create({...questionTrueFalseRequest,...{quizId:quiz.id}},{transaction_quiz}).catch(error => {throw error});
@@ -173,6 +177,23 @@ exports.findOneByOffer = async (req, res) => {
 exports.updateQuizContent = async (req, res) => {
     try {
         const quizId = req.params.quizId;
+        // update quiztooffer
+        if (req.body.offer) {
+            QuizToOffer.findOne({where:{quizId:req.params.quizId}})
+            .then(quizToOffer => {
+                if(quizToOffer){
+                    QuizToOffer.update({offreId:req.body.offer},{where:{quizId:quizToOffer.id}});
+                }
+                else{
+                    console.log(`\n\n${quizToOffer}\n\n`);
+                    QuizToOffer.create({offreId:req.body.offer,quizId:req.params.quizId});
+                }
+            });
+
+        }
+        else{
+            QuizToOffer.destroy({where:{quizId:req.params.quizId}});
+        }
         // True or False
         const listTrueOrFalseRequest = req.body.listTrueOrFalse || null;
         const listIds = req.body.listIds;
@@ -528,69 +549,6 @@ exports.updateQuizContent = async (req, res) => {
         res
             .status(HttpStatus.OK)
             .send({message: "success",error:false});
-        // console.log(`\n\n\n${JSON.stringify(listTrueOrFalseRequest)}\n\n\n`);
-        
-        // const listMultipleRequest = req.body.listMultiple || null;
-        // for(const questionMultipleRequest of listMultipleRequest) 
-        // {
-        //     let questionMultipleResponse = await Question.create(questionMultipleRequest).catch(error => {throw error});
-        //     for( const critere of questionMultipleRequest.criteres) 
-        //     {
-        //         const newCritere = {...critere,...{questionId:questionMultipleResponse.id}};
-        //         await CriteriaPointQuestion.create(newCritere).catch(error => {throw error});
-        //             for(index=0;index<questionMultipleRequest.responses.choices.length;index++)
-        //             {
-        //                 await Reponse.create({choices:questionMultipleRequest.responses.choices[index],isAnswers:questionMultipleRequest.responses.isAnswers[index], questionId:questionMultipleResponse.id}).catch(error => {throw error});
-        //             }
-        //     }
-        // }
-        // const listClassementRequest = req.body.listClassement || null;
-        // for(const questionClassementRequest of listClassementRequest) {
-        //     // console.log(`\n\n${JSON.stringify(questionClassementRequest)}\n\n`);
-        //     let questionClassementResponse = await Question.create(questionClassementRequest).catch(error => {throw error});
-        //     for(const critere of questionClassementRequest.criteres) {
-        //         const newCritere = {...critere,...{questionId:questionClassementResponse.id}};
-        //         await CriteriaPointQuestion.create(newCritere).catch(error => {throw error});
-        //         for(index=0;index<questionClassementRequest.responses.choices.length; index++) {                                        
-        //             // await Reponse.create({choices:questionClassementRequest.responses.choices[index],rang:questionClassementRequest.responses.rang[index], questionId:questionClassementResponse.id}).catch(error => {throw error});
-        //             await Reponse.create({choices:questionClassementRequest.responses.choices[index], rang:index, questionId:questionClassementResponse.id}).catch(error => {throw error});
-        //         }
-        //     }
-        // };
-        // const listRedactionRequest = req.body.listRedaction || null;
-        // for(const questionRedactionRequest of listRedactionRequest) {
-        //     // console.log(`\n\n${JSON.stringify(questionRedactionRequest)}\n\n`);
-        //     let questionRedactionResponse = await Question.create(questionRedactionRequest).catch(error => {throw error});
-        //     for(critere of questionRedactionRequest.criteres) {
-        //         const newCritere = {...critere,...{questionId:questionRedactionResponse.id}};
-        //         await CriteriaPointQuestion.create(newCritere).catch(error => {throw error});
-        //     } 
-        //     for(index=0;index<questionRedactionRequest.responses.choices.length;index++){    
-        //         await Reponse.create({choices:questionRedactionRequest.responses.choices[index],isAnswers:questionRedactionRequest.responses.isAnswers[index], questionId:questionRedactionResponse.id}).catch(error => {throw error});
-        //     }
-        // }
-        // console.log(req.body.listAudio);
-        // const listAudio = req.body.listAudio || null;
-        // for(const questionAudioRequest of listAudio){
-        //     // console.log(`\n\n${JSON.stringify(questionRedactionRequest)}\n\n`);
-        //     let questionAudioResponse = await Question.create(questionAudioRequest).catch(error => {throw error});
-        //     for((critere) of questionAudioRequest.criteres){
-        //         const newCritere = {...critere,...{questionId:questionAudioResponse.id}};
-        //         await CriteriaPointQuestion.create(newCritere).catch(error => {throw error});
-        //     };
-        //     await Reponse.create({type_audio:questionAudioRequest.responses.type_audio, questionId:questionAudioResponse.id}).catch(error => {throw error});
-        // }
-        // const listVideo = req.body.listVideo || null;
-        // for(const questionVideoRequest of listVideo){
-        //     console.log(`\n\n${JSON.stringify(questionVideoRequest)}\n\n`);
-        //     let questionVideoResponse = await Question.create(questionVideoRequest).catch(error => {throw error});
-        //     console.log(JSON.stringify(questionVideoResponse));
-        //     for((critere) of questionVideoRequest.criteres){
-        //         const newCritere = {...critere,...{questionId:questionVideoResponse.id}};
-        //         await CriteriaPointQuestion.create(newCritere).catch(error => {throw error});
-        //     };
-        //     await Reponse.create({type_audio:questionVideoRequest.responses.type_audio, questionId:questionVideoResponse.id}).catch(error => {throw error});
-        // }
     } catch (error) {
         res
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -652,7 +610,7 @@ exports.findQuestionbyId = (req, res, next) => {
 };
 exports.findAllQuiz = (req,res) => {
   try {
-    Quiz.findAll({include: [{model: db.offre}]})
+    Quiz.findAll({include: [{model: db.offre,as:"offerInQuiz"}]})
     .then(data => {
       res
         .status(HttpStatus.OK)
@@ -674,6 +632,7 @@ exports.findOneQuizById = (req, res) => {
             where:{id: req.params.quizId},
             include:
             [
+            {model: db.offre,as:"offerInQuiz"},
              {model: Question,as: "questions",
                 include:
                 [{model:CriteriaPointQuestion},{model:Reponse ,as: "options"}]
@@ -684,6 +643,25 @@ exports.findOneQuizById = (req, res) => {
                 .status(HttpStatus.OK)
                 .send({data:quiz, error: false});
         })
+    } catch (error) {
+        console.log(">> Error while finding project: ", error);
+        res
+            .status(HttpStatus.NOT_FOUND)
+            .send({ message: error.message, error: true });
+    }
+}
+
+exports.updateQuizStatePublished = (req, res) => {
+    try {
+        Quiz.update({publier:req.body.publier,date_publication:(req.body.publier ? new Date() : null)},{where:{id:req.params.id}})
+        .then(row => {
+            res
+                .status(HttpStatus.OK)
+                .send({message:"quiz is updated successfully",error:false});
+        })
+        .catch(error => {
+            throw error;
+        });
     } catch (error) {
         console.log(">> Error while finding project: ", error);
         res
