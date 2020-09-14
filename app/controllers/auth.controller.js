@@ -58,6 +58,19 @@ exports.register = async (req, res) => {
     var token = jwt.sign({ id: current_user.id }, config.secret, {
       expiresIn: 864000 // 24 hours
     });
+    console.log(token)
+    const url = `http://localhost:8181/confirmation/${token}`
+    
+    const mail = {
+    	body: {
+    		email_recipient: req.body.email,
+    		email_subject: `Confirmation d'adresse email`,
+    		email_content: `Bonjour! :) \n\n Veuillez cliquer sur ce lien pour valider votre adresse mail et votre compte : <a href="${url}">${url}</a>`
+    	}
+    }
+    
+    sendMail(mail, res, {});
+    
     res
       .status(HttpStatus.CREATED)
       .send({
@@ -107,6 +120,12 @@ exports.signin = (req, res) => {
           });
       }
 
+      if (!user.confirmed) {
+        return res
+          .status(HttpStatus.UNAUTHORIZED)
+          .send({ message: "Veuillez confirmer votre adresse email dans votre boite mail", error: true });
+      }
+      
       var token = jwt.sign({ id: user.id }, config.secret, {
         expiresIn: 864000 // 24 hours
       });
@@ -191,9 +210,22 @@ exports.updateProfile = async (req, res) => {
   
 };
 
+exports.confirm = async (req, res) => {
+	console.log(req.params.token);
+  	try {
+  		const {id} = jwt.verify(req.params.token, config.secret);
+  		await User.update({confirmed: true}, {where: {id: id}});
+  	} catch (e) {
+  		console.log(e);
+  		res.send('Error')
+  	}
+  	return res.redirect('http://localhost:4200/');
+};
+
 
 // ********** ESSAI CONFIRM MAIL ***************
 
+/*
 exports.log = async (req, res) => {
 
   console.log(req.body)
@@ -233,12 +265,7 @@ exports.log = async (req, res) => {
         expiresIn: 864000 // 24 hours
       });
 
-      var authorities = [];
-      user.getRoles().then(roles => {
-        for (let i = 0; i < roles.length; i++) {
-          authorities.push("ROLE_" + roles[i].name.toUpperCase());
-        }
-        res
+      res
           .status(HttpStatus.OK)
           .send({
             id: user.id,
@@ -252,14 +279,11 @@ exports.log = async (req, res) => {
             accessToken: token,
             error: false
           });
-      });
     })
     .catch(err => {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message, error: true });
     });
 };
-
-//
 
 exports.reg = async (req, res) => {
 
@@ -278,13 +302,13 @@ exports.reg = async (req, res) => {
     
     console.log(token)
     
-    const url = `http://localhost:4200/confirmation/${token}`
+    const url = `http://localhost:8181/confirmation/${token}`
     
     const mail = {
     	body: {
     		email_recipient: req.body.email,
-    		email_subject: 'Confirm email',
-    		email_content: `Please click this url to confirm your email address : <a href="${url}">${url}</a>`
+    		email_subject: `Confirmation d'adresse email`,
+    		email_content: `Bonjour! :) \n\n Veuillez cliquer sur ce lien pour valider votre adresse mail et votre compte : <a href="${url}">${url}</a>`
     	}
     }
     
@@ -307,18 +331,4 @@ exports.reg = async (req, res) => {
     console.log(">> Error while finding comment: ", err);
   }
 };
-
-//
-
-exports.confirm = async (req, res) => {
-	console.log(req);
-  	try {
-  		const {user: {id} } = jwt.verify(req.param.token, config.secret);
-  		await User.update({confirmed: true}, {where: {id}});
-  	} catch (e) {
-  		res.send('Error')
-  	}
-};
-
-
-  	
+*/
