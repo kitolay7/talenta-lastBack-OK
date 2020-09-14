@@ -24,6 +24,7 @@ exports.addFolder =  (req, res) => {
   exports.getAllFolderUser = (req, res) => {
     dossier.findAll({
         where:{ userId: req.params.idUser},
+        include:[{model: db.offre}]
     })
     .then(data => {
         res
@@ -31,7 +32,7 @@ exports.addFolder =  (req, res) => {
     })
 }
 exports.getOneFolder = (req, res) => {
-    return dossier.findByPk(req.params.id)
+    return dossier.findOne({where:{id:req.params.id},include:[{model:db.offre}]})
         .then((data) => {
             res
                 .send({ data: data, error: false });
