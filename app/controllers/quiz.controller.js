@@ -182,10 +182,10 @@ exports.updateQuizContent = async (req, res) => {
             QuizToOffer.findOne({where:{quizId:req.params.quizId}})
             .then(quizToOffer => {
                 if(quizToOffer){
-                    QuizToOffer.update({offreId:req.body.offer},{where:{quizId:quizToOffer.id}});
+                    console.log(quizToOffer);
+                    QuizToOffer.update({offreId:req.body.offer},{where:{quizId:req.params.quizId}});
                 }
                 else{
-                    console.log(`\n\n${quizToOffer}\n\n`);
                     QuizToOffer.create({offreId:req.body.offer,quizId:req.params.quizId});
                 }
             });
