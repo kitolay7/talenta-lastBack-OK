@@ -1,60 +1,39 @@
 module.exports = (sequelize, Sequelize) => {
     const User = sequelize.define("spontaneous", {
     
-    /*
-  		(this.firstName)
-  		(this.lastName)
-  		(this.birthday) 
-  		(this.email)
-  		(this.numTel)
-  		(this.idSkype) 
-  		(this.idWhatsapp) 
-  		(this.originCountry)
-  		(this.actualCountry) 
-  		(this.actualCity) 
-  		this.competences,
-  		(this.secteur)
-  		this.educations,
-  		this.profession,
-    */
-    
-    
       firstName: {
         type: Sequelize.STRING
       },
       lastName: {
         type: Sequelize.STRING
       },
-      ville: {
+      birthday: {
         type: Sequelize.STRING
       },
-      pays: {
+      email: {
         type: Sequelize.STRING
       },
       numTel: {
         type: Sequelize.STRING
       },
-      metierActuel: {
+      idSkype: {
         type: Sequelize.STRING
       },
-      anneesExperiences: {
+      idWhatsapp: {
         type: Sequelize.STRING
       },
-      niveauEtudes: {
+      originCountry: {
+        type: Sequelize.BOOLEAN
+      },
+      actualCountry: {
         type: Sequelize.STRING
       },
-      diplomes: {
+      actualCity: {
         type: Sequelize.STRING
       },
-      specialisations: {
+      secteur: {
         type: Sequelize.STRING
       },
-      codePostal: {
-        type: Sequelize.STRING
-      },
-      societe: {
-        type: Sequelize.STRING
-      }
     }, {
       freezeTableName: true,
     });

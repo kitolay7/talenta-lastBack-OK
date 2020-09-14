@@ -37,6 +37,10 @@ db.postulation = require("../models/postulation.model.js")(sequelize, Sequelize)
 db.type_question = require("../models/type_question.model.js")(sequelize, Sequelize);
 db.dossier = require("../models/dossier.model.js")(sequelize, Sequelize);
 db.criteria_point_question = require("../models/criteria_point_question.model.js")(sequelize, Sequelize);
+db.spontaneous = require("../models/spontaneous.model.js")(sequelize, Sequelize);
+db.education = require("../models/education.model.js")(sequelize, Sequelize);
+db.profession = require("../models/profession.model.js")(sequelize, Sequelize);
+db.competence = require("../models/competence.model.js")(sequelize, Sequelize);
 
 db.quiz.belongsTo(db.offre, {foreignKey:"offreId"});
 db.quiz.belongsTo(db.user, {
@@ -112,6 +116,16 @@ db.profile.belongsTo(db.user, {foreignKey: "userId"});
 
 db.type_question.hasMany(db.question,{foreignKey: "TypeQuestionId"});
 db.criteria_point_question.belongsTo(db.question, {foreignKey: "questionId"});
+
+db.competence.belongsTo(db.spontaneous, { foreignKey: "spontaneousId", });
+db.education.belongsTo(db.spontaneous, { foreignKey: "spontaneousId", });
+db.profession.belongsTo(db.spontaneous, { foreignKey: "spontaneousId", });
+
+
+db.spontaneous.hasMany(db.competence, { foreignKey:"spontaneousId" });
+db.spontaneous.hasMany(db.education, { foreignKey:"spontaneousId" });
+db.spontaneous.hasMany(db.profession, { foreignKey:"spontaneousId" });
+
 
 db.ROLES = ["candidat", "admin", "recruteur"];
 
