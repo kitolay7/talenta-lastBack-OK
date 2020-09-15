@@ -34,15 +34,25 @@ db.offre = require("../models/offre.model.js")(sequelize, Sequelize);
 db.blob = require("../models/blob.model.js")(sequelize, Sequelize);
 db.type_blob = require("../models/type_blob.model.js")(sequelize, Sequelize);
 db.postulation = require("../models/postulation.model.js")(sequelize, Sequelize);
+db.quiz_to_offer = require("../models/quiz_to_offer.model.js")(sequelize, Sequelize);
 db.type_question = require("../models/type_question.model.js")(sequelize, Sequelize);
 db.dossier = require("../models/dossier.model.js")(sequelize, Sequelize);
 db.criteria_point_question = require("../models/criteria_point_question.model.js")(sequelize, Sequelize);
+db.spontaneous = require("../models/spontaneous.model.js")(sequelize, Sequelize);
+db.education = require("../models/education.model.js")(sequelize, Sequelize);
+db.profession = require("../models/profession.model.js")(sequelize, Sequelize);
+db.competence = require("../models/competence.model.js")(sequelize, Sequelize);
 
-db.quiz.belongsTo(db.offre, {foreignKey:"offreId"});
 db.quiz.belongsTo(db.user, {
   through: db.offre
 });
 db.quiz.hasMany(db.question, { foreignKey:"quizId" });
+db.quiz.belongsToMany(db.offre,{
+  as:"offerInQuiz",
+  through:db.quiz_to_offer,
+  foreignKey:"quizId",
+  otherKey:"offreId"
+})
 db.question.belongsTo(db.quiz, {
   foreignKey: "quizId",
 });
@@ -70,10 +80,18 @@ db.offre.belongsToMany(db.user,{
   foreignKey:"offreId",
   otherKey:"userId"  
 });
-db.offre.hasMany(db.quiz,{foreignKey:"offreId"});
+db.offre.belongsToMany(db.quiz,{
+  as:"quizInOffer",
+  through:db.quiz_to_offer,
+  foreignKey:"offreId",
+  otherKey:"quizId"
+})
 // postulation
 db.postulation.belongsTo(db.user);
 db.postulation.belongsTo(db.offre);
+// quiz
+db.quiz_to_offer.belongsTo(db.quiz);
+db.quiz_to_offer.belongsTo(db.offre);
 
 db.blob.belongsTo(db.offre, { foreignKey: "OffreId", });
 db.type_blob.hasMany(db.blob, {
@@ -112,6 +130,16 @@ db.profile.belongsTo(db.user, {foreignKey: "userId"});
 
 db.type_question.hasMany(db.question,{foreignKey: "TypeQuestionId"});
 db.criteria_point_question.belongsTo(db.question, {foreignKey: "questionId"});
+
+db.competence.belongsTo(db.spontaneous, { foreignKey: "spontaneousId", });
+db.education.belongsTo(db.spontaneous, { foreignKey: "spontaneousId", });
+db.profession.belongsTo(db.spontaneous, { foreignKey: "spontaneousId", });
+
+
+db.spontaneous.hasMany(db.competence, { foreignKey:"spontaneousId" });
+db.spontaneous.hasMany(db.education, { foreignKey:"spontaneousId" });
+db.spontaneous.hasMany(db.profession, { foreignKey:"spontaneousId" });
+
 
 db.ROLES = ["candidat", "admin", "recruteur"];
 

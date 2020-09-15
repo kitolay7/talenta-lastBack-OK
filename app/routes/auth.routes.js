@@ -24,8 +24,8 @@ module.exports = function (app) {
   
   
   // ********** ESSAI CONFIRM MAIL ***************
-  app.post("/signup", controller.reg );
-  app.post("/signin", controller.log );
+  //app.post("/signup", controller.reg );
+  //app.post("/signin", controller.log );
   app.get("/confirmation/:token", controller.confirm );
   
 };

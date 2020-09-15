@@ -1,5 +1,6 @@
 const { authJwt } = require("../middleware");
 const controller = require("../controllers/user.controller");
+const spontaneousController = require("../controllers/spontaneous.controller");
 
 module.exports = function (app) {
   app.use(function (req, res, next) {
@@ -33,4 +34,6 @@ module.exports = function (app) {
     [authJwt.verifyToken, authJwt.isAdmin],
     controller.adminBoard
   );
+  
+  app.post("/createSpontaneous",spontaneousController.createSpontaneous);
 };
