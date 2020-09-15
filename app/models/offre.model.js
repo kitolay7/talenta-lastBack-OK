@@ -45,7 +45,8 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING
         },
         publicationDate:{
-            type: Sequelize.DATE
+            type: Sequelize.DATE,
+            defaultValue: null
         },
         dossier: {
             type: Sequelize.BOOLEAN,
