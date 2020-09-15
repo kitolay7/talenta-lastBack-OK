@@ -9,7 +9,7 @@ exports.addFolder =  (req, res) => {
         titre:req.body.titre,
         fiche: req.body.fiche,
         auteur: req.body.auteur,
-        offreId: req.body.offreId,
+        // offreId: req.body.offreId,
         userId: req.body.idUser,
         remarque: ''
     }).then((data) => {

@@ -42,6 +42,7 @@ db.spontaneous = require("../models/spontaneous.model.js")(sequelize, Sequelize)
 db.education = require("../models/education.model.js")(sequelize, Sequelize);
 db.profession = require("../models/profession.model.js")(sequelize, Sequelize);
 db.competence = require("../models/competence.model.js")(sequelize, Sequelize);
+db.dossier_offer = require("../models/dossier_offer.model.js")(sequelize, Sequelize);
 
 db.quiz.belongsTo(db.user, {
   through: db.offre
@@ -50,16 +51,13 @@ db.quiz.hasMany(db.question, { foreignKey:"quizId" });
 db.quiz.belongsToMany(db.offre,{
   as:"offerInQuiz",
   through:db.quiz_to_offer,
-  foreignKey:"quizId",
+  foreignKey:"quizzId",
   otherKey:"offreId"
 })
 db.question.belongsTo(db.quiz, {
   foreignKey: "quizId",
 });
 db.question.hasMany(db.reponse, {onDelete:"CASCADE", as: "options" });
-db.dossier.belongsTo(db.offre, {
-  foreignKey: "offreId",  
-});
 db.dossier.belongsTo(db.user, {
   foreignKey: "userId",  
 });
@@ -84,14 +82,23 @@ db.offre.belongsToMany(db.quiz,{
   as:"quizInOffer",
   through:db.quiz_to_offer,
   foreignKey:"offreId",
-  otherKey:"quizId"
-})
+  otherKey:"quizzId"
+});
+db.offre.belongsToMany(db.dossier,{
+  as:"folder",
+  through:db.dossier_offer,
+  foreignKey:"offreId",
+  otherKey:"dossierId"
+});
 // postulation
 db.postulation.belongsTo(db.user);
 db.postulation.belongsTo(db.offre);
-// quiz
+// quiz_to_offer
 db.quiz_to_offer.belongsTo(db.quiz);
 db.quiz_to_offer.belongsTo(db.offre);
+// dossier_offer
+db.dossier_offer.belongsTo(db.dossier);
+db.dossier_offer.belongsTo(db.offre);
 
 db.blob.belongsTo(db.offre, { foreignKey: "OffreId", });
 db.type_blob.hasMany(db.blob, {
@@ -140,6 +147,12 @@ db.spontaneous.hasMany(db.competence, { foreignKey:"spontaneousId" });
 db.spontaneous.hasMany(db.education, { foreignKey:"spontaneousId" });
 db.spontaneous.hasMany(db.profession, { foreignKey:"spontaneousId" });
 
+db.dossier.belongsToMany(db.offre,{
+  as:"offres",
+  through:db.dossier_offer,
+  foreignKey:"dossierId",
+  otherKey:"offreId"
+})
 
 db.ROLES = ["candidat", "admin", "recruteur"];
 
