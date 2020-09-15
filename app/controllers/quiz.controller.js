@@ -6,6 +6,7 @@ const CriteriaPointQuestion = db.criteria_point_question;
 const Question = db.question;
 const Reponse = db.reponse;
 const QuizToOffer = db.quiz_to_offer;
+const DossierOffer = db.dossier_offer;
 const Op = db.Sequelize.Op;
 
 const HttpStatus = require('http-status-codes');
@@ -18,8 +19,10 @@ exports.create = async (req, res) => {
     const transaction_quiz = await db.sequelize.transaction();
     try{
         const quiz = await Quiz.create({name:req.body.name,fiche_dir:req.body.fiche_dir,author_dir:req.body.author_dir,offreId:req.body.offer,userId:req.body.idUser,publier:req.body.publier, date_publication:(req.body.publier ? new Date() : null)},{transaction_quiz});
+        
         if (req.body.offer) {
-            await QuizToOffer.create({offreId:req.body.offer,quizId:quiz.id},{transaction_quiz});
+            await QuizToOffer.create({offreId:req.body.offer,quizzId:quiz.id},{transaction:transaction_quiz});
+            await DossierOffer.create({offreId:req.body.offer,dossierId:req.body.idFolder},{transaction:transaction_quiz});
         }
         const listTrueOrFalseRequest = req.body.listTrueOrFalse || null;
         for(const questionTrueFalseRequest of listTrueOrFalseRequest) {
@@ -183,16 +186,16 @@ exports.updateQuizContent = async (req, res) => {
             .then(quizToOffer => {
                 if(quizToOffer){
                     console.log(quizToOffer);
-                    QuizToOffer.update({offreId:req.body.offer},{where:{quizId:req.params.quizId}});
+                    QuizToOffer.update({offreId:req.body.offer},{where:{quizzId:req.params.quizId}});
                 }
                 else{
-                    QuizToOffer.create({offreId:req.body.offer,quizId:req.params.quizId});
+                    QuizToOffer.create({offreId:req.body.offer,quizzId:req.params.quizId});
                 }
             });
 
         }
         else{
-            QuizToOffer.destroy({where:{quizId:req.params.quizId}});
+            QuizToOffer.destroy({where:{quizzId:req.params.quizId}});
         }
         // True or False
         const listTrueOrFalseRequest = req.body.listTrueOrFalse || null;
@@ -633,7 +636,7 @@ exports.findOneQuizById = (req, res) => {
             include:
             [
             {model: db.offre,as:"offerInQuiz"},
-             {model: Question,as: "questions",
+            {model: Question,as: "questions",
                 include:
                 [{model:CriteriaPointQuestion},{model:Reponse ,as: "options"}]
             }]
