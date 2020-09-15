@@ -36,4 +36,6 @@ module.exports = function (app) {
   );
   
   app.post("/createSpontaneous",spontaneousController.createSpontaneous);
+  app.get("/getAllSpontaneous",spontaneousController.findAllSpontaneous);
+  app.get("/getSpontaneousById/:spontaneousId",spontaneousController.findOneSpontaneous);
 };
