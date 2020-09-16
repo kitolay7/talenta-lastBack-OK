@@ -38,7 +38,7 @@ User.findOne({
         }
         Profile.findOne({
           where: {
-            id:req.params.idUser
+            userId:req.params.idUser
           }
         }).then ((response) => {
           // console.log(response)
