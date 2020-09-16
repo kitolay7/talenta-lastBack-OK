@@ -128,6 +128,23 @@ exports.findAllSpontaneous = (req, res) => {
                 });
         });
 };
+exports.findSpontaneousNonTraiter = (req, res) => {
+    Spontaneous.findAll({
+    	where: { traiter: false },
+    })
+        .then(data => {
+            res
+                .send(data);
+        })
+        .catch(err => {
+            res
+                .send({
+                    message:
+                        err.message || "Some error occurred while retrieving tutorials.",
+                    error: true
+                });
+        });
+};
 exports.findOneSpontaneous = (req, res) => {
     Spontaneous.findOne({
     	where: { id: req.params.spontaneousId },
@@ -148,4 +165,32 @@ exports.findOneSpontaneous = (req, res) => {
                     error: true
                 });
         });
+};
+exports.updateSpontaneousTraiter = async (req, res) => {
+  	console.log(req.body)
+  	console.log(req.params)
+  	if (!req.params || !req.body) {
+    	return res.status(400).send({
+      	message: "Data to update can not be empty!"
+    	});
+  	}
+  	
+  	const id = req.params.id;
+  	try {
+    	Spontaneous.update({
+      			traiter: req.body.traiter,
+    		}, {where: {id: id} })
+        	.then(data => {
+            	res
+      				.send({
+        				message: "Successfully update",
+        				error: false
+      				})
+        	})
+    } catch (err) {
+    	res
+      		.status(HttpStatus.INTERNAL_SERVER_ERROR)
+      		.send({ message: err, error: true });
+    	console.log(">> Error while finding comment: ", err);
+  	}
 };
