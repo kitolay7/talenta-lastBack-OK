@@ -59,12 +59,13 @@ exports.register = async (req, res) => {
       expiresIn: 864000 // 24 hours
     });
     console.log(token)
-    const url = `http://localhost:8181/confirmation/${token}`
+    const url = `http://154.126.92.194:8181/confirmation/${token}`
+    //const url = `http://localhost:8181/confirmation/${token}`
     
     const mail = {
     	body: {
     		email_recipient: req.body.email,
-    		email_subject: `Confirmation d'adresse email`,
+    		email_subject: `Confirmation d'adresse email pour Talenta Sourcing`,
     		email_content: `Bonjour! :) \n\n Veuillez cliquer sur ce lien pour valider votre adresse mail et votre compte : <a href="${url}">${url}</a>`
     	}
     }
