@@ -13,6 +13,7 @@ const Op = db.Sequelize.Op;
 
 exports.createSpontaneous = async (req, res) => {
 	
+    console.log(req.body)
     const spontaneous = {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
@@ -27,12 +28,13 @@ exports.createSpontaneous = async (req, res) => {
       secteur: req.body.secteur,
     };
     
+    
     // Creation Data
     console.log(spontaneous)
     const generateData = (req) => {
         const competences = (req) => {
             let competences = [];
-            req.body.competence.forEach((competence) => {
+            JSON.parse(req.body.competence).forEach((competence) => {
                 competences.push({
                     name: competence,
                 })
@@ -42,7 +44,7 @@ exports.createSpontaneous = async (req, res) => {
         console.log(`\n\n Competences ${JSON.stringify(competences(req))}\n\n`);
         const educations = (req) => {
             let educations = [];
-            req.body.education.forEach((education) => {
+            JSON.parse(req.body.education).forEach((education) => {
                 educations.push({
                     titre: education.titre,
                     specialisation: education.specialisation,
@@ -56,7 +58,7 @@ exports.createSpontaneous = async (req, res) => {
         console.log(`\n\n Educations ${JSON.stringify(educations(req))}\n\n`);
         const professions = (req) => {
             let professions = [];
-            req.body.profession.forEach((profession) => {
+            JSON.parse(req.body.profession).forEach((profession) => {
                 professions.push({
                     titre: profession.titre,
                     nomSociete: profession.nomSociete,
@@ -68,15 +70,22 @@ exports.createSpontaneous = async (req, res) => {
             return professions;
         }
         console.log(`\n\n Professions ${JSON.stringify(professions(req))}\n\n`);
+        const blobFile = (req.files.file && req.files.file[0]) ? {
+            path: req.files.file[0].originalname,
+            extension: req.files.file[0].originalname.split('.').pop(),
+            TypeBlobId: 5 // file
+        } : null
+        console.log(`\n\nblobFile ${JSON.stringify(blobFile)}\n\n`);
 
         return {
             competences,
             educations,
-            professions
+            professions,
+            blobFile
         }
     }
     // CREATION 
-    const { competences, educations, professions } = generateData(req);
+    const { competences, educations, professions, blobFile } = generateData(req);
 
     const transaction_spontaneous = await db.sequelize.transaction();
     const bulkMerge = (objectList, object) => {
@@ -93,6 +102,7 @@ exports.createSpontaneous = async (req, res) => {
         await Competence.bulkCreate(bulkMerge(competences(req), { spontaneousId: current_spontaneous.id }), { returning: true, transaction: transaction_spontaneous })
         await Education.bulkCreate(bulkMerge(educations(req), { spontaneousId: current_spontaneous.id }), { returning: true, transaction: transaction_spontaneous })
         await Profession.bulkCreate(bulkMerge(professions(req), { spontaneousId: current_spontaneous.id }), { returning: true, transaction: transaction_spontaneous })
+        blobFile && await db.blobscv.create({ ...blobFile, ...{ spontaneousId: current_spontaneous.id } }, { transaction: transaction_spontaneous });
         await transaction_spontaneous.commit();
         res
             .send({
@@ -113,7 +123,8 @@ exports.findAllSpontaneous = (req, res) => {
         include:
             [{ model: db.competence },
             { model: db.education },
-            { model: db.profession }]
+            { model: db.profession },
+            { model: db.blobscv }]
     })
         .then(data => {
             res
@@ -151,7 +162,8 @@ exports.findOneSpontaneous = (req, res) => {
         include:
             [{ model: db.competence },
             { model: db.education },
-            { model: db.profession }]
+            { model: db.profession },
+            { model: db.blobscv }]
     })
         .then(data => {
             res
