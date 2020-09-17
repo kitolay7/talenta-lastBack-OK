@@ -9,7 +9,7 @@ exports.addFolder =  (req, res) => {
         titre:req.body.titre,
         fiche: req.body.fiche,
         auteur: req.body.auteur,
-        offreId: req.body.offreId,
+        // offreId: req.body.offreId,
         userId: req.body.idUser,
         remarque: ''
     }).then((data) => {
@@ -24,7 +24,7 @@ exports.addFolder =  (req, res) => {
   exports.getAllFolderUser = (req, res) => {
     dossier.findAll({
         where:{ userId: req.params.idUser},
-        include:[{model: db.offre}]
+        include:[{model: db.offre, as:'offres'}]
     })
     .then(data => {
         res
@@ -32,7 +32,7 @@ exports.addFolder =  (req, res) => {
     })
 }
 exports.getOneFolder = (req, res) => {
-    return dossier.findOne({where:{id:req.params.id},include:[{model:db.offre}]})
+    return dossier.findOne({where:{id:req.params.id},include:[{model:db.offre, as: 'offres'}]})
         .then((data) => {
             res
                 .send({ data: data, error: false });

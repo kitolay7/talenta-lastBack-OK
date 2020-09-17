@@ -11,7 +11,9 @@ const User = db.user;
 const Reponse = db.reponse;
 const Postulation = db.postulation;
 const Profile = db.profile;
+const Folder = db.dossier;
 const Op = db.Sequelize.Op;
+const QuizToOffer = db.quiz_to_offer
 exports.createOffre = async (req, res) => {
     const offre = {
         titre: req.body.titre,
@@ -150,7 +152,7 @@ exports.getOfferByCreator = async (req, res) => {
         where: {
           userId: req.params.userId
         }
-      },
+      }
     ).then(data => {
       res
         .status(HttpStatus.OK)
@@ -166,13 +168,14 @@ exports.getOfferByCreator = async (req, res) => {
 }
 exports.getOfferByCreatorPublished = async (req, res) => {
   try {
-    await offres.findAll({
-        where:{ 
-        	userId: req.params.userId, 
-        	archived: false, 
-        	publier: true
-        },
-    }).then(data => {
+    //  QuizToOffer
+    await QuizToOffer.findAll({
+        include:[
+            {model: db.quiz,where:{userId:req.params.userId}},
+            {model: offres,include:[{model:db.dossier, as:"folder"}]}
+        ]
+    })
+    .then(data => {
       	res
         .status(HttpStatus.OK)
         .send({ data: data, error: false });
@@ -182,7 +185,7 @@ exports.getOfferByCreatorPublished = async (req, res) => {
   } catch (error) {
     	res
         .status(HttpStatus.NOT_FOUND)
-        .send({ message: err.message, error: true });
+        .send({ message: error.message, error: true });
   }
 }
 exports.findAllPublished = (req, res) => {
@@ -265,8 +268,6 @@ exports.findAllOfferIdUser = (req, res) => {
         [{
             model: db.blob,
             include: [{ model: db.type_blob }],
-
-           
         }]
     })
         .then(data => {
@@ -389,14 +390,14 @@ exports.updateOfferStatusPublished = (req, res) => {
     offres.update(
         {
             publier: req.body.publier,
-            publicationDate: req.body.publicationDate,
+            publicationDate: new Date(),
         }, {
         where: { id: req.params.id },
         returning: true
     })
         .then((result) => {
             console.log(`\n\n\n${result}\n\n\n`)
-            if (result[1] === 0) throw "Any field is modified"
+            // if (result[1] === 0) throw "Any field is modified"
             res.status(HttpStatus.OK).json({
                 message: "this offer is updated successfully",
                 error: false

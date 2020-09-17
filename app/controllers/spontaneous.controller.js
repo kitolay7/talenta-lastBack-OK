@@ -76,7 +76,7 @@ exports.createSpontaneous = async (req, res) => {
         }
     }
     // CREATION 
-    const { competences, educations, professions } = generateBlob(req);
+    const { competences, educations, professions } = generateData(req);
 
     const transaction_spontaneous = await db.sequelize.transaction();
     const bulkMerge = (objectList, object) => {
@@ -89,10 +89,10 @@ exports.createSpontaneous = async (req, res) => {
 
     try {
         // SPONTANEOUS CREATION
-        const current_spontaneous = await Spontaneous.create(offre, { transaction: transaction_spontaneous });
-        await Competence.create({ ...competences, ...{ spontaneousId: current_spontaneous.id } }, { transaction: transaction_spontaneous });
-        await Education.create({ ...educations, ...{ spontaneousId: current_spontaneous.id } }, { transaction: transaction_spontaneous });
-        await Profession.create({ ...competences, ...{ spontaneousId: current_spontaneous.id } }, { transaction: transaction_spontaneous });
+        const current_spontaneous = await Spontaneous.create(spontaneous, { transaction: transaction_spontaneous });
+        await Competence.bulkCreate(bulkMerge(competences(req), { spontaneousId: current_spontaneous.id }), { returning: true, transaction: transaction_spontaneous })
+        await Education.bulkCreate(bulkMerge(educations(req), { spontaneousId: current_spontaneous.id }), { returning: true, transaction: transaction_spontaneous })
+        await Profession.bulkCreate(bulkMerge(professions(req), { spontaneousId: current_spontaneous.id }), { returning: true, transaction: transaction_spontaneous })
         await transaction_spontaneous.commit();
         res
             .send({
@@ -101,8 +101,51 @@ exports.createSpontaneous = async (req, res) => {
                 error: false
             })
     } catch (error) {
+    	console.log(error);
         await transaction_spontaneous.rollback();
         res
             .send({ message: error, error: true });
     }
+};
+
+exports.findAllSpontaneous = (req, res) => {
+    Spontaneous.findAll({
+        include:
+            [{ model: db.competence },
+            { model: db.education },
+            { model: db.profession }]
+    })
+        .then(data => {
+            res
+                .send(data);
+        })
+        .catch(err => {
+            res
+                .send({
+                    message:
+                        err.message || "Some error occurred while retrieving tutorials.",
+                    error: true
+                });
+        });
+};
+exports.findOneSpontaneous = (req, res) => {
+    Spontaneous.findOne({
+    	where: { id: req.params.spontaneousId },
+        include:
+            [{ model: db.competence },
+            { model: db.education },
+            { model: db.profession }]
+    })
+        .then(data => {
+            res
+                .send(data);
+        })
+        .catch(err => {
+            res
+                .send({
+                    message:
+                        err.message || "Some error occurred while retrieving tutorials.",
+                    error: true
+                });
+        });
 };
