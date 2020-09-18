@@ -82,6 +82,7 @@ try {
             
       // connection.query(`CREATE SEQUENCE postulation_sequence_id IF NOT EXISTS;`)
       mkdirpSync('uploads/videos/');
+      mkdirpSync('uploads/cv/');
       // CREATE TABLES IF NOT EXIST
       db.sequelize.sync().then((result) => {
         console.log(`\n\nre-sync db.\n\n`);
@@ -162,6 +163,9 @@ const initalizeBlob = () => {
   });
   TypeBlob.create({
     wording: "diaporama"
+  });
+  TypeBlob.create({
+    wording: "cv"
   });
 }
 

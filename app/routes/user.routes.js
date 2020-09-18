@@ -37,5 +37,7 @@ module.exports = function (app) {
   
   app.post("/createSpontaneous",spontaneousController.createSpontaneous);
   app.get("/getAllSpontaneous",spontaneousController.findAllSpontaneous);
+  app.get("/getSpontaneousNonTraiter",spontaneousController.findSpontaneousNonTraiter);
   app.get("/getSpontaneousById/:spontaneousId",spontaneousController.findOneSpontaneous);
+  app.put("/updateSpontaneousTraiter/:id",spontaneousController.updateSpontaneousTraiter);
 };

@@ -43,6 +43,7 @@ db.education = require("../models/education.model.js")(sequelize, Sequelize);
 db.profession = require("../models/profession.model.js")(sequelize, Sequelize);
 db.competence = require("../models/competence.model.js")(sequelize, Sequelize);
 db.dossier_offer = require("../models/dossier_offer.model.js")(sequelize, Sequelize);
+db.blobscv = require("../models/blobCV.model.js")(sequelize, Sequelize);
 
 db.quiz.belongsTo(db.user, {
   through: db.offre
@@ -67,6 +68,7 @@ db.question.hasMany(db.criteria_point_question, {foreignKey: "questionId", onDel
 db.offre.hasMany(db.blob, {
   foreignKey: "OffreId"
 });
+
 db.offre.belongsTo(db.user, {
   as: "creator",
   foreignKey: "userId"
@@ -153,6 +155,11 @@ db.dossier.belongsToMany(db.offre,{
   foreignKey:"dossierId",
   otherKey:"offreId"
 })
+db.spontaneous.hasMany(db.blobscv, { foreignKey: "spontaneousId" });
+db.blobscv.belongsTo(db.spontaneous, { foreignKey: "spontaneousId", });
+db.blobscv.belongsTo(db.type_blob, { foreignKey: "TypeBlobId" });
+db.type_blob.hasMany(db.blobscv, { foreignKey: "TypeBlobId" });
+
 
 db.ROLES = ["candidat", "admin", "recruteur"];
 
