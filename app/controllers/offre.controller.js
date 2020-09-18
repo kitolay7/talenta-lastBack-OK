@@ -543,7 +543,7 @@ exports.updatePostulation = async (req, res) => {
           returning: true
        })
     .then(async (result) => {
-      if (result[1] === 0) throw "Any field is modified"
+    //   if (result[1] === 0) throw "Any field is modified"
     //   const ioClient = io.connect("http://192.168.1.1:8080");
     //   ioClient.emit('update_postulation', {message:"Quelqu'un a modifié la postulation",offreId: req.body.offreId, userId: req.body.userId});
       // ioClient.on('socketClientID', (socketClientID)=> {
@@ -556,27 +556,32 @@ exports.updatePostulation = async (req, res) => {
             [Op.and]:[
              {userId: req.body.userId},
              {offreId: req.body.offreId}
-           ]
-         },
-         include:
-      [
-        {
-          model: User,
-          attributes: ['id'],
-          include: [{
-            model: Profile,
-            attributes: ['firstName','lastName']
-          }]
-        },
-        {
-          model: offres,
-          attributes: ['post', 'publicationDate']
-        }
-      ]
+            ]
+            },
+            include:
+                [
+                    {
+                        model: User,
+                        attributes: ['id','email'],
+                        include: [{
+                            model: Profile,
+                            attributes: ['firstName','lastName']
+                        }]
+                    },
+                    {
+                        model: offres,
+                        attributes: ['post', 'publicationDate'],
+                        include:[{
+                            model:User,
+                            as:'creator',
+                            attributes: ['email']
+                        }]
+                    }
+                ]
         }),
-        message: "this postulation is updated successfully",
-        error: false
-      })
+                message: "this postulation is updated successfully",
+                error: false
+            })
      })
      .catch((error) => {
        throw error;
