@@ -488,7 +488,7 @@ exports.getUsersByOffer = async (req, res) => {
       [
         {
           model: User,
-          attributes: ['id'],
+          attributes: ['id','email'],
           include: [{
             model: Profile,
             attributes: ['firstName','lastName']
