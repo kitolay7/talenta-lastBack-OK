@@ -144,11 +144,14 @@ exports.findOne = (req, res) => {
 
 exports.findOneByOffer = async (req, res) => {
     console.log(`OFFFER ID ${JSON.stringify(req.body)}`);
-    const current_quiz = await Quiz.findOne({
+    const current_quiz = await QuizToOffer.findOne({
         where: {offreId:req.params.id},
         include:[
             {
                 model: db.offre,
+            },
+            {
+                model: db.quiz,
                 include:[
                     {
                         model:Question, as: "questions",
