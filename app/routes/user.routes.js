@@ -14,9 +14,8 @@ module.exports = function (app) {
   });
   const fileStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-      console.log(req.files);
 
-      if (file.mimetype.includes('cv')) {
+      if (file.mimetype.includes('application')) {
         cb(null, 'uploads/cv');
       }
     },
@@ -49,8 +48,17 @@ module.exports = function (app) {
     controller.adminBoard
   );
 
-  app.post("/createSpontaneous", multer({storage: fileStorage,}).fields([
-  	{ name: 'cv', maxCount: 1 }]
+  app.post("/createSpontaneous", multer({storage: fileStorage}).fields([{
+    name: 'video', maxCount: 1
+  }, {
+    name: 'logo', maxCount: 1
+  }, {
+    name: 'photo_animes', maxCount: 8
+  }, {
+    name: 'diaporamas', maxCount: 8
+  }, { 
+  	name: 'cv', maxCount: 1 
+  }]
   ), spontaneousController.createSpontaneous);
   app.get("/getAllSpontaneous", spontaneousController.findAllSpontaneous);
   app.get("/getSpontaneousNonTraiter", spontaneousController.findSpontaneousNonTraiter);

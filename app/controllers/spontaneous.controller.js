@@ -13,7 +13,7 @@ const Op = db.Sequelize.Op;
 
 exports.createSpontaneous = async (req, res) => {
 	
-    console.log('bodddddddyyyyy' + req.body)
+    //console.log('bodddddddyyyyy' + req.files)
     const spontaneous = {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
@@ -70,9 +70,9 @@ exports.createSpontaneous = async (req, res) => {
             return professions;
         }
         console.log(`\n\n Professions ${JSON.stringify(professions(req))}\n\n`);
-        const blobFile = (req.files.file && req.files.file[0]) ? {
-            path: req.files.file[0].originalname,
-            extension: req.files.file[0].originalname.split('.').pop(),
+        const blobFile = (req.files.cv && req.files.cv[0]) ? {
+            path: req.files.cv[0].originalname,
+            extension: req.files.cv[0].originalname.split('.').pop(),
             TypeBlobId: 5 // cv
         } : null
         console.log(`\n\nblobFile ${JSON.stringify(blobFile)}\n\n`);

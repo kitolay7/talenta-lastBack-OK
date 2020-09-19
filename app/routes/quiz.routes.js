@@ -15,7 +15,6 @@ module.exports = function (app) {
   });
   const fileStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-      console.log(req.files);
 
       if (file.mimetype.includes('video')) {
         cb(null, 'uploads/videos');
