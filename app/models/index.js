@@ -44,6 +44,7 @@ db.profession = require("../models/profession.model.js")(sequelize, Sequelize);
 db.competence = require("../models/competence.model.js")(sequelize, Sequelize);
 db.dossier_offer = require("../models/dossier_offer.model.js")(sequelize, Sequelize);
 db.blobscv = require("../models/blobCV.model.js")(sequelize, Sequelize);
+db.response_test = require("../models/response_test.model.js")(sequelize, Sequelize);
 
 db.quiz.belongsTo(db.user, {
   through: db.offre
@@ -65,6 +66,8 @@ db.dossier.belongsTo(db.user, {
 db.question.belongsTo(db.type_question, { foreignKey: "TypeQuestionId" });
 db.question.hasMany(db.criteria_point_question, {foreignKey: "questionId", onDelete:"CASCADE"});
 // db.offre.hasMany(db.question, { as: "questions" });
+db.question.hasMany(db.response_test,{foreignKey:"questionId"});
+
 db.offre.hasMany(db.blob, {
   foreignKey: "OffreId"
 });
@@ -135,6 +138,10 @@ db.user.belongsToMany(db.offre,{
   foreignKey:"userId",
   otherKey:"offreId"  
 });
+
+db.user.hasMany(db.response_test,{
+  foreignKey:"userId"
+})
 db.profile.belongsTo(db.user, {foreignKey: "userId"});
 
 db.type_question.hasMany(db.question,{foreignKey: "TypeQuestionId"});
@@ -160,6 +167,15 @@ db.blobscv.belongsTo(db.spontaneous, { foreignKey: "spontaneousId", });
 db.blobscv.belongsTo(db.type_blob, { foreignKey: "TypeBlobId" });
 db.type_blob.hasMany(db.blobscv, { foreignKey: "TypeBlobId" });
 
+
+db.response_test.belongsTo(db.question, {
+  foreignKey:"questionId"
+})
+
+db.response_test.belongsTo(db.user, {
+  foreignKey:"userId",
+  as: "UserCandidat"
+})
 
 db.ROLES = ["candidat", "admin", "recruteur"];
 
