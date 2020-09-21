@@ -59,9 +59,7 @@ exports.register = async (req, res) => {
       expiresIn: 864000 // 24 hours
     });
     console.log(token)
-    const url = `http://154.126.92.194:8181/confirmation/${token}`
-    //const url = `http://localhost:8181/confirmation/${token}`
-    
+    const url = `http://${req.headers.host}/confirmation/${token}`
     const mail = {
     	body: {
     		email_recipient: req.body.email,
