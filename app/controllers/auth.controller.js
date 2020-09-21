@@ -61,15 +61,15 @@ exports.register = async (req, res) => {
     console.log(token)
     const url = `http://${req.headers.host}/confirmation/${token}`
     const mail = {
-    	body: {
-    		email_recipient: req.body.email,
-    		email_subject: `Confirmation d'adresse email pour Talenta Sourcing`,
-    		email_content: `Bonjour! :) \n\n Veuillez cliquer sur ce lien pour valider votre adresse mail et votre compte : <a href="${url}">${url}</a>`
-    	}
+      body: {
+        email_recipient: req.body.email,
+        email_subject: `Confirmation d'adresse email pour Talenta Sourcing`,
+        email_content: `Bonjour! :) \n\n Veuillez cliquer sur ce lien pour valider votre adresse mail et votre compte : <a href="${url}">${url}</a>`
+      }
     }
-    
+
     sendMail(mail, res, {});
-    
+
     res
       .status(HttpStatus.CREATED)
       .send({
@@ -124,7 +124,7 @@ exports.signin = (req, res) => {
           .status(HttpStatus.UNAUTHORIZED)
           .send({ message: "Veuillez confirmer votre adresse email dans votre boite mail", error: true });
       }
-      
+
       var token = jwt.sign({ id: user.id }, config.secret, {
         expiresIn: 864000 // 24 hours
       });
@@ -163,23 +163,23 @@ exports.updateProfile = async (req, res) => {
       message: "Data to update can not be empty!"
     });
   }
-  
+
   Profile.findOne({
     where: {
-      id:req.body.userId
+      id: req.body.userId
     }
-  }).then (current_user => {
-  	console.log(current_user)
+  }).then(current_user => {
+    console.log(current_user)
     if (current_user === null) {
       return res
         .status(HttpStatus.NOT_FOUND)
         .send({ message: "User Not found.", error: true });
     }
   })
-    
+
   const id = req.body.userId;
   try {
-   Profile.update({
+    Profile.update({
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       numTel: req.body.numTel,
@@ -193,7 +193,7 @@ exports.updateProfile = async (req, res) => {
       codePostal: req.body.codePostal,
       societe: req.body.societe,
       userId: await id
-    }, {where: {id: id} });;
+    }, { where: { id: id } });;
     res
       .send({
         message: "successfully update",
@@ -205,47 +205,30 @@ exports.updateProfile = async (req, res) => {
       .send({ message: err, error: true });
     console.log(">> Error while finding comment: ", err);
   }
-    
-  
+
+
 };
 
 exports.confirm = async (req, res) => {
-	console.log(req.params.token);
-  	try {
-  		const {id} = jwt.verify(req.params.token, config.secret);
-  		await User.update({confirmed: true}, {where: {id: id}});
-  	} catch (e) {
-  		console.log(e);
-  		res.send('Error')
-  	}
-  	return res.redirect('http://localhost:4200/');
+  console.log(req.params.token);
+  try {
+    const id = jwt.verify(req.params.token, config.secret);
+    await User.update({ confirmed: true }, { where: { id: id } });
+  } catch (e) {
+    console.log(e);
+    res.send('Error')
+  }
+  return res.redirect('http://localhost:4200/');
 };
 
-
-// ********** ESSAI CONFIRM MAIL ***************
-
-/*
-exports.log = async (req, res) => {
-
-  console.log(req.body)
-  
+exports.editPW = (req, res) => {
+  console.log(`\n\n\n${req.body}\n\n\n`);
   User.findOne({
     where: {
-      email: req.body.email
+      id: req.body.id
     }
   })
     .then(user => {
-      if (!user) {
-        return res
-          .status(HttpStatus.NOT_FOUND)
-          .send({ message: "User Not found.", error: true });
-      }
-      if (!user.confirmed) {
-        return res
-          .status(HttpStatus.NOT_FOUND)
-          .send({ message: "Confirmez votre email", error: true });
-      }
-
       var passwordIsValid = bcrypt.compareSync(
         req.body.password,
         user.password
@@ -254,80 +237,16 @@ exports.log = async (req, res) => {
       if (!passwordIsValid) {
         return res
           .send({
-            accessToken: null,
+            error: true,
             message: "Invalid Password!",
-            error: HttpStatus.UNAUTHORIZED
           });
+      } else {
+      User.update({
+        password: bcrypt.hashSync(req.body.newPw, 8)
+
+      }, { where: { id: req.body.id } })
+        res
+        .send({ message: 'mot de passe modifier', error: false });
       }
-
-      var token = jwt.sign({ id: user.id }, config.secret, {
-        expiresIn: 864000 // 24 hours
-      });
-
-      res
-          .status(HttpStatus.OK)
-          .send({
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            roles: authorities,
-            numTel: user.numTel,
-            pays: user.pays,
-            codePostal: user.codePostal,
-            societe: user.societe,
-            accessToken: token,
-            error: false
-          });
     })
-    .catch(err => {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message, error: true });
-    });
 };
-
-exports.reg = async (req, res) => {
-
-  console.log(req.body)
-  
-  try {
-    const current_user = await User.create({
-      username: req.body.username,
-      email: req.body.email,
-      password: bcrypt.hashSync(req.body.password, 8),
-    });
-    
-    var token = jwt.sign({ id: current_user.id }, config.secret, {
-      expiresIn: 864000 // 24 hours
-    });
-    
-    console.log(token)
-    
-    const url = `http://localhost:8181/confirmation/${token}`
-    
-    const mail = {
-    	body: {
-    		email_recipient: req.body.email,
-    		email_subject: `Confirmation d'adresse email`,
-    		email_content: `Bonjour! :) \n\n Veuillez cliquer sur ce lien pour valider votre adresse mail et votre compte : <a href="${url}">${url}</a>`
-    	}
-    }
-    
-    sendMail(mail, res, {});
-    
-    res
-      .status(HttpStatus.CREATED)
-      .send({
-        message: "successfully created",
-        data: {
-          user: { ...current_user.dataValues },
-        },
-        accessToken: token,
-        error: false
-      })
-  } catch (err) {
-    res
-      .status(HttpStatus.INTERNAL_SERVER_ERROR)
-      .send({ message: err, error: true });
-    console.log(">> Error while finding comment: ", err);
-  }
-};
-*/
