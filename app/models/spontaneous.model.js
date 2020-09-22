@@ -34,6 +34,10 @@ module.exports = (sequelize, Sequelize) => {
       secteur: {
         type: Sequelize.STRING
       },
+      traiter: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
     }, {
       freezeTableName: true,
     });
