@@ -60,10 +60,8 @@ exports.register = async (req, res) => {
     });
     console.log(token)
     const roleId = (req.body.roles.includes('ROLE_RECRUTEUR')) ? 1 : 2 ;
-    const url = `http://154.126.92.194:8181/confirmation/${token}/${roleId}`
-    //const url = `http://localhost:8181/confirmation/${token}/${roleId}`
+    const url = `http://${req.headers.host}/confirmation/${token}/${roleId}`
     
-    const url = `http://${req.headers.host}/confirmation/${token}`
     const mail = {
       body: {
         email_recipient: req.body.email,
