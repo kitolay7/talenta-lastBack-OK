@@ -60,6 +60,7 @@ module.exports = function (app) {
   app.post("/offre/:offreId/postule", offreControler.postuleToOffer);
   app.get("/offre/:offreId/users", offreControler.getUsersByOffer);
   app.get("/offrePostuled/:idUser", offreControler.getOffersByPostulator);
+  app.get("/offreCandidat/:idUser", offreControler.listingOffreCandidat);
   app.get("/offer/:id/quiz/", quizControler.findOneByOffer);
   app.put("/postulation/update", offreControler.updatePostulation);
   app.get("/postulation/users/:userId/offres/:offreId", offreControler.getPostulationById);
