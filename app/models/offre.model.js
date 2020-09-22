@@ -4,16 +4,16 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING
         },
         description: {
-            type: Sequelize.STRING
+            type: Sequelize.TEXT
         },
         contexte: {
-            type: Sequelize.STRING
+            type: Sequelize.TEXT
         },
         missions: {
-            type: Sequelize.STRING
+            type: Sequelize.TEXT
         },
         qualification: {
-            type: Sequelize.STRING
+            type: Sequelize.TEXT
         },
         // logo: {
         //     type: Sequelize.STRING
@@ -22,7 +22,7 @@ module.exports = (sequelize, Sequelize) => {
         //     type: Sequelize.STRING
         // },
         messages: {
-            type: Sequelize.STRING
+            type: Sequelize.TEXT
         },
         // photoAnime: {
         //     type: Sequelize.STRING

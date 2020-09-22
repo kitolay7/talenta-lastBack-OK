@@ -4,13 +4,13 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING
       },
       fiche: {
-        type: Sequelize.STRING
+        type: Sequelize.TEXT
       },
       auteur: {
         type: Sequelize.STRING
       },
       remarque: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         defaultValue: null
       },
     }, { timestamps: false, });
