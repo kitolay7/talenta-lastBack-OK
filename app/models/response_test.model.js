@@ -9,6 +9,19 @@ module.exports = (sequelize, Sequelize) => {
       rang: {
           type: Sequelize.INTEGER
       },
+      pointWin:{
+          type: Sequelize.INTEGER,
+          defaultValue:0
+      },
+      pointLost:{
+        type: Sequelize.INTEGER,
+        defaultValue:0
+      },
+      grid:{
+        type: Sequelize.INTEGER,
+        defaultValue:0
+      }
+
   }, { timestamps: false,});
 
   return responseTest;

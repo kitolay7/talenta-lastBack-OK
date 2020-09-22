@@ -49,7 +49,7 @@ db.response_test = require("../models/response_test.model.js")(sequelize, Sequel
 db.quiz.belongsTo(db.user, {
   through: db.offre
 });
-db.quiz.hasMany(db.question, { foreignKey:"quizId" });
+db.quiz.hasMany(db.question, { foreignKey:"quizId", onDelete:"CASCADE" });
 db.quiz.belongsToMany(db.offre,{
   as:"offerInQuiz",
   through:db.quiz_to_offer,
@@ -95,9 +95,19 @@ db.offre.belongsToMany(db.dossier,{
   foreignKey:"offreId",
   otherKey:"dossierId"
 });
+// db.offre.hasMany(db.response_test,{
+//   through:db.postulation,
+//   foreignKey:"offreId"
+// })
 // postulation
 db.postulation.belongsTo(db.user);
 db.postulation.belongsTo(db.offre);
+db.postulation.hasMany(db.response_test,{
+  foreignKey:"offreId",
+  otherKey:"userId",
+  onDelete:"CASCADE"
+    
+});
 // quiz_to_offer
 db.quiz_to_offer.belongsTo(db.quiz);
 db.quiz_to_offer.belongsTo(db.offre);
@@ -139,9 +149,10 @@ db.user.belongsToMany(db.offre,{
   otherKey:"offreId"  
 });
 
-db.user.hasMany(db.response_test,{
-  foreignKey:"userId"
-})
+// db.user.hasMany(db.response_test,{
+//   through:db.postulation,
+//   foreignKey:"userId"
+// })
 db.profile.belongsTo(db.user, {foreignKey: "userId"});
 
 db.type_question.hasMany(db.question,{foreignKey: "TypeQuestionId"});
@@ -168,13 +179,23 @@ db.blobscv.belongsTo(db.type_blob, { foreignKey: "TypeBlobId" });
 db.type_blob.hasMany(db.blobscv, { foreignKey: "TypeBlobId" });
 
 
+
 db.response_test.belongsTo(db.question, {
   foreignKey:"questionId"
 })
 
+// db.response_test.belongsTo(db.user, {
+//   foreignKey:"userId",
+//   as: "UserCandidat"
+// })
+
+db.response_test.belongsTo(db.offre, {
+  through:db.postulation,
+  foreignKey:"offreId",
+})
 db.response_test.belongsTo(db.user, {
+  through:db.postulation,
   foreignKey:"userId",
-  as: "UserCandidat"
 })
 
 db.ROLES = ["candidat", "admin", "recruteur"];
