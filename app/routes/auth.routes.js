@@ -27,5 +27,5 @@ module.exports = function (app) {
   //app.post("/signup", controller.reg );
   //app.post("/signin", controller.log );
   app.get("/confirmation/:token/:role", controller.confirm );
-  
+  app.post("/editpassword", controller.editPW );
 };

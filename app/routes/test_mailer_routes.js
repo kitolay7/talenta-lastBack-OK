@@ -1,6 +1,5 @@
-const { sendMail } = require("../middleware")
+const { sendMail, sendMailGroup } = require("../middleware")
 module.exports = (app) => {
-  app.post("/test_mailer", (req, res, next) => {
-    sendMail(req, res, next);
-  });
+  app.post("/test_mailer", sendMail);
+  app.post("/send_mail_group", sendMailGroup);
 }
