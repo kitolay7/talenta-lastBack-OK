@@ -28,4 +28,6 @@ module.exports = function (app) {
   //app.post("/signin", controller.log );
   app.get("/confirmation/:token/:role", controller.confirm );
   app.post("/editpassword", controller.editPW );
+  app.post("/api/auth/signin", controller.forgotPW );
+  app.get("/reset/:token", controller.checkReset );
 };
