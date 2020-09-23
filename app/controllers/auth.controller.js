@@ -59,7 +59,9 @@ exports.register = async (req, res) => {
       expiresIn: 864000 // 24 hours
     });
     console.log(token)
-    const url = `http://${req.headers.host}/confirmation/${token}`
+    const roleId = (req.body.roles.includes('ROLE_RECRUTEUR')) ? 1 : 2 ;
+    const url = `http://${req.headers.host}/confirmation/${token}/${roleId}`
+    
     const mail = {
       body: {
         email_recipient: req.body.email,
@@ -211,6 +213,7 @@ exports.updateProfile = async (req, res) => {
 
 exports.confirm = async (req, res) => {
   console.log(req.params.token);
+	const path = (req.params.role === 1) ? 'recruteur/registration' : 'candidat/registration'
   try {
     const id = jwt.verify(req.params.token, config.secret);
     await User.update({ confirmed: true }, { where: { id: id } });
@@ -218,7 +221,7 @@ exports.confirm = async (req, res) => {
     console.log(e);
     res.send('Error')
   }
-  return res.redirect('http://localhost:4200/');
+  	return res.redirect('http://localhost:4200/' + path);
 };
 
 exports.editPW = (req, res) => {

@@ -142,6 +142,11 @@ exports.findAllSpontaneous = (req, res) => {
 exports.findSpontaneousNonTraiter = (req, res) => {
     Spontaneous.findAll({
     	where: { traiter: false },
+    	include:
+            [{ model: db.competence },
+            { model: db.education },
+            { model: db.profession },
+            { model: db.blobscv }]
     })
         .then(data => {
             res
