@@ -75,4 +75,7 @@ module.exports = function (app) {
   app.get("/users/:userId/offresPublished", offreControler.getOfferByCreatorPublished);
   app.put("/quizzs/state/:id/update", controller.updateQuizStatePublished);
   app.get("/users/:userId/offres", offreControler.getOfferByCreator);
+  app.post("/postulation/users/:userId/offres/:offreId/responses", quizControler.createResponseQuizz);
+  app.get("/postulation/users/:userId/offres/:offreId/responses", quizControler.getResponseTestByPostulation);
+  app.put("/postulation/users/:userId/offres/:offreId/update", quizControler.updateResponseQuizz);
 };
