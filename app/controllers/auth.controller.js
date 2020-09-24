@@ -195,7 +195,7 @@ exports.updateProfile = async (req, res) => {
       codePostal: req.body.codePostal,
       societe: req.body.societe,
       userId: await id
-    }, { where: { id: id } });;
+    }, { where: { id: id } });
     res
       .send({
         message: "successfully update",
@@ -212,16 +212,50 @@ exports.updateProfile = async (req, res) => {
 };
 
 exports.confirm = async (req, res) => {
-  console.log(req.params.token);
-	const path = (req.params.role === 1) ? 'recruteur/registration' : 'candidat/registration'
-  try {
-    const id = jwt.verify(req.params.token, config.secret);
-    await User.update({ confirmed: true }, { where: { id: id } });
-  } catch (e) {
-    console.log(e);
-    res.send('Error')
-  }
-  	return res.redirect('/' + path);
+  	console.log(`\n\n\n${req.params}\n\n\n`);
+  	
+  	try {
+  	
+  		if (!req.params) {
+    		res.status(400).send({
+      		message: "Data to update can not be empty!"
+    		});
+  		}
+  		console.log(`\n\n\n${req.params}\n\n\n`);
+		const path = (req.params.role === 1) ? 'recruteur/registration' : (req.params.role === 2 ? 'candidat/registration' : '' )
+    	console.log(`\n\n\n${path}\n\n\n`);
+    	const idU = jwt.verify(req.params.token, config.secret);
+    	console.log(`\n\n\n${idU}\n\n\n`);
+  		await User.findOne({
+    		where: {
+      			id: idU
+    		}
+  		})
+  			.then(current_user => {
+    		console.log(current_user)
+    		if (current_user === null) {
+      		res
+        		.status(HttpStatus.NOT_FOUND)
+        		.send({ message: "User Not found.", error: true })
+    		}
+  		})
+  			.catch(err => { throw err })
+  		
+    	await User.update({ confirmed: true }, { where: { id: idU } })
+    		.then(user => {
+    		res
+      			.send({
+        			message: "User confirmed",
+        			error: false
+      			})
+      		})
+      		.catch(err => { throw err })
+  	} catch (e) {
+    	console.log(e);
+    	res.send('Error')
+  	}
+    //return res.redirect( `${req.headers.origin}/${path}`)
+    return res.redirect( `http://localhost:4200/${path}`)
 };
 
 exports.editPW = (req, res) => {
@@ -272,7 +306,7 @@ exports.forgotPW = (req, res) => {
       		expiresIn: 864000 // 24 hours
     	});
     	console.log(token)
-    	const url = `http://${req.headers.host}/reset/${token}`
+    	const url = `http://${req.headers.origin}/user/reset/${token}`
     	
     	const mail = {
       		body: {
@@ -293,7 +327,7 @@ exports.forgotPW = (req, res) => {
       });
 };
 exports.checkReset = async (req, res) => {
-  console.log(req.params.token);
+  // console.log(req.headers.origin);
   try {
     const id = jwt.verify(req.params.token, config.secret);
     await User.findOne({
@@ -303,26 +337,29 @@ exports.checkReset = async (req, res) => {
   	})
     .then(user => {
       	if (!user) {
-        	return res
-          	.status(HttpStatus.NOT_FOUND)
-          	.send({ 
-          		message: "User Not found.",
-          		access: "error",
-          		error: true });
-      	}
+        	res
+          		.status(HttpStatus.NOT_FOUND)
+          		.send({ 
+          			message: "User Not found.",
+          			error: true })
+      	} else {
 
-        res
-          .status(HttpStatus.OK)
-          .send({
-          	data: user,
-          	access: "ok",
-            error: false
-          });
-      });
+        	res
+          		.status(HttpStatus.OK)
+          		.send({
+          			data: user,
+            		error: false
+          		})
+        }
+    })
+    .catch(err => { throw err })
     
   } catch (e) {
     console.log(e);
-    res.send('Error')
+    res
+    	.send({
+          		access: "error",
+            	error: true
+          	})
   }
-  	return res.redirect('/user/reset');
 };
