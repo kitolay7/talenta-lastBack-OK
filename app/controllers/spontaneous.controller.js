@@ -4,6 +4,7 @@ const io = require("socket.io-client");
 
 const fs = require('fs');
 const { error, count } = require("console");
+const { sendMail } = require("../middleware");
 
 const Spontaneous = db.spontaneous;
 const Competence = db.competence;
@@ -28,6 +29,20 @@ exports.createSpontaneous = async (req, res) => {
       secteur: req.body.secteur,
     };
     
+    const mail = {
+      body: {
+        email_recipient: req.body.email,
+        email_subject: `Dossier de Candidature spontanée déposé - Talenta Sourcing`,
+        email_content: `Bonjour! :) 
+        	<br> 
+        	Talenta a bien enregistré votre candidature spontanée et prend en charge son orientation suivant les informations communiquées. 
+        	<br>  
+        	L'équipe Talenta vous remercie de votre confiance. 
+        	<br>
+        	***************************************************************************************************`
+      }
+    }
+
     
     // Creation Data
     console.log(spontaneous)
@@ -104,6 +119,9 @@ exports.createSpontaneous = async (req, res) => {
         await Profession.bulkCreate(bulkMerge(professions(req), { spontaneousId: current_spontaneous.id }), { returning: true, transaction: transaction_spontaneous })
         blobFile && await db.blobscv.create({ ...blobFile, ...{ spontaneousId: current_spontaneous.id } }, { transaction: transaction_spontaneous });
         await transaction_spontaneous.commit();
+        
+        sendMail(mail, res, {});
+    
         res
             .send({
                 message: "successfully created",
