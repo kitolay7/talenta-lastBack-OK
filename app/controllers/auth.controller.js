@@ -211,17 +211,18 @@ exports.updateProfile = async (req, res) => {
 
 };
 
-exports.confirm = async (req, res) => {
-  console.log(req.params.token);
-	const path = (req.params.role === 1) ? 'recruteur/registration' : 'candidat/registration'
-  try {
-    const id = jwt.verify(req.params.token, config.secret);
-    await User.update({ confirmed: true }, { where: { id: id } });
-  } catch (e) {
-    console.log(e);
-    res.send('Error')
-  }
-  	return res.redirect('http://localhost:4200/' + path);
+exports.confirm = (req, res) => {
+  const id = jwt.verify(req.params.token, config.secret);
+  User.update({ confirmed: true }, { where: { id: id.id } })
+  .then(resultat => {
+     if (req.params.role === 1) {
+   return res.redirect('http://localhost:4200/candidat/registration');
+ } else {
+   return res.redirect('http://localhost:4200/recruteur/registration');
+ }
+  }).catch(err => { throw err });
+
+
 };
 
 exports.editPW = (req, res) => {
