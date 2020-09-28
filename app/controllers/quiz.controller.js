@@ -723,6 +723,10 @@ exports.createResponseQuizz = async (req,res) => {
                 let pathname = req.files.fileAudio[indexFiles].path.split("/");
                 responses[index].answers = pathname.splice(1,2).join("/");
             }
+            if (responses[index].answers === req.files.fileVideo[indexFiles].originalname) {
+                let pathname = req.files.fileVideo[indexFiles].path.split("/");
+                responses[index].answers = pathname.splice(1,2).join("/");
+            }
         }
         await ResponseTest.create(responses[index],{transaction:transaction_response_quiz})
         .catch(error => {throw error});   
