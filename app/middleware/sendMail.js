@@ -39,7 +39,10 @@ exports.sendMail = (req, res, next) => {
       from: process.env.FROM_EMAIL,
       to: req.body.email_recipient,
       subject: req.body.email_subject,
-      html: req.body.email_content
+      html: req.body.email_content,
+      attachements: {
+      	path: (req.body.email_attachement ? req.body.email_attachement : '')
+      }
     };
   
     transporter.sendMail(mail, (error, response) => {
