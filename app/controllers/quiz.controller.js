@@ -8,17 +8,17 @@ const Reponse = db.reponse;
 const QuizToOffer = db.quiz_to_offer;
 const DossierOffer = db.dossier_offer;
 const Op = db.Sequelize.Op;
-
+const fs = require('fs');
 const HttpStatus = require('http-status-codes');
 const { response } = require("express");
 const options = require("dotenv/lib/env-options");
 const { quiz, question } = require("../models");
-
+const ResponseTest = db.response_test;
 exports.create = async (req, res) => {
     // offres id
     const transaction_quiz = await db.sequelize.transaction();
     try{
-        const quiz = await Quiz.create({name:req.body.name,fiche_dir:req.body.fiche_dir,author_dir:req.body.author_dir,offreId:req.body.offer,userId:req.body.idUser,publier:req.body.publier, date_publication:(req.body.publier ? new Date() : null)},{transaction_quiz});
+        const quiz = await Quiz.create({name:req.body.name,fiche_dir:req.body.fiche_dir,author_dir:req.body.author_dir,offreId:req.body.offer,userId:req.body.idUser,publier:req.body.publier, date_publication:(req.body.publier ? new Date() : null)},{transaction:transaction_quiz});
         
         if (req.body.offer) {
             await QuizToOffer.create({offreId:req.body.offer,quizzId:quiz.id},{transaction:transaction_quiz});
@@ -26,74 +26,74 @@ exports.create = async (req, res) => {
         }
         const listTrueOrFalseRequest = req.body.listTrueOrFalse || null;
         for(const questionTrueFalseRequest of listTrueOrFalseRequest) {
-            let questionTrueFalseResponse = await Question.create({...questionTrueFalseRequest,...{quizId:quiz.id}},{transaction_quiz}).catch(error => {throw error});
+            let questionTrueFalseResponse = await Question.create({...questionTrueFalseRequest,...{quizId:quiz.id}},{transaction:transaction_quiz}).catch(error => {throw error});
             for( const critere of questionTrueFalseRequest.criteres) {
                 const newCritere = {...critere,...{questionId:questionTrueFalseResponse.id}};
-                await CriteriaPointQuestion.create(newCritere,{transaction_quiz}).catch(error => {throw error});
+                await CriteriaPointQuestion.create(newCritere,{transaction:transaction_quiz}).catch(error => {throw error});
             };
             // console.log(`\n\n${JSON.stringify(questionTrueFalseRequest.responses)}\n\n`);
-            await Reponse.create({isAnswers:questionTrueFalseRequest.responses.isAnswers[0], questionId:questionTrueFalseResponse.id},{transaction_quiz}).catch(error => {throw error});
+            await Reponse.create({isAnswers:questionTrueFalseRequest.responses.isAnswers[0], questionId:questionTrueFalseResponse.id},{transaction:transaction_quiz}).catch(error => {throw error});
         };
         const listMultipleRequest = req.body.listMultiple || null;
         for(const questionMultipleRequest of listMultipleRequest) 
         {
-            let questionMultipleResponse = await Question.create({...questionMultipleRequest,...{quizId:quiz.id}},{transaction_quiz}).catch(error => {throw error});
+            let questionMultipleResponse = await Question.create({...questionMultipleRequest,...{quizId:await quiz.id}},{transaction:transaction_quiz}).catch(error => {throw error});
             for( const critere of questionMultipleRequest.criteres) 
             {
                 const newCritere = {...critere,...{questionId:questionMultipleResponse.id}};
-                await CriteriaPointQuestion.create(newCritere,{transaction_quiz}).catch(error => {throw error});
+                await CriteriaPointQuestion.create(newCritere,{transaction:transaction_quiz}).catch(error => {throw error});
                     for(index=0;index<questionMultipleRequest.responses.choices.length;index++)
                     {
-                        await Reponse.create({choices:questionMultipleRequest.responses.choices[index],isAnswers:questionMultipleRequest.responses.isAnswers[index], questionId:questionMultipleResponse.id},{transaction_quiz}).catch(error => {throw error});
+                        await Reponse.create({choices:questionMultipleRequest.responses.choices[index],isAnswers:questionMultipleRequest.responses.isAnswers[index], questionId:questionMultipleResponse.id},{transaction:transaction_quiz}).catch(error => {throw error});
                     }
             }
         }
         const listClassementRequest = req.body.listClassement || null;
         for(const questionClassementRequest of listClassementRequest) {
             // console.log(`\n\n${JSON.stringify(questionClassementRequest)}\n\n`);
-            let questionClassementResponse = await Question.create({...questionClassementRequest,...{quizId:quiz.id}},{transaction_quiz}).catch(error => {throw error});
+            let questionClassementResponse = await Question.create({...questionClassementRequest,...{quizId: await quiz.id}},{transaction:transaction_quiz}).catch(error => {throw error});
             for(const critere of questionClassementRequest.criteres) {
                 const newCritere = {...critere,...{questionId:questionClassementResponse.id}};
-                await CriteriaPointQuestion.create(newCritere,{transaction_quiz}).catch(error => {throw error});
+                await CriteriaPointQuestion.create(newCritere,{transaction:transaction_quiz}).catch(error => {throw error});
                 for(index=0;index<questionClassementRequest.responses.choices.length; index++) {                                        
                     // await Reponse.create({choices:questionClassementRequest.responses.choices[index],rang:questionClassementRequest.responses.rang[index], questionId:questionClassementResponse.id},{transaction_quiz}).catch(error => {throw error});
-                    await Reponse.create({choices:questionClassementRequest.responses.choices[index], rang:index+1, questionId:questionClassementResponse.id},{transaction_quiz}).catch(error => {throw error});
+                    await Reponse.create({choices:questionClassementRequest.responses.choices[index], rang:index+1, questionId:questionClassementResponse.id},{transaction:transaction_quiz}).catch(error => {throw error});
                 }
             }
         };
         const listRedactionRequest = req.body.listRedaction || null;
         for(const questionRedactionRequest of listRedactionRequest) {
             // console.log(`\n\n${JSON.stringify(questionRedactionRequest)}\n\n`);
-            let questionRedactionResponse = await Question.create({...questionRedactionRequest,...{quizId:quiz.id}},{transaction_quiz}).catch(error => {throw error});
+            let questionRedactionResponse = await Question.create({...questionRedactionRequest,...{quizId:await quiz.id}},{transaction:transaction_quiz}).catch(error => {throw error});
             for(critere of questionRedactionRequest.criteres) {
                 const newCritere = {...critere,...{questionId:questionRedactionResponse.id}};
-                await CriteriaPointQuestion.create(newCritere,{transaction_quiz}).catch(error => {throw error});
+                await CriteriaPointQuestion.create(newCritere,{transaction:transaction_quiz}).catch(error => {throw error});
             } 
             for(index=0;index<questionRedactionRequest.responses.choices.length;index++){    
-                await Reponse.create({choices:questionRedactionRequest.responses.choices[index],isAnswers:questionRedactionRequest.responses.isAnswers[index], questionId:questionRedactionResponse.id},{transaction_quiz}).catch(error => {throw error});
+                await Reponse.create({choices:questionRedactionRequest.responses.choices[index],isAnswers:questionRedactionRequest.responses.isAnswers[index], questionId:questionRedactionResponse.id},{transaction:transaction_quiz}).catch(error => {throw error});
             }
         }
         console.log(req.body.listAudio);
         const listAudio = req.body.listAudio || null;
         for(const questionAudioRequest of listAudio){
             // console.log(`\n\n${JSON.stringify(questionRedactionRequest)}\n\n`);
-            let questionAudioResponse = await Question.create({...questionAudioRequest,...{quizId: quiz.id}},{transaction_quiz}).catch(error => {throw error});
+            let questionAudioResponse = await Question.create({...questionAudioRequest,...{quizId: await quiz.id}},{transaction:transaction_quiz}).catch(error => {throw error});
             for((critere) of questionAudioRequest.criteres){
                 const newCritere = {...critere,...{questionId:questionAudioResponse.id}};
-                await CriteriaPointQuestion.create(newCritere,{transaction_quiz}).catch(error => {throw error});
+                await CriteriaPointQuestion.create(newCritere,{transaction:transaction_quiz}).catch(error => {throw error});
             };
-            await Reponse.create({type_audio:questionAudioRequest.responses.type_audio, questionId:questionAudioResponse.id},{transaction_quiz}).catch(error => {throw error});
+            await Reponse.create({type_audio:questionAudioRequest.responses.type_audio, questionId:questionAudioResponse.id},{transaction:transaction_quiz}).catch(error => {throw error});
         }
         const listVideo = req.body.listVideo || null;
         for(const questionVideoRequest of listVideo){
             console.log(`\n\n${JSON.stringify(questionVideoRequest)}\n\n`);
-            let questionVideoResponse = await Question.create({...questionVideoRequest,...{quizId:quiz.id}},{transaction_quiz}).catch(error => {throw error});
+            let questionVideoResponse = await Question.create({...questionVideoRequest,...{quizId:await quiz.id}},{transaction:transaction_quiz}).catch(error => {throw error});
             console.log(JSON.stringify(questionVideoResponse));
             for((critere) of questionVideoRequest.criteres){
                 const newCritere = {...critere,...{questionId:questionVideoResponse.id}};
-                await CriteriaPointQuestion.create(newCritere,{transaction_quiz}).catch(error => {throw error});
+                await CriteriaPointQuestion.create(newCritere,{transaction:transaction_quiz}).catch(error => {throw error});
             };
-            await Reponse.create({type_audio:questionVideoRequest.responses.type_audio, questionId:questionVideoResponse.id},{transaction_quiz}).catch(error => {throw error});
+            await Reponse.create({type_audio:questionVideoRequest.responses.type_audio, questionId:questionVideoResponse.id},{transaction:transaction_quiz}).catch(error => {throw error});
         }
 
 
@@ -674,4 +674,104 @@ exports.updateQuizStatePublished = (req, res) => {
             .status(HttpStatus.NOT_FOUND)
             .send({ message: error.message, error: true });
     }
+}
+
+exports.getResponseTestByPostulation = async (req,res) => {
+    try {
+        await ResponseTest.findAll({
+            where:{[Op.and]:[{offreId:req.params.offreId},{userId:req.params.userId}]},
+            include:[
+                {
+                    model:db.question,
+                    include:[{model:db.quiz},{model:db.type_question,attributes:["wording"]}]
+                },
+                {
+                    model:db.user,
+                    attributes:["id"],
+                    include:[
+                        {
+                            model:db.profile,
+                            attributes:["firstName","lastName"]
+                        }
+                    ]
+                }
+            ]
+        })
+        .then(response => {
+          res
+                .status(HttpStatus.OK)
+                .send({data:response, error: false});         
+        })
+        .catch(error => {
+            throw error;
+        })
+    } catch (error) {
+      console.log(">> Error while finding project: ", error);
+      res
+          .status(HttpStatus.NOT_FOUND)
+          .send({ message: error.message, error: true });
+    }
+}
+
+exports.createResponseQuizz = async (req,res) => {
+    const transaction_response_quiz = await db.sequelize.transaction();
+  try {
+      let responses = JSON.parse(req.body.listResponseTest);
+      for (let index = 0; index < responses.length; index++) {
+        for (let indexFiles = 0; indexFiles < req.files.fileAudio.length; indexFiles++) {
+            if (responses[index].answers === req.files.fileAudio[indexFiles].originalname) {
+                let pathname = req.files.fileAudio[indexFiles].path.split("/");
+                responses[index].answers = pathname.splice(1,2).join("/");
+            }
+        }
+        await ResponseTest.create(responses[index],{transaction:transaction_response_quiz})
+        .catch(error => {throw error});   
+    }
+    await transaction_response_quiz.commit();
+        res
+            .status(HttpStatus.CREATED)
+            .send({
+                message: "responses are successfull saved",
+                error: false
+            })
+  } catch (error) {
+    await transaction_response_quiz.rollback();
+    console.log(">> Error while finding project: ", error);
+      res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .send({ message: error.message, error: true });
+  }
+}
+
+exports.updateResponseQuizz = async(req,res) => {
+    try {
+      await ResponseTest.update({pointWin:req.body.pointWin},{where:{[Op.and]:[{offreId:req.params.offreId},{userId:req.params.userId}]}})
+      .then(() => {
+        res
+            .status(HttpStatus.OK)
+            .send({
+                message: "reponses of quizz updated successfully",
+                error: false
+            })
+      })
+      .catch(error => {
+        throw error;
+      })
+    } catch (error) {
+        console.log(">> Error while finding project: ", error);
+        res
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .send({ message: error.message, error: true });
+    }
+}
+
+exports.uploadMediaAudio = (req, res) => {
+  try {
+    console.log(req.files);    
+  } catch (error) {
+    console.log(">> Error while finding project: ", error);
+        res
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .send({ message: error.message, error: true });
+  }
 }

@@ -195,7 +195,7 @@ exports.updateProfile = async (req, res) => {
       codePostal: req.body.codePostal,
       societe: req.body.societe,
       userId: await id
-    }, { where: { id: id } });;
+    }, { where: { id: id } });
     res
       .send({
         message: "successfully update",
@@ -253,4 +253,80 @@ exports.editPW = (req, res) => {
         .send({ message: 'mot de passe modifier', error: false });
       }
     })
+};
+
+exports.forgotPW = (req, res) => {
+  	console.log(`\n\n\n${req.body}\n\n\n`);
+  	User.findOne({
+    	where: {
+      		email: req.body.email
+    	}
+  	})
+    .then(user => {
+      	if (!user) {
+        	return res
+          	.status(HttpStatus.NOT_FOUND)
+          	.send({ message: "User Not found.", error: true });
+      	}
+      
+    	var token = jwt.sign({ id: user.id }, config.secret, {
+      		expiresIn: 864000 // 24 hours
+    	});
+    	console.log(token)
+    	const url = `http://${req.headers.origin}/user/reset/${token}`
+    	
+    	const mail = {
+      		body: {
+        		email_recipient: req.body.email,
+        		email_subject: `Réinitialisation de mot de passe pour Talenta Sourcing`,
+        		email_content: `Bonjour! :) \n\n Veuillez cliquer sur ce lien pour réinitialiser votre mot de passe : <a href="${url}">${url}</a>`
+      		}
+    	}
+	
+    	sendMail(mail, res, {});
+	
+        res
+          .status(HttpStatus.OK)
+          .send({
+            id: user.id,
+            error: false
+          });
+      });
+};
+exports.checkReset = async (req, res) => {
+  // console.log(req.headers.origin);
+  try {
+    const id = jwt.verify(req.params.token, config.secret);
+    await User.findOne({
+    	where: {
+      		id: id
+    	}
+  	})
+    .then(user => {
+      	if (!user) {
+        	res
+          		.status(HttpStatus.NOT_FOUND)
+          		.send({ 
+          			message: "User Not found.",
+          			error: true })
+      	} else {
+
+        	res
+          		.status(HttpStatus.OK)
+          		.send({
+          			data: user,
+            		error: false
+          		})
+        }
+    })
+    .catch(err => { throw err })
+    
+  } catch (e) {
+    console.log(e);
+    res
+    	.send({
+          		access: "error",
+            	error: true
+          	})
+  }
 };

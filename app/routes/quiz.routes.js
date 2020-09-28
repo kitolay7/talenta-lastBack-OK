@@ -15,15 +15,18 @@ module.exports = function (app) {
   });
   const fileStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-
+      console.log(file);
       if (file.mimetype.includes('video')) {
         cb(null, 'uploads/videos');
       } else if (file.mimetype.includes('image')) {
         cb(null, 'uploads/');
+      }else if (file.mimetype.includes('stream')) {
+        cb(null, 'uploads/audios');
       }
     },
     filename: (req, file, cb) => {
-      cb(null, file.originalname);
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, uniqueSuffix + file.originalname);
     }
   });
   app.post("/quiz", controller.create);
@@ -60,6 +63,7 @@ module.exports = function (app) {
   app.post("/offre/:offreId/postule", offreControler.postuleToOffer);
   app.get("/offre/:offreId/users", offreControler.getUsersByOffer);
   app.get("/offrePostuled/:idUser", offreControler.getOffersByPostulator);
+  app.get("/offreCandidat/:idUser", offreControler.listingOffreCandidat);
   app.get("/offer/:id/quiz/", quizControler.findOneByOffer);
   app.put("/postulation/update", offreControler.updatePostulation);
   app.get("/postulation/users/:userId/offres/:offreId", offreControler.getPostulationById);
@@ -74,4 +78,22 @@ module.exports = function (app) {
   app.get("/users/:userId/offresPublished", offreControler.getOfferByCreatorPublished);
   app.put("/quizzs/state/:id/update", controller.updateQuizStatePublished);
   app.get("/users/:userId/offres", offreControler.getOfferByCreator);
+  app.post("/postulation/users/:userId/offres/:offreId/audio/upload", multer(
+    {
+      storage: fileStorage,
+    }
+  ).fields([{
+    name: 'fileAudio', maxCount: 1
+  }]
+  ),quizControler.uploadMediaAudio);
+  app.post("/postulation/users/:userId/offres/:offreId/responses",multer(
+    {
+      storage: fileStorage,
+    }
+  ).fields([{
+    name: 'fileAudio', maxCount: 1
+  }]
+  ), quizControler.createResponseQuizz);
+  app.get("/postulation/users/:userId/offres/:offreId/responses", quizControler.getResponseTestByPostulation);
+  app.put("/postulation/users/:userId/offres/:offreId/update", quizControler.updateResponseQuizz);
 };
