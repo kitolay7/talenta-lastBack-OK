@@ -663,7 +663,7 @@ exports.getPostulationById = async (req, res) => {
                     },
                     {
                         model: offres,
-                        attributes: ['post', 'publicationDate']
+                        attributes: ['post', 'publicationDate', 'passe']
                     }
                 ]
         })

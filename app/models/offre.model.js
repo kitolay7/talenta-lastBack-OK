@@ -44,7 +44,10 @@ module.exports = (sequelize, Sequelize) => {
         secteur: {
             type: Sequelize.STRING
         },
-        publicationDate:{
+        passe: {
+            type: Sequelize.FLOAT
+        },
+        publicationDate: {
             type: Sequelize.DATE,
             defaultValue: null
         },
