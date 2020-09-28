@@ -15,6 +15,7 @@ const Folder = db.dossier;
 const Op = db.Sequelize.Op;
 const QuizToOffer = db.quiz_to_offer
 exports.createOffre = async (req, res) => {
+    console.log(req.body);
     const offre = {
         titre: req.body.titre,
         description: req.body.description,
