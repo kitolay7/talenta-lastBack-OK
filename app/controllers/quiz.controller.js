@@ -8,7 +8,7 @@ const Reponse = db.reponse;
 const QuizToOffer = db.quiz_to_offer;
 const DossierOffer = db.dossier_offer;
 const Op = db.Sequelize.Op;
-
+const fs = require('fs');
 const HttpStatus = require('http-status-codes');
 const { response } = require("express");
 const options = require("dotenv/lib/env-options");
@@ -714,10 +714,16 @@ exports.getResponseTestByPostulation = async (req,res) => {
 }
 
 exports.createResponseQuizz = async (req,res) => {
+    const transaction_response_quiz = await db.sequelize.transaction();
   try {
-      const transaction_response_quiz = await db.sequelize.transaction();
-      const responses = req.body.listResponseTest;
-    for (let index = 0; index < responses.length; index++) {
+      let responses = JSON.parse(req.body.listResponseTest);
+      for (let index = 0; index < responses.length; index++) {
+        for (let indexFiles = 0; indexFiles < req.files.fileAudio.length; indexFiles++) {
+            if (responses[index].answers === req.files.fileAudio[indexFiles].originalname) {
+                let pathname = req.files.fileAudio[indexFiles].path.split("/");
+                responses[index].answers = pathname.splice(1,2).join("/");
+            }
+        }
         await ResponseTest.create(responses[index],{transaction:transaction_response_quiz})
         .catch(error => {throw error});   
     }
@@ -729,6 +735,7 @@ exports.createResponseQuizz = async (req,res) => {
                 error: false
             })
   } catch (error) {
+    await transaction_response_quiz.rollback();
     console.log(">> Error while finding project: ", error);
       res
           .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -748,7 +755,7 @@ exports.updateResponseQuizz = async(req,res) => {
             })
       })
       .catch(error => {
-
+        throw error;
       })
     } catch (error) {
         console.log(">> Error while finding project: ", error);
@@ -756,4 +763,15 @@ exports.updateResponseQuizz = async(req,res) => {
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .send({ message: error.message, error: true });
     }
+}
+
+exports.uploadMediaAudio = (req, res) => {
+  try {
+    console.log(req.files);    
+  } catch (error) {
+    console.log(">> Error while finding project: ", error);
+        res
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .send({ message: error.message, error: true });
+  }
 }
