@@ -733,3 +733,30 @@ exports.updateOffreDossier = async (req, res) => {
 
 };
 
+exports.getLastBlobLogo = async (req,res) => {
+    try {        
+        await db.blob.findOne({
+            order: [['id', 'DESC']],
+            attributes:['path'],
+            include:[
+                {
+                    model: db.offre,
+                    as:'offre',
+                    where:{userId:req.params.userId},
+                    attributes:['userId']
+                }
+            ]
+        })
+        .then(blob => {
+            res
+            .status(HttpStatus.OK)
+            .send({ data: blob, error: false });
+        })
+        .catch(error => {throw error})
+    } catch (error) {
+        console.log(error);
+        res
+            .status(HttpStatus.NOT_FOUND)
+            .send({ message: error, error: true });
+    }
+}
