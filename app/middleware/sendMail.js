@@ -4,7 +4,7 @@ const { resolve } = require("path");
 require('dotenv/config');
 exports.sendMail = (req, res, next) => {
 	
-  console.log(req);
+  //console.log(req);
   try {
 
     const transporter = nodemailer.createTransport({
@@ -36,10 +36,13 @@ exports.sendMail = (req, res, next) => {
     });
   
     let mail = {
-      from: process.env.FROM_EMAIL,
+      from: req.body.email_sender ? req.body.email_sender : process.env.FROM_EMAIL,
       to: req.body.email_recipient,
       subject: req.body.email_subject,
-      html: req.body.email_content
+      html: req.body.email_content,
+      attachements: {
+      	path: (req.body.email_attachement ? req.body.email_attachement : '')
+      }
     };
   
     transporter.sendMail(mail, (error, response) => {

@@ -66,7 +66,14 @@ exports.register = async (req, res) => {
       body: {
         email_recipient: req.body.email,
         email_subject: `Confirmation d'adresse email pour Talenta Sourcing`,
-        email_content: `Bonjour! :) \n\n Veuillez cliquer sur ce lien pour valider votre adresse mail et votre compte : <a href="${url}">${url}</a>`
+        email_content: `Bonjour! :) 
+        <br>
+        <br>Veuillez cliquer sur ce lien pour valider votre adresse mail et votre compte : <a href="${url}">${url}</a>
+        <br>
+        <br>  
+        L'équipe Talenta vous remercie de votre confiance. 
+        <br>
+        	***************************************************************************************************`
       }
     }
 
@@ -195,7 +202,7 @@ exports.updateProfile = async (req, res) => {
       codePostal: req.body.codePostal,
       societe: req.body.societe,
       userId: await id
-    }, { where: { id: id } });;
+    }, { where: { id: id } });
     res
       .send({
         message: "successfully update",
@@ -211,17 +218,18 @@ exports.updateProfile = async (req, res) => {
 
 };
 
-exports.confirm = async (req, res) => {
-  console.log(req.params.token);
-	const path = (req.params.role === 1) ? 'recruteur/registration' : 'candidat/registration'
-  try {
-    const id = jwt.verify(req.params.token, config.secret);
-    await User.update({ confirmed: true }, { where: { id: id } });
-  } catch (e) {
-    console.log(e);
-    res.send('Error')
-  }
-  	return res.redirect('/' + path);
+exports.confirm = (req, res) => {
+  const id = jwt.verify(req.params.token, config.secret);
+  User.update({ confirmed: true }, { where: { id: id.id } })
+  .then(resultat => {
+     if (req.params.role === 1) {
+   return res.redirect('http://localhost:4200/candidat/registration');
+ } else {
+   return res.redirect('http://localhost:4200/recruteur/registration');
+ }
+  }).catch(err => { throw err });
+
+
 };
 
 exports.editPW = (req, res) => {
@@ -272,13 +280,20 @@ exports.forgotPW = (req, res) => {
       		expiresIn: 864000 // 24 hours
     	});
     	console.log(token)
-    	const url = `http://${req.headers.host}/reset/${token}`
+    	const url = `${req.headers.origin}/user/reset/${token}`
     	
     	const mail = {
       		body: {
         		email_recipient: req.body.email,
         		email_subject: `Réinitialisation de mot de passe pour Talenta Sourcing`,
-        		email_content: `Bonjour! :) \n\n Veuillez cliquer sur ce lien pour réinitialiser votre mot de passe : <a href="${url}">${url}</a>`
+        		email_content: `Bonjour! :) 
+        		<br>
+        		<br>Veuillez cliquer sur ce lien pour réinitialiser votre mot de passe : <a href="${url}">${url}</a>
+        		<br>
+        		<br>  
+        		L'équipe Talenta vous remercie de votre confiance. 
+        		<br>
+        	***************************************************************************************************`
       		}
     	}
 	
@@ -293,36 +308,61 @@ exports.forgotPW = (req, res) => {
       });
 };
 exports.checkReset = async (req, res) => {
-  console.log(req.params.token);
+  // console.log(req.headers.origin);
   try {
     const id = jwt.verify(req.params.token, config.secret);
+  	//console.log(id);
     await User.findOne({
     	where: {
-      		id: id
+      		id: id.id
     	}
   	})
     .then(user => {
       	if (!user) {
-        	return res
-          	.status(HttpStatus.NOT_FOUND)
-          	.send({ 
-          		message: "User Not found.",
-          		access: "error",
-          		error: true });
-      	}
+        	res
+          		.status(HttpStatus.NOT_FOUND)
+          		.send({ 
+          			message: "User Not found.",
+          			error: true })
+      	} else {
 
-        res
-          .status(HttpStatus.OK)
-          .send({
-          	data: user,
-          	access: "ok",
-            error: false
-          });
-      });
+        	res
+          		.status(HttpStatus.OK)
+          		.send({
+          			data: user,
+            		error: false
+          		})
+        }
+    })
+    .catch(err => { throw err })
     
   } catch (e) {
     console.log(e);
-    res.send('Error')
+    res
+    	.send({
+          		access: "error",
+            	error: true
+          	})
   }
-  	return res.redirect('/user/reset');
+};
+exports.contact = (req, res) => {
+  	console.log(`\n\n\n${req.body}\n\n\n`);
+    
+    const mail = {
+      	body: {
+        	email_sender: req.body.email,
+        	email_recipient: 'jenny.chris.0123@gmail.com',
+        	email_subject: req.body.objet,
+        	email_content: req.body.message
+      	}
+    }
+
+    sendMail(mail, res, {});
+
+    res
+        .status(HttpStatus.OK)
+        .send({
+        id: user.id,
+        error: false
+        });
 };

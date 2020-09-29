@@ -4,6 +4,7 @@ const io = require("socket.io-client");
 
 const fs = require('fs');
 const { error, count } = require("console");
+const { sendMail } = require("../middleware");
 
 const Spontaneous = db.spontaneous;
 const Competence = db.competence;
@@ -27,10 +28,79 @@ exports.createSpontaneous = async (req, res) => {
       actualCity: req.body.actualCity,
       secteur: req.body.secteur,
     };
+    console.log(spontaneous)
+    
+    
+    const mail = {
+      body: {
+        email_recipient: req.body.email,
+        email_subject: `Dossier de Candidature spontanée déposé - Talenta Sourcing`,
+        email_content: `Bonjour! :) 
+        	<br>
+        	<br> 
+        	Talenta a bien enregistré votre candidature spontanée et prend en charge son orientation suivant les informations communiquées. 
+        	<br>
+        	<br>  
+        	L'équipe Talenta vous remercie de votre confiance. 
+        	<br>
+        	***************************************************************************************************`
+      }
+    }
+    
+	const getCompetences = () => {
+		let allCompetences = '';
+		JSON.parse(req.body.competence).forEach((competence) => {
+        	allCompetences += `${competence}, ` });
+        return allCompetences
+	}
+	const getEducations = () => {
+		let allEducations = '';
+		let titre = '';
+		let specialisation = '';
+		let diplome = '';
+		let debut = '';
+		let fin = '';
+		JSON.parse(req.body.education).forEach((education) => {
+        	titre = education.titre;
+        	specialisation = education.specialisation;
+        	diplome = education.diplome;
+        	debut = education.startDate; 
+        	fin = education.endDate;
+        	allEducations += `<strong>Titre</strong> : ${titre},<br> 
+        		<strong>Specialisation</strong> : ${specialisation},<br>
+        		<strong>Diplome</strong> : ${diplome},<br>
+        		<strong>Debut</strong> : ${debut},
+        		<strong>Fin</strong> : ${fin};<br>
+        		<br>`;
+        });
+        return allEducations
+	}
+	const getProfessions = () => {
+		let allProfessions = '';
+		let titre = '';
+		let nomSociete = '';
+		let resume = '';
+		let debut = '';
+		let fin = '';
+		JSON.parse(req.body.profession).forEach((profession) => {
+        	titre = profession.titre;
+        	nomSociete = profession.nomSociete;
+        	resume = profession.resume;
+        	debut = profession.startDate; 
+        	fin = profession.endDate;
+        	allProfessions += `<strong>Titre</strong> : ${titre},<br> 
+        		<strong>Nom de la société</strong> : ${nomSociete},<br>
+        		<strong>Résumé</strong> : ${resume},<br>
+        		<strong>Debut</strong> : ${debut},
+        		<strong>Fin</strong> : ${fin};<br>
+        		<br>`;
+        });
+        return allProfessions
+	}
+    
     
     
     // Creation Data
-    console.log(spontaneous)
     const generateData = (req) => {
         const competences = (req) => {
             let competences = [];
@@ -104,6 +174,40 @@ exports.createSpontaneous = async (req, res) => {
         await Profession.bulkCreate(bulkMerge(professions(req), { spontaneousId: current_spontaneous.id }), { returning: true, transaction: transaction_spontaneous })
         blobFile && await db.blobscv.create({ ...blobFile, ...{ spontaneousId: current_spontaneous.id } }, { transaction: transaction_spontaneous });
         await transaction_spontaneous.commit();
+        
+        // Send Mail to the Candidat
+        sendMail(mail, res, {});
+        
+        // Send Mail to the Talenta responsible
+    	const url = `http://${req.headers.host}/cv/${req.files.cv[0].originalname}`
+    	const infos = {
+      		body: {
+        		email_recipient: 'rakotoni.d@gmail.com',
+        		email_subject: `Nouveau dossier de candidature spontanée - Talenta Sourcing`,
+        		email_attachement: `${url}`,
+        		email_content: `Nouveau dossier de candidature spontanée! <br>
+        			<br> <u>Nom </u>: ${spontaneous.firstName},
+        			<br> <u>Prénoms </u>: ${spontaneous.lastName},
+        			<br> <u>Email </u>: ${spontaneous.email},
+        			<br> <u>Numero de téléphone </u>: ${spontaneous.numTel},
+        			<br> <u>Id Skype </u>: ${spontaneous.idSkype},
+        			<br> <u>Id Whatsapp </u>: ${spontaneous.idWhatsapp},
+        			<br> <u>Voyage hors du pays d'origine </u>: ${spontaneous.originCountry ? 'Oui' : 'Non'},
+        			<br> <u>Pays actuel </u>: ${spontaneous.actualCountry},
+        			<br> <u>Ville actuel </u>: ${spontaneous.actualCity},
+        			<br> <u>Secteur </u>: ${spontaneous.secteur},
+        			<br> <u>Compétences </u>: ${getCompetences()},
+        			<br> <u>Educations </u>: <br> ${getEducations()},
+        			<br> <u>Professions </u>: <br> ${getProfessions()},
+        			<br> <u>CV importé </u>: <a href="${url}">${req.files.cv[0].originalname}</a>
+        			<br>
+        			<br>
+        			***************************************************************************************************`
+      		}
+    	}
+    	
+    	sendMail(infos, res, {});
+    
         res
             .send({
                 message: "successfully created",
