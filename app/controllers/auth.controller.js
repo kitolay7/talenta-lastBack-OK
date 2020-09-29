@@ -66,7 +66,14 @@ exports.register = async (req, res) => {
       body: {
         email_recipient: req.body.email,
         email_subject: `Confirmation d'adresse email pour Talenta Sourcing`,
-        email_content: `Bonjour! :) \n\n Veuillez cliquer sur ce lien pour valider votre adresse mail et votre compte : <a href="${url}">${url}</a>`
+        email_content: `Bonjour! :) 
+        <br>
+        <br>Veuillez cliquer sur ce lien pour valider votre adresse mail et votre compte : <a href="${url}">${url}</a>
+        <br>
+        <br>  
+        L'équipe Talenta vous remercie de votre confiance. 
+        <br>
+        	***************************************************************************************************`
       }
     }
 
@@ -273,13 +280,20 @@ exports.forgotPW = (req, res) => {
       		expiresIn: 864000 // 24 hours
     	});
     	console.log(token)
-    	const url = `http://${req.headers.origin}/user/reset/${token}`
+    	const url = `${req.headers.origin}/user/reset/${token}`
     	
     	const mail = {
       		body: {
         		email_recipient: req.body.email,
         		email_subject: `Réinitialisation de mot de passe pour Talenta Sourcing`,
-        		email_content: `Bonjour! :) \n\n Veuillez cliquer sur ce lien pour réinitialiser votre mot de passe : <a href="${url}">${url}</a>`
+        		email_content: `Bonjour! :) 
+        		<br>
+        		<br>Veuillez cliquer sur ce lien pour réinitialiser votre mot de passe : <a href="${url}">${url}</a>
+        		<br>
+        		<br>  
+        		L'équipe Talenta vous remercie de votre confiance. 
+        		<br>
+        	***************************************************************************************************`
       		}
     	}
 	
@@ -297,9 +311,10 @@ exports.checkReset = async (req, res) => {
   // console.log(req.headers.origin);
   try {
     const id = jwt.verify(req.params.token, config.secret);
+  	//console.log(id);
     await User.findOne({
     	where: {
-      		id: id
+      		id: id.id
     	}
   	})
     .then(user => {

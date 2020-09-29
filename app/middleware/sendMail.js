@@ -4,7 +4,7 @@ const { resolve } = require("path");
 require('dotenv/config');
 exports.sendMail = (req, res, next) => {
 	
-  console.log(req);
+  //console.log(req);
   try {
 
     const transporter = nodemailer.createTransport({

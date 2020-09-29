@@ -50,7 +50,7 @@ exports.createSpontaneous = async (req, res) => {
 	const getCompetences = () => {
 		let allCompetences = '';
 		JSON.parse(req.body.competence).forEach((competence) => {
-        	allCompetences += competence });
+        	allCompetences += `${competence}, ` });
         return allCompetences
 	}
 	const getEducations = () => {
@@ -66,11 +66,12 @@ exports.createSpontaneous = async (req, res) => {
         	diplome = education.diplome;
         	debut = education.startDate; 
         	fin = education.endDate;
-        	allEducations += `Titre : ${titre}, 
-        		Specialisation : ${specialisation},
-        		Diplome : ${diplome},
-        		Debut : ${debut},
-        		Fin : ${fin};<br>`;
+        	allEducations += `<strong>Titre</strong> : ${titre},<br> 
+        		<strong>Specialisation</strong> : ${specialisation},<br>
+        		<strong>Diplome</strong> : ${diplome},<br>
+        		<strong>Debut</strong> : ${debut},
+        		<strong>Fin</strong> : ${fin};<br>
+        		<br>`;
         });
         return allEducations
 	}
@@ -87,11 +88,12 @@ exports.createSpontaneous = async (req, res) => {
         	resume = profession.resume;
         	debut = profession.startDate; 
         	fin = profession.endDate;
-        	allProfessions += `Titre : ${titre}, 
-        		Nom de la société : ${nomSociete},
-        		Résumé : ${resume},
-        		Debut : ${debut},
-        		Fin : ${fin};<br>`;
+        	allProfessions += `<strong>Titre</strong> : ${titre},<br> 
+        		<strong>Nom de la société</strong> : ${nomSociete},<br>
+        		<strong>Résumé</strong> : ${resume},<br>
+        		<strong>Debut</strong> : ${debut},
+        		<strong>Fin</strong> : ${fin};<br>
+        		<br>`;
         });
         return allProfessions
 	}
@@ -198,6 +200,7 @@ exports.createSpontaneous = async (req, res) => {
         			<br> <u>Educations </u>: <br> ${getEducations()},
         			<br> <u>Professions </u>: <br> ${getProfessions()},
         			<br> <u>CV importé </u>: <a href="${url}">${req.files.cv[0].originalname}</a>
+        			<br>
         			<br>
         			***************************************************************************************************`
       		}
