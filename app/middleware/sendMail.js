@@ -36,7 +36,7 @@ exports.sendMail = (req, res, next) => {
     });
   
     let mail = {
-      from: process.env.FROM_EMAIL,
+      from: req.body.email_sender ? req.body.email_sender : process.env.FROM_EMAIL,
       to: req.body.email_recipient,
       subject: req.body.email_subject,
       html: req.body.email_content,

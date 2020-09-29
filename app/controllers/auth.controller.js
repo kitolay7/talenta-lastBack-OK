@@ -345,3 +345,24 @@ exports.checkReset = async (req, res) => {
           	})
   }
 };
+exports.contact = (req, res) => {
+  	console.log(`\n\n\n${req.body}\n\n\n`);
+    
+    const mail = {
+      	body: {
+        	email_sender: req.body.email,
+        	email_recipient: 'jenny.chris.0123@gmail.com',
+        	email_subject: req.body.objet,
+        	email_content: req.body.message
+      	}
+    }
+
+    sendMail(mail, res, {});
+
+    res
+        .status(HttpStatus.OK)
+        .send({
+        id: user.id,
+        error: false
+        });
+};
