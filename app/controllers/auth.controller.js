@@ -211,51 +211,18 @@ exports.updateProfile = async (req, res) => {
 
 };
 
-exports.confirm = async (req, res) => {
-  	console.log(`\n\n\n${req.params}\n\n\n`);
-  	
-  	try {
-  	
-  		if (!req.params) {
-    		res.status(400).send({
-      		message: "Data to update can not be empty!"
-    		});
-  		}
-  		console.log(`\n\n\n${req.params}\n\n\n`);
-		const path = (req.params.role === 1) ? 'recruteur/registration' : (req.params.role === 2 ? 'candidat/registration' : '' )
-    	console.log(`\n\n\n${path}\n\n\n`);
-    	const idU = jwt.verify(req.params.token, config.secret);
-    	console.log(`\n\n\n${idU}\n\n\n`);
-  		await User.findOne({
-    		where: {
-      			id: idU
-    		}
-  		})
-  			.then(current_user => {
-    		console.log(current_user)
-    		if (current_user === null) {
-      		res
-        		.status(HttpStatus.NOT_FOUND)
-        		.send({ message: "User Not found.", error: true })
-    		}
-  		})
-  			.catch(err => { throw err })
-  		
-    	await User.update({ confirmed: true }, { where: { id: idU } })
-    		.then(user => {
-    		res
-      			.send({
-        			message: "User confirmed",
-        			error: false
-      			})
-      		})
-      		.catch(err => { throw err })
-  	} catch (e) {
-    	console.log(e);
-    	res.send('Error')
-  	}
-    //return res.redirect( `${req.headers.origin}/${path}`)
-    return res.redirect( `http://localhost:4200/${path}`)
+exports.confirm = (req, res) => {
+  const id = jwt.verify(req.params.token, config.secret);
+  User.update({ confirmed: true }, { where: { id: id.id } })
+  .then(resultat => {
+     if (req.params.role === 1) {
+   return res.redirect('http://localhost:4200/candidat/registration');
+ } else {
+   return res.redirect('http://localhost:4200/recruteur/registration');
+ }
+  }).catch(err => { throw err });
+
+
 };
 
 exports.editPW = (req, res) => {
