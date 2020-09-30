@@ -224,9 +224,9 @@ exports.confirm = (req, res) => {
   User.update({ confirmed: true }, { where: { id: id.id } })
   .then(resultat => {
      if (req.params.role === 1) {
-   return res.redirect('http://localhost:4200/candidat/registration');
+   return res.redirect('http://154.126.92.194:4200/candidat/registration');
  } else {
-   return res.redirect('http://localhost:4200/recruteur/registration');
+   return res.redirect('http://154.126.92.194:4200/recruteur/registration');
  }
   }).catch(err => { throw err });
 
