@@ -11,6 +11,7 @@ const Op = db.Sequelize.Op;
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 const { profile, user, role } = require("../models");
+require('dotenv/config');
 
 // Save User to Database
 exports.register = async (req, res) => {
@@ -111,7 +112,7 @@ exports.signin = (req, res) => {
       if (!user) {
         return res
           .status(HttpStatus.NOT_FOUND)
-          .send({ message: "User Not found.", error: true });
+          .send({ message: "Utilisateur non trouvé.", error: true });
       }
 
       var passwordIsValid = bcrypt.compareSync(
@@ -123,7 +124,7 @@ exports.signin = (req, res) => {
         return res
           .send({
             accessToken: null,
-            message: "Invalid Password!",
+            message: "Mot de passe invalide!",
             error: HttpStatus.UNAUTHORIZED
           });
       }
@@ -345,24 +346,62 @@ exports.checkReset = async (req, res) => {
           	})
   }
 };
-exports.contact = (req, res) => {
-  	console.log(`\n\n\n${req.body}\n\n\n`);
+exports.contact = async (req, res) => {
+  	//console.log(`\n\n\n${req}\n\n\n`);
     
     const mail = {
       	body: {
-        	email_sender: req.body.email,
-        	email_recipient: 'jenny.chris.0123@gmail.com',
-        	email_subject: req.body.objet,
-        	email_content: req.body.message
+        	email_recipient: process.env.FROM_EMAIL,
+        	email_subject: `Talenta Sourcing - Message vennant d'un client`,
+        	email_content: `Message vennant de ${req.body.nom} - (${req.body.email})
+        		<br>
+        		<br>
+        		<br>
+        		<u>Objet </u>: ${req.body.objet}
+        		<br>
+        		<br> 
+        		${req.body.message}
+        		<br> 
+        		<br> 
+        		
+        	***************************************************************************************************`
       	}
     }
-
-    sendMail(mail, res, {});
-
-    res
-        .status(HttpStatus.OK)
-        .send({
-        id: user.id,
-        error: false
-        });
+    //console.log(`\n\n\n${mail}\n\n\n`);
+    const reponse = {
+      	body: {        	
+        	email_recipient: req.body.email,
+        	email_subject: `Talenta Sourcing - Réponse à votre message`,
+        	email_content: `Bonjour! 
+        		<br>
+        		Talenta Sourcing a bien reçu votre message. Nous vous contacterons ultérieurement le plus vite possible. 
+        		<br> 
+        		N'hésitez pas à nous contacter via notre adresse email ou au numero 030 00 000 00 si vous avez d'autres recommandations.
+        		<br> 
+        		<br>  
+        		L'équipe Talenta vous remercie de votre confiance. 
+        		<br>
+        		<br> 
+        	***************************************************************************************************`
+      	}
+    }
+    //console.log(`\n\n\n${reponse}\n\n\n`);
+    try {
+	
+    	await sendMail(mail, res, {});
+    	await sendMail(reponse, res, {});
+	
+    	res
+        	.status(HttpStatus.OK)
+        	.send({
+        		error: false
+        	});
+    } catch (e) {
+    	console.log(e);
+    	res
+    		.send({
+          			access: "error",
+            		error: true
+          		})
+    }
 };

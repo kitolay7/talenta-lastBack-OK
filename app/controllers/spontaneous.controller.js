@@ -11,6 +11,7 @@ const Competence = db.competence;
 const Education = db.education;
 const Profession = db.profession;
 const Op = db.Sequelize.Op;
+require('dotenv/config');
 
 exports.createSpontaneous = async (req, res) => {
 	
@@ -182,7 +183,7 @@ exports.createSpontaneous = async (req, res) => {
     	const url = `http://${req.headers.host}/cv/${req.files.cv[0].originalname}`
     	const infos = {
       		body: {
-        		email_recipient: 'rakotoni.d@gmail.com',
+        		email_recipient: process.env.ADMIN_EMAIL,
         		email_subject: `Nouveau dossier de candidature spontanée - Talenta Sourcing`,
         		email_attachement: `${url}`,
         		email_content: `Nouveau dossier de candidature spontanée! <br>
