@@ -100,4 +100,5 @@ module.exports = function (app) {
   ), quizControler.createResponseQuizz);
   app.get("/postulation/users/:userId/offres/:offreId/responses", quizControler.getResponseTestByPostulation);
   app.put("/postulation/users/:userId/offres/:offreId/update", quizControler.updateResponseQuizz);
+  app.get("/users/:userId/lastLogo", offreControler.getLastBlobLogo);
 };

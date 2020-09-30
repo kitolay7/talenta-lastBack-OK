@@ -69,6 +69,7 @@ db.question.hasMany(db.criteria_point_question, {foreignKey: "questionId", onDel
 db.question.hasMany(db.response_test,{foreignKey:"questionId"});
 
 db.offre.hasMany(db.blob, {
+  onDelete:"CASCADE",
   foreignKey: "OffreId"
 });
 
@@ -115,7 +116,7 @@ db.quiz_to_offer.belongsTo(db.offre);
 db.dossier_offer.belongsTo(db.dossier);
 db.dossier_offer.belongsTo(db.offre);
 
-db.blob.belongsTo(db.offre, { foreignKey: "OffreId", });
+db.blob.belongsTo(db.offre, {as:'offre', foreignKey: "OffreId", });
 db.type_blob.hasMany(db.blob, {
   foreignKey: "TypeBlobId"
 });
