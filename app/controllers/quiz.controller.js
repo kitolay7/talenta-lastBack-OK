@@ -683,7 +683,15 @@ exports.getResponseTestByPostulation = async (req,res) => {
             include:[
                 {
                     model:db.question,
-                    include:[{model:db.quiz},{model:db.type_question,attributes:["wording"]}]
+                    // where:{TypeQuestionId:{[Op.gt]: 3}},
+                    include:[
+                        {
+                            model:db.criteria_point_question,
+                            include:[{model:db.details_note}]
+                        },
+                        {model:db.quiz},
+                        {model:db.type_question,attributes:["id","wording"]}
+                    ],
                 },
                 {
                     model:db.user,
@@ -694,7 +702,11 @@ exports.getResponseTestByPostulation = async (req,res) => {
                             attributes:["firstName","lastName"]
                         }
                     ]
-                }
+                },
+                {
+                    model:db.details_note,
+                    include:[{model:db.criteria_point_question}]
+                },
             ]
         })
         .then(response => {
@@ -717,19 +729,32 @@ exports.createResponseQuizz = async (req,res) => {
     const transaction_response_quiz = await db.sequelize.transaction();
   try {
       let responses = JSON.parse(req.body.listResponseTest);
+      console.log(req.body.listResponseTest);
       for (let index = 0; index < responses.length; index++) {
         for (let indexFiles = 0; indexFiles < req.files.fileAudio.length; indexFiles++) {
-            if (responses[index].answers === req.files.fileAudio[indexFiles].originalname) {
+            if (req.files.fileAudio && responses[index].answers === req.files.fileAudio[indexFiles].originalname) {
                 let pathname = req.files.fileAudio[indexFiles].path.split("/");
                 responses[index].answers = pathname.splice(1,2).join("/");
             }
-            if (responses[index].answers === req.files.fileVideo[indexFiles].originalname) {
+            if (req.files.fileVideo && responses[index].answers === req.files.fileVideo[indexFiles].originalname) {
                 let pathname = req.files.fileVideo[indexFiles].path.split("/");
                 responses[index].answers = pathname.splice(1,2).join("/");
             }
         }
-        await ResponseTest.create(responses[index],{transaction:transaction_response_quiz})
-        .catch(error => {throw error});   
+        const responseTest = await ResponseTest.create(responses[index],{transaction:transaction_response_quiz})
+        .then(responseTest =>{ return responseTest})
+        .catch(error => {throw error});
+
+        const criteres = await Question.findOne({where:{id:responseTest.questionId}, include:[{model:CriteriaPointQuestion}]})
+        .then(question => {
+            return question.criteria_point_questions;
+        })
+        .catch(error => { throw error});
+        for (let index = 0; index < criteres.length; index++) {
+            console.log(`(${await criteres[index].id},${await responseTest.id})`);
+            await db.details_note.create({critereId:await criteres[index].id, responseTestId:await responseTest.id},{transaction:transaction_response_quiz})
+            .catch(error => { throw error });
+        }
     }
     await transaction_response_quiz.commit();
         res
@@ -749,7 +774,7 @@ exports.createResponseQuizz = async (req,res) => {
 
 exports.updateResponseQuizz = async(req,res) => {
     try {
-      await ResponseTest.update({pointWin:req.body.pointWin},{where:{[Op.and]:[{offreId:req.params.offreId},{userId:req.params.userId}]}})
+      await ResponseTest.update({pointWin:req.body.pointWin},{where:{[Op.and]:[{offreId:req.params.offreId},{userId:req.params.userId},{id:req.body.id}]}})
       .then(() => {
         res
             .status(HttpStatus.OK)
@@ -778,4 +803,45 @@ exports.uploadMediaAudio = (req, res) => {
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .send({ message: error.message, error: true });
   }
+}
+
+exports.updateResponsePostulationMultiple = async (req, res) => {
+    const transaction_update_response_quiz = await db.sequelize.transaction();
+    let resultNote = 0;
+    try {
+    //   console.log(req.body.responseToUpdate);  
+      const responseToUpdate = req.body.responseToUpdate;
+      for (let indexResponse = 0; indexResponse < responseToUpdate.length; indexResponse++) {
+        for (let indexDetailsNote = 0; indexDetailsNote < responseToUpdate[indexResponse].details_notes.length; indexDetailsNote++) {
+           await db.details_note.update(responseToUpdate[indexResponse].details_notes[indexDetailsNote],{where:{id:responseToUpdate[indexResponse].details_notes[indexDetailsNote].id}},{transaction:transaction_update_response_quiz}).catch(error => {throw error;});
+           resultNote += parseInt(responseToUpdate[indexResponse].details_notes[indexDetailsNote].note);
+        }
+      }
+      const postulation_note = await db.postulation.findOne({where:{[Op.and]:[{offreId:responseToUpdate[0].offreId},{userId:responseToUpdate[0].userId}]}})
+      .then(postulation => {return postulation.note})
+      .catch(error => {throw error});
+      console.log(postulation_note);
+      resultNote+=parseInt(postulation_note);
+      await db.postulation.update({note:resultNote, offreId:responseToUpdate[0].offreId,userId:responseToUpdate[0].userId},{where:{[Op.and]:[{offreId:responseToUpdate[0].offreId},{userId:responseToUpdate[0].userId}]}}, {transaction: transaction_update_response_quiz}).catch(error => {throw error});
+    //   for (let index = 0; index < responseToUpdate.length; index++) {
+    //     await ResponseTest.update({pointWin:responseToUpdate[index].pointWin},{where:{id:responseToUpdate[index].id}})
+    //     .catch(error => {
+    //         throw error;
+    //     });
+    //   }
+    console.log(`\nNOTE:${resultNote}\n`);
+      await transaction_update_response_quiz.commit();
+        res
+            .status(HttpStatus.CREATED)
+            .send({
+                message: "responses are successfull updated",
+                error: false
+            })
+    } catch (error) {
+        await transaction_update_response_quiz.rollback();
+        console.log(">> Error while finding project: ", error);
+        res
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .send({ message: error.message, error: true });
+    }
 }
