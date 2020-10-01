@@ -167,29 +167,29 @@ exports.signin = (req, res) => {
 
 // Update Profile to Database
 exports.updateProfile = async (req, res) => {
-  console.log(req + 'azearzetzeraert')
+  console.log(req.body + 'azearzetzeraert')
   if (!req.body) {
     return res.status(400).send({
       message: "Data to update can not be empty!"
     });
   }
 
-  Profile.findOne({
-    where: {
-      id: req.body.userId
-    }
-  }).then(current_user => {
-    console.log(current_user)
-    if (current_user === null) {
-      return res
-        .status(HttpStatus.NOT_FOUND)
-        .send({ message: "User Not found.", error: true });
-    }
-  })
-
-  const id = req.body.userId;
   try {
-    Profile.update({
+  	await User.findOne({
+    	where: {
+      		id: req.body.userId
+    	}
+  	}).then(current_user => {
+    	console.log(current_user)
+    	if (current_user === null) {
+      	return res
+        	.status(HttpStatus.NOT_FOUND)
+        	.send({ message: "User Not found.", error: true });
+    	}
+  	})
+
+  	const id = req.body.userId;
+    await Profile.update({
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       numTel: req.body.numTel,
@@ -203,7 +203,7 @@ exports.updateProfile = async (req, res) => {
       codePostal: req.body.codePostal,
       societe: req.body.societe,
       userId: await id
-    }, { where: { id: id } });
+    }, { where: { userId: id } })
     res
       .send({
         message: "successfully update",
