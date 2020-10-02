@@ -202,6 +202,7 @@ db.response_test.belongsTo(db.user, {
 });
 db.response_test.hasMany(db.details_note, {
   foreignKey:"responseTestId",
+  onDelete:"CASCADE"
 });
 db.details_note.belongsTo(db.criteria_point_question,{
   foreignKey:"critereId",
