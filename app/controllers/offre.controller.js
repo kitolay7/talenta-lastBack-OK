@@ -30,12 +30,13 @@ exports.createOffre = async (req, res) => {
         secteur: req.body.secteur,
         userId: req.body.userId,
         dossier: req.body.dossier,
-        publicationDate: req.body.publicationDate
+        publicationDate: req.body.publicationDate,
+        passe: req.body.passe
         // logo: req.files.logo[0].filename,
         // video: req.files.video[0].filename,
     };
     // Creation Blob
-    console.log(offre)
+    // console.log(offre)
     const generateBlob = (req) => {
         const blobLogo = (req.files.logo && req.files.logo[0]) ? {
             path: req.files.logo[0].originalname,
@@ -96,6 +97,8 @@ exports.createOffre = async (req, res) => {
 
     try {
         // OFFRE CREATION
+        // offre.passe = await parseFloat(offre.passe);
+        // console.log(offre);
         const current_offer = await offres.create(offre, { transaction: transaction_offer });
         blobLogo && await db.blob.create({ ...blobLogo, ...{ OffreId: current_offer.id } }, { transaction: transaction_offer });
         blobVideo && await db.blob.create({ ...blobVideo, ...{ OffreId: current_offer.id } }, { transaction: transaction_offer });
@@ -519,7 +522,7 @@ exports.getUsersByOffer = async (req, res) => {
                     },
                     {
                         model: offres,
-                        attributes: ['post', 'titre', 'publicationDate']
+                        attributes: ['post', 'titre', 'publicationDate', 'passe']
                     }
                 ]
         })
@@ -733,3 +736,30 @@ exports.updateOffreDossier = async (req, res) => {
 
 };
 
+exports.getLastBlobLogo = async (req,res) => {
+    try {        
+        await db.blob.findOne({
+            order: [['id', 'DESC']],
+            attributes:['path'],
+            include:[
+                {
+                    model: db.offre,
+                    as:'offre',
+                    where:{userId:req.params.userId},
+                    attributes:['userId']
+                }
+            ]
+        })
+        .then(blob => {
+            res
+            .status(HttpStatus.OK)
+            .send({ data: blob, error: false });
+        })
+        .catch(error => {throw error})
+    } catch (error) {
+        console.log(error);
+        res
+            .status(HttpStatus.NOT_FOUND)
+            .send({ message: error, error: true });
+    }
+}

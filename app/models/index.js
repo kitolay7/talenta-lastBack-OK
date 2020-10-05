@@ -45,6 +45,7 @@ db.competence = require("../models/competence.model.js")(sequelize, Sequelize);
 db.dossier_offer = require("../models/dossier_offer.model.js")(sequelize, Sequelize);
 db.blobscv = require("../models/blobCV.model.js")(sequelize, Sequelize);
 db.response_test = require("../models/response_test.model.js")(sequelize, Sequelize);
+db.details_note = require("../models/details_note.model.js")(sequelize, Sequelize);
 
 db.quiz.belongsTo(db.user, {
   through: db.offre
@@ -69,6 +70,7 @@ db.question.hasMany(db.criteria_point_question, {foreignKey: "questionId", onDel
 db.question.hasMany(db.response_test,{foreignKey:"questionId"});
 
 db.offre.hasMany(db.blob, {
+  onDelete:"CASCADE",
   foreignKey: "OffreId"
 });
 
@@ -115,7 +117,7 @@ db.quiz_to_offer.belongsTo(db.offre);
 db.dossier_offer.belongsTo(db.dossier);
 db.dossier_offer.belongsTo(db.offre);
 
-db.blob.belongsTo(db.offre, { foreignKey: "OffreId", });
+db.blob.belongsTo(db.offre, {as:'offre', foreignKey: "OffreId", });
 db.type_blob.hasMany(db.blob, {
   foreignKey: "TypeBlobId"
 });
@@ -157,6 +159,7 @@ db.profile.belongsTo(db.user, {foreignKey: "userId"});
 
 db.type_question.hasMany(db.question,{foreignKey: "TypeQuestionId"});
 db.criteria_point_question.belongsTo(db.question, {foreignKey: "questionId"});
+db.criteria_point_question.hasOne(db.details_note, {foreignKey: "critereId",onDelete:"CASCADE"});
 
 db.competence.belongsTo(db.spontaneous, { foreignKey: "spontaneousId", });
 db.education.belongsTo(db.spontaneous, { foreignKey: "spontaneousId", });
@@ -196,8 +199,17 @@ db.response_test.belongsTo(db.offre, {
 db.response_test.belongsTo(db.user, {
   through:db.postulation,
   foreignKey:"userId",
+});
+db.response_test.hasMany(db.details_note, {
+  foreignKey:"responseTestId",
+  onDelete:"CASCADE"
+});
+db.details_note.belongsTo(db.criteria_point_question,{
+  foreignKey:"critereId",
 })
-
+db.details_note.belongsTo(db.response_test,{
+  foreignKey:"responseTestId",
+})
 db.ROLES = ["candidat", "admin", "recruteur"];
 
 module.exports = db;

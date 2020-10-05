@@ -66,7 +66,14 @@ exports.register = async (req, res) => {
       body: {
         email_recipient: req.body.email,
         email_subject: `Confirmation d'adresse email pour Talenta Sourcing`,
-        email_content: `Bonjour! :) \n\n Veuillez cliquer sur ce lien pour valider votre adresse mail et votre compte : <a href="${url}">${url}</a>`
+        email_content: `Bonjour! :) 
+        <br>
+        <br>Veuillez cliquer sur ce lien pour valider votre adresse mail et votre compte : <a href="${url}">${url}</a>
+        <br>
+        <br>  
+        L'équipe Talenta vous remercie de votre confiance. 
+        <br>
+        	***************************************************************************************************`
       }
     }
 
@@ -306,4 +313,109 @@ exports.editPW = (req, res) => {
         .send({ message: 'mot de passe modifier', error: false });
       }
     })
+};
+
+exports.forgotPW = (req, res) => {
+  	console.log(`\n\n\n${req.body}\n\n\n`);
+  	User.findOne({
+    	where: {
+      		email: req.body.email
+    	}
+  	})
+    .then(user => {
+      	if (!user) {
+        	return res
+          	.status(HttpStatus.NOT_FOUND)
+          	.send({ message: "User Not found.", error: true });
+      	}
+      
+    	var token = jwt.sign({ id: user.id }, config.secret, {
+      		expiresIn: 864000 // 24 hours
+    	});
+    	console.log(token)
+    	const url = `${req.headers.origin}/user/reset/${token}`
+    	
+    	const mail = {
+      		body: {
+        		email_recipient: req.body.email,
+        		email_subject: `Réinitialisation de mot de passe pour Talenta Sourcing`,
+        		email_content: `Bonjour! :) 
+        		<br>
+        		<br>Veuillez cliquer sur ce lien pour réinitialiser votre mot de passe : <a href="${url}">${url}</a>
+        		<br>
+        		<br>  
+        		L'équipe Talenta vous remercie de votre confiance. 
+        		<br>
+        	***************************************************************************************************`
+      		}
+    	}
+	
+    	sendMail(mail, res, {});
+	
+        res
+          .status(HttpStatus.OK)
+          .send({
+            id: user.id,
+            error: false
+          });
+      });
+};
+exports.checkReset = async (req, res) => {
+  // console.log(req.headers.origin);
+  try {
+    const id = jwt.verify(req.params.token, config.secret);
+  	//console.log(id);
+    await User.findOne({
+    	where: {
+      		id: id.id
+    	}
+  	})
+    .then(user => {
+      	if (!user) {
+        	res
+          		.status(HttpStatus.NOT_FOUND)
+          		.send({ 
+          			message: "User Not found.",
+          			error: true })
+      	} else {
+
+        	res
+          		.status(HttpStatus.OK)
+          		.send({
+          			data: user,
+            		error: false
+          		})
+        }
+    })
+    .catch(err => { throw err })
+    
+  } catch (e) {
+    console.log(e);
+    res
+    	.send({
+          		access: "error",
+            	error: true
+          	})
+  }
+};
+exports.contact = (req, res) => {
+  	console.log(`\n\n\n${req.body}\n\n\n`);
+    
+    const mail = {
+      	body: {
+        	email_sender: req.body.email,
+        	email_recipient: 'jenny.chris.0123@gmail.com',
+        	email_subject: req.body.objet,
+        	email_content: req.body.message
+      	}
+    }
+
+    sendMail(mail, res, {});
+
+    res
+        .status(HttpStatus.OK)
+        .send({
+        id: user.id,
+        error: false
+        });
 };

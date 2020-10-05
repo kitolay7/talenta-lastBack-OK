@@ -25,8 +25,8 @@ module.exports = function (app) {
       }
     },
     filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, uniqueSuffix + file.originalname);
+      // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, file.originalname);
     }
   });
   app.post("/quiz", controller.create);
@@ -92,8 +92,14 @@ module.exports = function (app) {
     }
   ).fields([{
     name: 'fileAudio', maxCount: 1
-  }]
+  },
+  {
+    name: 'fileVideo', maxCount: 1
+  }
+]
   ), quizControler.createResponseQuizz);
   app.get("/postulation/users/:userId/offres/:offreId/responses", quizControler.getResponseTestByPostulation);
   app.put("/postulation/users/:userId/offres/:offreId/update", quizControler.updateResponseQuizz);
+  app.get("/users/:userId/lastLogo", offreControler.getLastBlobLogo);
+  app.put("/postulation/users/:userId/offres/:offreId/responseNote", quizControler.updateResponsePostulationMultiple);
 };
