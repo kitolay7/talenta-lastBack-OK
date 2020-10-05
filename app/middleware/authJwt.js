@@ -21,7 +21,7 @@ verifyToken = (req, res, next) => {
   jwt.verify(token, config.secret, (err, decoded) => {
     if (err) {
       return res
-        .status(HttpStatus.UNAUTHORIZED).send({
+        .send({
           message: "Unauthorized!",
           error: true
         });
@@ -42,7 +42,6 @@ isAdmin = (req, res, next) => {
       }
 
       res
-        .status(HttpStatus.FORBIDDEN)
         .send({
           message: "Require Admin Role!",
           error: true
