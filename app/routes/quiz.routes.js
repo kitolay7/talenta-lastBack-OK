@@ -102,4 +102,6 @@ module.exports = function (app) {
   app.put("/postulation/users/:userId/offres/:offreId/update", quizControler.updateResponseQuizz);
   app.get("/users/:userId/lastLogo", offreControler.getLastBlobLogo);
   app.put("/postulation/users/:userId/offres/:offreId/responseNote", quizControler.updateResponsePostulationMultiple);
+  app.get("/quiztooffer/:offreId", offreControler.getQuestionsByOffer);
+  
 };

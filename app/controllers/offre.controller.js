@@ -519,7 +519,7 @@ exports.getUsersByOffer = async (req, res) => {
                     },
                     {
                         model: offres,
-                        attributes: ['post', 'titre', 'publicationDate']
+                        attributes: ['post', 'titre', 'publicationDate', 'passe']
                     }
                 ]
         })
@@ -759,4 +759,35 @@ exports.getLastBlobLogo = async (req,res) => {
             .status(HttpStatus.NOT_FOUND)
             .send({ message: error, error: true });
     }
-}
+};
+
+exports.getQuestionsByOffer = async (req, res) => {
+    try {
+        await QuizToOffer.findOne({
+            where: { offreId: req.params.offreId },
+            include: [{ 
+            	model: db.quiz,
+            	include: [{ model: db.question }] 
+            }]
+        })
+            .then(data => {
+                res
+                    .status(HttpStatus.OK)
+                    .send({
+                        data: data,
+                        error: false
+                    });
+            })
+            .catch(err => {
+                throw err;
+            })
+    } catch (error) {
+        res
+            .status(HttpStatus.NOT_FOUND)
+            .send({
+                message:
+                    error.message || "Some error occurred while retrieving tutorials.",
+                error: true
+            });
+    }
+};
