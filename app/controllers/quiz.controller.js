@@ -731,16 +731,18 @@ exports.createResponseQuizz = async (req,res) => {
       let responses = JSON.parse(req.body.listResponseTest);
       console.log(req.body.listResponseTest);
       for (let index = 0; index < responses.length; index++) {
-        for (let indexFiles = 0; indexFiles < req.files.fileAudio.length; indexFiles++) {
-            if (req.files.fileAudio && responses[index].answers === req.files.fileAudio[indexFiles].originalname) {
-                let pathname = req.files.fileAudio[indexFiles].path.split("/");
-                responses[index].answers = pathname.splice(1,2).join("/");
-            }
-            if (req.files.fileVideo && responses[index].answers === req.files.fileVideo[indexFiles].originalname) {
-                let pathname = req.files.fileVideo[indexFiles].path.split("/");
-                responses[index].answers = pathname.splice(1,2).join("/");
-            }
-        }
+          if (req.files.fileAudio) {              
+              for (let indexFiles = 0; indexFiles < req.files.fileAudio.length; indexFiles++) {
+                  if (req.files.fileAudio && responses[index].answers === req.files.fileAudio[indexFiles].originalname) {
+                      let pathname = req.files.fileAudio[indexFiles].path.split("/");
+                      responses[index].answers = pathname.splice(1,2).join("/");
+                  }
+                  if (req.files.fileVideo && responses[index].answers === req.files.fileVideo[indexFiles].originalname) {
+                      let pathname = req.files.fileVideo[indexFiles].path.split("/");
+                      responses[index].answers = pathname.splice(1,2).join("/");
+                  }
+              }
+          }
         const responseTest = await ResponseTest.create(responses[index],{transaction:transaction_response_quiz})
         .then(responseTest =>{ return responseTest})
         .catch(error => {throw error});

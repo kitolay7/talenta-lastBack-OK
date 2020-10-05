@@ -100,7 +100,59 @@ exports.register = async (req, res) => {
     console.log(">> Error while finding comment: ", err);
   }
 };
+exports.signAdmin = (req, res) => {
+  console.log(`\n\n\n${req.body}\n\n\n`);
+  User.findOne({
+    where: {
+      email: req.body.email
+    }
+  })
+    .then(user => {
+      if (!user) {
+        return res
+          .status(HttpStatus.NOT_FOUND)
+          .send({ message: "User Not found.", error: true });
+      }
 
+      var passwordIsValid = bcrypt.compareSync(
+        req.body.password,
+        user.password
+      );
+
+      if (!passwordIsValid) {
+        return res
+          .send({
+            accessToken: null,
+            message: "Invalid Password!",
+            error: HttpStatus.UNAUTHORIZED
+          });
+      }
+
+      var token = jwt.sign({ id: user.id }, config.secret, {
+        expiresIn: "4 days"
+      });
+
+      var authorities = [];
+      user.getRoles().then(roles => {
+        for (let i = 0; i < roles.length; i++) {
+          authorities.push("ROLE_" + roles[i].name.toUpperCase());
+        }
+        res
+          .status(HttpStatus.OK)
+          .send({
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            roles: authorities,
+            accessToken: token,
+            error: false
+          });
+      });
+    })
+    .catch(err => {
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message, error: true });
+    });
+};
 exports.signin = (req, res) => {
   console.log(`\n\n\n${req.body}\n\n\n`);
   User.findOne({
@@ -223,6 +275,7 @@ exports.confirm = (req, res) => {
   const id = jwt.verify(req.params.token, config.secret);
   User.update({ confirmed: true }, { where: { id: id.id } })
   .then(resultat => {
+    
      if (req.params.role === 1) {
    return res.redirect('http://154.126.92.194:4200/candidat/registration');
  } else {

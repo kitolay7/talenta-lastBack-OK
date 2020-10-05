@@ -2,7 +2,7 @@ const nodemailer = require("nodemailer");
 const HttpStatus = require('http-status-codes');
 const { resolve } = require("path");
 require('dotenv/config');
-exports.sendMail = (req, res, next) => {
+exports.sendMail = async (req, res, next) => {
 	
   //console.log(req);
   try {
@@ -35,9 +35,9 @@ exports.sendMail = (req, res, next) => {
     };
     // console.log(mail);
   
-    transporter.sendMail(mail, (error, response) => {
+    await transporter.sendMail(mail, (error, response) => {
       if (error) {
-        
+        throw error;
       } else {
         console.log("Mail envoyé avec succès!")
         res
