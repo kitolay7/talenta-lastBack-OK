@@ -58,7 +58,9 @@ try {
   mysql_connection.createConnection({
     user: config.USER,
     password: config.PASSWORD,
-    multipleStatements: true
+    multipleStatements: true,
+    host:config.HOST,
+    port: config.PORT
   }).then(async (connection) => {
     connection.query(`CREATE DATABASE IF NOT EXISTS ${config.DB};`).then(async (connection) => {
       const host = config.HOST;
@@ -69,16 +71,16 @@ try {
       // Safe to use sequelize now
       console.info("Database create or successfully checked");
       
-      importer.import('script.sequence.sql').then(async()=>{
-        var files_imported = importer.getImported();
-        console.log(`${files_imported.length} SQL file(s) imported.`);
-        await db.sequelize.query("CALL CreateSequence( :sSeqName, :iSeqValue )",{replacements:{sSeqName:"postulation_sequence",iSeqValue:0}}).then(response => {
-          console.log(`\n\nCREATION postulation's index\n\n`);
-        });
-      }).catch((err)=>{
-        console.error(err);
-        throw err;
-      });
+      // importer.import('script.sequence.sql').then(async()=>{
+      //   var files_imported = importer.getImported();
+      //   console.log(`${files_imported.length} SQL file(s) imported.`);
+      //   await db.sequelize.query("CALL CreateSequence( :sSeqName, :iSeqValue )",{replacements:{sSeqName:"postulation_sequence",iSeqValue:0}}).then(response => {
+      //     console.log(`\n\nCREATION postulation's index\n\n`);
+      //   });
+      // }).catch((err)=>{
+      //   console.error(err);
+      //   throw err;
+      // });
             
       // connection.query(`CREATE SEQUENCE postulation_sequence_id IF NOT EXISTS;`)
       mkdirpSync('uploads/videos/');
@@ -134,38 +136,38 @@ require('./app/routes/user.routes')(app);
 require("./app/routes/quiz.routes")(app);
 require("./app/routes/test_mailer_routes")(app);
 // set port, listen for requests
-const initalizeRole = () => {
-  Role.create({
+const initalizeRole = async() => {
+  await Role.create({
     id: 1,
     name: "admin"
   });
 
-  Role.create({
+  await Role.create({
     id: 2,
     name: "candidat"
   });
 
-  Role.create({
+  await Role.create({
     id: 3,
     name: "recruteur"
   });
 }
 
-const initalizeBlob = () => {
+const initalizeBlob = async() => {
   // intialiser type blob
-  TypeBlob.create({
+  await TypeBlob.create({
     wording: "logo"
   });
-  TypeBlob.create({
+  await TypeBlob.create({
     wording: "video"
   });
-  TypeBlob.create({
+  await TypeBlob.create({
     wording: "photo_animés"
   });
-  TypeBlob.create({
+  await TypeBlob.create({
     wording: "diaporama"
   });
-  TypeBlob.create({
+  await TypeBlob.create({
     wording: "cv"
   });
 }
