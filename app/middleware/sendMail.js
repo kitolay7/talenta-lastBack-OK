@@ -8,15 +8,6 @@ exports.sendMail = async (req, res, next) => {
   try {
 
     const transporter = nodemailer.createTransport({
-      /*
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false, // upgrade later with STARTTLS
-      auth: {
-        user: process.env.EMAIL,
-        pass: process.env.PASSWORD
-      }
-      */
       host:  process.env.SMTP_HOST,
       port:  process.env.SMTP_PORT,
       secure: false,
@@ -36,14 +27,13 @@ exports.sendMail = async (req, res, next) => {
     });
   
     let mail = {
-      from: req.body.email_sender ? req.body.email_sender : process.env.FROM_EMAIL,
+      from: process.env.FROM_EMAIL,
       to: req.body.email_recipient,
       subject: req.body.email_subject,
       html: req.body.email_content,
-      attachements: {
-      	path: (req.body.email_attachement ? req.body.email_attachement : '')
-      }
+      attachments: req.body.email_attachement ? req.body.email_attachement : ''
     };
+    // console.log(mail);
   
     await transporter.sendMail(mail, (error, response) => {
       if (error) {

@@ -11,10 +11,11 @@ const Competence = db.competence;
 const Education = db.education;
 const Profession = db.profession;
 const Op = db.Sequelize.Op;
+require('dotenv/config');
 
 exports.createSpontaneous = async (req, res) => {
 	
-    //console.log('bodddddddyyyyy' + req.files)
+    console.log('bodddddddyyyyy' + JSON.stringify(req.files))
     const spontaneous = {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
@@ -112,6 +113,7 @@ exports.createSpontaneous = async (req, res) => {
             return competences;
         }
         console.log(`\n\n Competences ${JSON.stringify(competences(req))}\n\n`);
+        
         const educations = (req) => {
             let educations = [];
             JSON.parse(req.body.education).forEach((education) => {
@@ -126,6 +128,7 @@ exports.createSpontaneous = async (req, res) => {
             return educations;
         }
         console.log(`\n\n Educations ${JSON.stringify(educations(req))}\n\n`);
+        
         const professions = (req) => {
             let professions = [];
             JSON.parse(req.body.profession).forEach((profession) => {
@@ -140,22 +143,31 @@ exports.createSpontaneous = async (req, res) => {
             return professions;
         }
         console.log(`\n\n Professions ${JSON.stringify(professions(req))}\n\n`);
+        
         const blobFile = (req.files.cv && req.files.cv[0]) ? {
             path: req.files.cv[0].originalname,
             extension: req.files.cv[0].originalname.split('.').pop(),
             TypeBlobId: 5 // cv
         } : null
         console.log(`\n\nblobFile ${JSON.stringify(blobFile)}\n\n`);
+        
+        const blobInfos = (req.files.infos && req.files.infos[0]) ? {
+            path: req.files.infos[0].originalname,
+            extension: req.files.infos[0].originalname.split('.').pop(),
+            TypeBlobId: 5 // cv
+        } : null
+        console.log(`\n\nblobInfos ${JSON.stringify(blobInfos)}\n\n`);
 
         return {
             competences,
             educations,
             professions,
-            blobFile
+            blobFile,
+            blobInfos
         }
     }
     // CREATION 
-    const { competences, educations, professions, blobFile } = generateData(req);
+    const { competences, educations, professions, blobFile, blobInfos } = generateData(req);
 
     const transaction_spontaneous = await db.sequelize.transaction();
     const bulkMerge = (objectList, object) => {
@@ -173,18 +185,29 @@ exports.createSpontaneous = async (req, res) => {
         await Education.bulkCreate(bulkMerge(educations(req), { spontaneousId: current_spontaneous.id }), { returning: true, transaction: transaction_spontaneous })
         await Profession.bulkCreate(bulkMerge(professions(req), { spontaneousId: current_spontaneous.id }), { returning: true, transaction: transaction_spontaneous })
         blobFile && await db.blobscv.create({ ...blobFile, ...{ spontaneousId: current_spontaneous.id } }, { transaction: transaction_spontaneous });
+        blobInfos && await db.blobscv.create({ ...blobInfos, ...{ spontaneousId: current_spontaneous.id } }, { transaction: transaction_spontaneous });
         await transaction_spontaneous.commit();
         
         // Send Mail to the Candidat
-        sendMail(mail, res, {});
+        await sendMail(mail, res, {});
         
         // Send Mail to the Talenta responsible
-    	const url = `http://${req.headers.host}/cv/${req.files.cv[0].originalname}`
+    	const url = [ 
+    		{
+    			filename: `${req.files.cv[0].filename}`,
+    			path: `http://${req.headers.host}/cv/${req.files.cv[0].filename}`,
+    		},
+    		{
+    			filename: `${req.files.infos[0].filename}`,
+    			path: `http://${req.headers.host}/cv/${req.files.infos[0].filename}`,
+    		}
+    	]
     	const infos = {
       		body: {
-        		email_recipient: 'rakotoni.d@gmail.com',
+        		//email_recipient: process.env.FROM_EMAIL,
+        		email_recipient: process.env.ADMIN_EMAIL,
         		email_subject: `Nouveau dossier de candidature spontanée - Talenta Sourcing`,
-        		email_attachement: `${url}`,
+        		email_attachement: url,
         		email_content: `Nouveau dossier de candidature spontanée! <br>
         			<br> <u>Nom </u>: ${spontaneous.firstName},
         			<br> <u>Prénoms </u>: ${spontaneous.lastName},
@@ -199,14 +222,14 @@ exports.createSpontaneous = async (req, res) => {
         			<br> <u>Compétences </u>: ${getCompetences()},
         			<br> <u>Educations </u>: <br> ${getEducations()},
         			<br> <u>Professions </u>: <br> ${getProfessions()},
-        			<br> <u>CV importé </u>: <a href="${url}">${req.files.cv[0].originalname}</a>
+        			<br> <u>CV importé </u>: <a href="http://${req.headers.host}/cv/${req.files.cv[0].filename}">${req.files.cv[0].originalname}</a>
         			<br>
         			<br>
         			***************************************************************************************************`
       		}
     	}
     	
-    	sendMail(infos, res, {});
+    	await sendMail(infos, res, {});
     
         res
             .send({
