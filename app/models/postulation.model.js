@@ -45,12 +45,12 @@ module.exports = (sequelize, Sequelize) => {
         freezeTableName: true,
     });
 	
-		Postulation.beforeCreate(async postulation => {
-			await sequelize.query("select GetSequenceVal(?,?) as index_postulation",{replacements:['postulation_sequence',1], type:QueryTypes.SELECT})
-			.then(response => {
-				console.log(`\n\nRESPONSE ${JSON.stringify(response)}\n\n`);
-				postulation.index = response[0].index_postulation
-			});
-		})
+		// Postulation.beforeCreate(async postulation => {
+		// 	await sequelize.query("select GetSequenceVal(?,?) as index_postulation",{replacements:['postulation_sequence',1], type:QueryTypes.SELECT})
+		// 	.then(response => {
+		// 		console.log(`\n\nRESPONSE ${JSON.stringify(response)}\n\n`);
+		// 		postulation.index = response[0].index_postulation
+		// 	});
+		// })
     return Postulation;
   };
