@@ -92,7 +92,59 @@ exports.register = async (req, res) => {
     console.log(">> Error while finding comment: ", err);
   }
 };
+exports.signAdmin = (req, res) => {
+  console.log(`\n\n\n${req.body}\n\n\n`);
+  User.findOne({
+    where: {
+      email: req.body.email
+    }
+  })
+    .then(user => {
+      if (!user) {
+        return res
+          .status(HttpStatus.NOT_FOUND)
+          .send({ message: "User Not found.", error: true });
+      }
 
+      var passwordIsValid = bcrypt.compareSync(
+        req.body.password,
+        user.password
+      );
+
+      if (!passwordIsValid) {
+        return res
+          .send({
+            accessToken: null,
+            message: "Invalid Password!",
+            error: HttpStatus.UNAUTHORIZED
+          });
+      }
+
+      var token = jwt.sign({ id: user.id }, config.secret, {
+        expiresIn: "1 days"
+      });
+
+      var authorities = [];
+      user.getRoles().then(roles => {
+        for (let i = 0; i < roles.length; i++) {
+          authorities.push("ROLE_" + roles[i].name.toUpperCase());
+        }
+        res
+          .status(HttpStatus.OK)
+          .send({
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            roles: authorities,
+            accessToken: token,
+            error: false
+          });
+      });
+    })
+    .catch(err => {
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message, error: true });
+    });
+};
 exports.signin = (req, res) => {
   console.log(`\n\n\n${req.body}\n\n\n`);
   User.findOne({
@@ -195,7 +247,7 @@ exports.updateProfile = async (req, res) => {
       codePostal: req.body.codePostal,
       societe: req.body.societe,
       userId: await id
-    }, { where: { id: id } });
+    }, { where: { id: id } });;
     res
       .send({
         message: "successfully update",
@@ -215,6 +267,7 @@ exports.confirm = (req, res) => {
   const id = jwt.verify(req.params.token, config.secret);
   User.update({ confirmed: true }, { where: { id: id.id } })
   .then(resultat => {
+    
      if (req.params.role === 1) {
    return res.redirect('http://localhost:4200/candidat/registration');
  } else {
@@ -253,80 +306,4 @@ exports.editPW = (req, res) => {
         .send({ message: 'mot de passe modifier', error: false });
       }
     })
-};
-
-exports.forgotPW = (req, res) => {
-  	console.log(`\n\n\n${req.body}\n\n\n`);
-  	User.findOne({
-    	where: {
-      		email: req.body.email
-    	}
-  	})
-    .then(user => {
-      	if (!user) {
-        	return res
-          	.status(HttpStatus.NOT_FOUND)
-          	.send({ message: "User Not found.", error: true });
-      	}
-      
-    	var token = jwt.sign({ id: user.id }, config.secret, {
-      		expiresIn: 864000 // 24 hours
-    	});
-    	console.log(token)
-    	const url = `http://${req.headers.origin}/user/reset/${token}`
-    	
-    	const mail = {
-      		body: {
-        		email_recipient: req.body.email,
-        		email_subject: `Réinitialisation de mot de passe pour Talenta Sourcing`,
-        		email_content: `Bonjour! :) \n\n Veuillez cliquer sur ce lien pour réinitialiser votre mot de passe : <a href="${url}">${url}</a>`
-      		}
-    	}
-	
-    	sendMail(mail, res, {});
-	
-        res
-          .status(HttpStatus.OK)
-          .send({
-            id: user.id,
-            error: false
-          });
-      });
-};
-exports.checkReset = async (req, res) => {
-  // console.log(req.headers.origin);
-  try {
-    const id = jwt.verify(req.params.token, config.secret);
-    await User.findOne({
-    	where: {
-      		id: id
-    	}
-  	})
-    .then(user => {
-      	if (!user) {
-        	res
-          		.status(HttpStatus.NOT_FOUND)
-          		.send({ 
-          			message: "User Not found.",
-          			error: true })
-      	} else {
-
-        	res
-          		.status(HttpStatus.OK)
-          		.send({
-          			data: user,
-            		error: false
-          		})
-        }
-    })
-    .catch(err => { throw err })
-    
-  } catch (e) {
-    console.log(e);
-    res
-    	.send({
-          		access: "error",
-            	error: true
-          	})
-  }
 };
