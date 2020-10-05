@@ -82,6 +82,7 @@ try {
             
       // connection.query(`CREATE SEQUENCE postulation_sequence_id IF NOT EXISTS;`)
       mkdirpSync('uploads/videos/');
+      mkdirpSync('uploads/audios/');
       mkdirpSync('uploads/cv/');
       // CREATE TABLES IF NOT EXIST
       db.sequelize.sync().then((result) => {
@@ -169,29 +170,29 @@ const initalizeBlob = () => {
   });
 }
 
-const initalizeTypeQuestion = () => {
+const initalizeTypeQuestion = async() => {
   // intialiser type blob
-  TypeQuestion.create({
+  await TypeQuestion.create({
     wording: "Vrai ou Faux"
   });
-  TypeQuestion.create({
+  await TypeQuestion.create({
     wording: "Choix multiple"
   });
-  TypeQuestion.create({
+  await TypeQuestion.create({
     wording: "Classement hiérarchique"
   });
-  TypeQuestion.create({
+  await TypeQuestion.create({
     wording: "Rédaction"
   });
-  TypeQuestion.create({
+  await TypeQuestion.create({
     wording: "Audio"
   });
-  TypeQuestion.create({
+  await TypeQuestion.create({
     wording: "Video"
   });
 }
 
-const PORT = process.env.PORT || 8181;
+const PORT = process.env.PORT || 8080;
 const server = http.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
