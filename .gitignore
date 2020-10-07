@@ -3,3 +3,6 @@ package-lock.json
 yarn.lock
 uploads
 todo
+.env
+info_database.txt
+.env.txt
