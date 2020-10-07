@@ -273,14 +273,15 @@ exports.updateProfile = async (req, res) => {
 
 exports.confirm = (req, res) => {
   const id = jwt.verify(req.params.token, config.secret);
+  const url = req.headers.host.split(':')[0];
   User.update({ confirmed: true }, { where: { id: id.id } })
   .then(resultat => {
     
      if (req.params.role === 1) {
-   return res.redirect('http://154.126.92.194:4200/candidat/registration');
- } else {
-   return res.redirect('http://154.126.92.194:4200/recruteur/registration');
- }
+   			return res.redirect(`http://${url}:4200/candidat/registration`);
+ 		} else {
+   			return res.redirect(`http://${url}:4200/recruteur/registration`);
+ 		}
   }).catch(err => { throw err });
 
 
