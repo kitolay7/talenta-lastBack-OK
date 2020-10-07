@@ -1,15 +1,15 @@
 module.exports = (sequelize, Sequelize) => {
     const question = sequelize.define("questions", {
-        questionId: {
+        enunciate: {
             type: Sequelize.STRING
         },
-        name: {
+        // type: {
+        //     type: Sequelize.STRING
+        // },
+        timer: {
             type: Sequelize.STRING
-        },
-        type: {
-            type: Sequelize.STRING
-        },
-    });
+        }
+    }, { timestamps: false, });
 
     return question;
 };

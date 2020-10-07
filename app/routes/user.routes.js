@@ -1,13 +1,27 @@
 const { authJwt } = require("../middleware");
 const controller = require("../controllers/user.controller");
+const spontaneousController = require("../controllers/spontaneous.controller");
+const multer = require('multer');
+const upload = multer({ dest: './uploads/' });
 
-module.exports = function(app) {
-  app.use(function(req, res, next) {
+module.exports = function (app) {
+  app.use(function (req, res, next) {
     res.header(
       "Access-Control-Allow-Headers",
-      "x-access-token, Origin, Content-Type, Accept"
+      "Authorization, Origin, Content-Type, Accept"
     );
     next();
+  });
+  const fileStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+
+      if (file.mimetype.includes('application')) {
+        cb(null, 'uploads/cv');
+      }
+    },
+    filename: (req, file, cb) => {
+      cb(null, file.originalname);
+    }
   });
 
   app.get("/api/test/all", controller.allAccess);
@@ -17,7 +31,11 @@ module.exports = function(app) {
     [authJwt.verifyToken],
     controller.userBoard
   );
-
+  app.get(
+    "/api/test/userinfo/:idUser",
+    [authJwt.verifyToken],
+    controller.userInfo
+  );
   app.get(
     "/api/test/mod",
     [authJwt.verifyToken, authJwt.isModerator],
@@ -29,4 +47,15 @@ module.exports = function(app) {
     [authJwt.verifyToken, authJwt.isAdmin],
     controller.adminBoard
   );
+
+  app.post("/createSpontaneous", multer({storage: fileStorage}).fields([{ 
+  	name: 'cv', maxCount: 1 
+  }, { 
+  	name: 'infos', maxCount: 1 
+  }]
+  ), spontaneousController.createSpontaneous);
+  app.get("/getAllSpontaneous", spontaneousController.findAllSpontaneous);
+  app.get("/getSpontaneousNonTraiter", spontaneousController.findSpontaneousNonTraiter);
+  app.get("/getSpontaneousById/:spontaneousId", spontaneousController.findOneSpontaneous);
+  app.put("/updateSpontaneousTraiter/:id", spontaneousController.updateSpontaneousTraiter);
 };

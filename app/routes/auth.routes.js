@@ -1,11 +1,11 @@
 const { verifySignUp } = require("../middleware");
 const controller = require("../controllers/auth.controller");
 
-module.exports = function(app) {
-  app.use(function(req, res, next) {
+module.exports = function (app) {
+  app.use(function (req, res, next) {
     res.header(
       "Access-Control-Allow-Headers",
-      "x-access-token, Origin, Content-Type, Accept"
+      "Authorization, Origin, Content-Type, Accept"
     );
     next();
   });
@@ -20,4 +20,16 @@ module.exports = function(app) {
   );
 
   app.post("/api/auth/signin", controller.signin);
+  app.post("/api/auth/admin", controller.signAdmin);
+  app.put("/api/auth/updateprofile", controller.updateProfile);
+  
+  
+  // ********** ESSAI CONFIRM MAIL ***************
+  //app.post("/signup", controller.reg );
+  //app.post("/signin", controller.log );
+  app.get("/confirmation/:token/:role", controller.confirm );
+  app.post("/editpassword", controller.editPW );
+  app.post("/api/auth/forgot", controller.forgotPW );
+  app.get("/reset/:token", controller.checkReset );
+  app.post("/contact", controller.contact );
 };

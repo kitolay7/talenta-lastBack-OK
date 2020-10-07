@@ -1,15 +1,18 @@
 module.exports = (sequelize, Sequelize) => {
     const reponse = sequelize.define("reponses", {
-        reponseId: {
+        choices: {
             type: Sequelize.STRING
         },
-        name: {
-            type: Sequelize.STRING
+        isAnswers: {
+            type: Sequelize.BOOLEAN
         },
-        isAnswer: {
-            type: Sequelize.STRING
+        type_audio: {
+            type: Sequelize.INTEGER
         },
-    });
+        rang: {
+            type: Sequelize.INTEGER
+        },
+    }, { timestamps: false,});
 
     return reponse;
 };
