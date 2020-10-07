@@ -1,6 +1,7 @@
 const nodemailer = require("nodemailer");
 const HttpStatus = require('http-status-codes');
 const { resolve } = require("path");
+const emailCheck = require('email-check');
 require('dotenv/config');
 exports.sendMail = async (req, res, next) => {
 	
@@ -17,6 +18,23 @@ exports.sendMail = async (req, res, next) => {
         pass:  process.env.SMTP_PASSWORD,
       }
     });
+    
+    
+    /*
+    await emailCheck(req.body.email_recipient, {	
+  		from: process.env.FROM_EMAIL,
+  		timeout: 100000
+    })
+  	.then((resp) => {
+    	// Returns "true" if the email address exists, "false" if it doesn't.
+  		console.log(resp);
+      	if (!resp) { // if email doesn't exist : resp = false
+        	throw "L'adresse email n'existe pas";
+      	}
+  	})
+  	.catch((err) => { throw err });
+  	*/
+  	
     // verify connection configuration
     transporter.verify((error, success) => {
       if (error) {
@@ -26,6 +44,8 @@ exports.sendMail = async (req, res, next) => {
       }
     });
   
+    
+    
     let mail = {
       from: process.env.FROM_EMAIL,
       to: req.body.email_recipient,
@@ -35,25 +55,35 @@ exports.sendMail = async (req, res, next) => {
     };
     // console.log(mail);
   
-    await transporter.sendMail(mail, (error, response) => {
+    await transporter.sendMail(mail)
+    	.then((resp) => {
+    		console.log(resp)
+    	})
+    	.catch((err) => { throw err});
+    transporter.close();
+    	
+    	/*
+    await transporter.sendMail(mail, (error, info, response) => {
+    	console.log(`\n\n\n${info}\n\n\n`);
+    	console.log(`\n\n\n${response}\n\n\n`);
       if (error) {
         throw error;
       } else {
-        console.log("Mail envoyé avec succès!")
+        console.log("Mail envoyé à " + req.body.email_recipient + " avec succès!")
         res
           .status(HttpStatus.OK)
           .send({ message: "Mail envoyé avec succès!" });
       }
-      transporter.close();
     });
+    */
   } catch (error) {
     console.log("Erreur lors de l'envoie du mail!");
         console.log(error);
         res
           .status(HttpStatus.BAD_REQUEST)
           .send({
-            error: error,
-            message: "Erreur lors de l'envoi du email!"
+            error: true,
+            message: error
           });
   }
 }
