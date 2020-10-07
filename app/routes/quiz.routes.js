@@ -103,5 +103,5 @@ module.exports = function (app) {
   app.get("/users/:userId/lastLogo", offreControler.getLastBlobLogo);
   app.put("/postulation/users/:userId/offres/:offreId/responseNote", quizControler.updateResponsePostulationMultiple);
   app.get("/quiztooffer/:offreId", offreControler.getQuestionsByOffer);
-  
+  app.delete("/offres/:id/delete", quizControler.destroyOffre);
 };

@@ -12,7 +12,7 @@ const fs = require('fs');
 const HttpStatus = require('http-status-codes');
 const { response } = require("express");
 const options = require("dotenv/lib/env-options");
-const { quiz, question } = require("../models");
+const { quiz, question, offre } = require("../models");
 const ResponseTest = db.response_test;
 exports.create = async (req, res) => {
     // offres id
@@ -846,4 +846,25 @@ exports.updateResponsePostulationMultiple = async (req, res) => {
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .send({ message: error.message, error: true });
     }
+}
+
+exports.destroyOffre = async (req,res) => {
+  try {
+    db.offre.destroy({where:{id:req.params.id}})
+    .then(()=> {
+      res
+      .status(HttpStatus.NO_CONTENT)
+      .send({
+          message: "Offre is deleted successfully",
+          error: false
+      })
+    })
+    .catch(error => {throw error});
+    
+  } catch (error) {
+    console.log(">> Error while finding project: ", error);
+        res
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .send({ message: error.message, error: true });
+  }
 }
