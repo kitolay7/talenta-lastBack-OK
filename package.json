@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "serve": "./node_modules/.bin/nodemon server.js",
-    "start":"node server.js"
+    "start": "node server.js"
   },
   "keywords": [
     "node.js",
@@ -29,6 +29,7 @@
     "http": "^0.0.1-security",
     "http-status-codes": "^1.4.0",
     "jsonwebtoken": "^8.5.1",
+    "legit": "^1.0.8",
     "multer": "^1.4.2",
     "mysql-import": "^4.0.24",
     "mysql2": "^2.1.0",
@@ -40,6 +41,6 @@
     "socket.io-client": "^2.3.0"
   },
   "engines": {
-    "node":"10.21.0"
+    "node": "10.21.0"
   }
 }

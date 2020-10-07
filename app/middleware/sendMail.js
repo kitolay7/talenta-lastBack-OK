@@ -2,6 +2,7 @@ const nodemailer = require("nodemailer");
 const HttpStatus = require('http-status-codes');
 const { resolve } = require("path");
 const emailCheck = require('email-check');
+const legit = require('legit');
 require('dotenv/config');
 exports.sendMail = async (req, res, next) => {
 	
@@ -29,6 +30,18 @@ exports.sendMail = async (req, res, next) => {
     	// Returns "true" if the email address exists, "false" if it doesn't.
   		console.log(resp);
       	if (!resp) { // if email doesn't exist : resp = false
+        	throw "L'adresse email n'existe pas";
+      	}
+  	})
+  	.catch((err) => { throw err });
+  	*/
+  	
+  	/*
+  	await legit(req.body.email_recipient)
+  	.then(result => {
+    	result.isValid ? console.log('Valid!') : console.log('Invalid!');
+    	console.log(JSON.stringify(result));
+    	if (!result.isValid) { // if email doesn't exist : resp = false
         	throw "L'adresse email n'existe pas";
       	}
   	})
