@@ -1,6 +1,7 @@
 const db = require("../models");
 const HttpStatus = require('http-status-codes');
 const io = require("socket.io-client");
+const legit = require('legit');
 
 const fs = require('fs');
 const { error, count } = require("console");
@@ -16,170 +17,182 @@ require('dotenv/config');
 exports.createSpontaneous = async (req, res) => {
 
     console.log('bodddddddyyyyy' + JSON.stringify(req.files))
-    const spontaneous = {
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        birthday: req.body.birthday,
-        email: req.body.email,
-        numTel: req.body.numTel,
-        idSkype: req.body.idSkype,
-        idWhatsapp: req.body.idWhatsapp,
-        originCountry: req.body.originCountry,
-        actualCountry: req.body.actualCountry,
-        actualCity: req.body.actualCity,
-        secteur: req.body.secteur,
-    };
-    console.log(spontaneous)
-
-
-    const mail = {
-        body: {
-            email_recipient: req.body.email,
-            email_subject: `Dossier de Candidature spontanée déposé - Talenta Sourcing`,
-            email_content: `Bonjour! :) 
-        	<br>
-        	<br> 
-        	Talenta a bien enregistré votre candidature spontanée et prend en charge son orientation suivant les informations communiquées. 
-        	<br>
-        	<br>  
-        	L'équipe Talenta vous remercie de votre confiance. 
-        	<br>
-        	***************************************************************************************************`
-        }
-    }
-
-    const getCompetences = () => {
-        let allCompetences = '';
-        JSON.parse(req.body.competence).forEach((competence) => {
-            allCompetences += `${competence}, `
-        });
-        return allCompetences
-    }
-    const getEducations = () => {
-        let allEducations = '';
-        let titre = '';
-        let specialisation = '';
-        let diplome = '';
-        let debut = '';
-        let fin = '';
-        JSON.parse(req.body.education).forEach((education) => {
-            titre = education.titre;
-            specialisation = education.specialisation;
-            diplome = education.diplome;
-            debut = education.startDate;
-            fin = education.endDate;
-            allEducations += `<strong>Titre</strong> : ${titre},<br> 
-        		<strong>Specialisation</strong> : ${specialisation},<br>
-        		<strong>Diplome</strong> : ${diplome},<br>
-        		<strong>Debut</strong> : ${debut},
-        		<strong>Fin</strong> : ${fin};<br>
-        		<br>`;
-        });
-        return allEducations
-    }
-    const getProfessions = () => {
-        let allProfessions = '';
-        let titre = '';
-        let nomSociete = '';
-        let resume = '';
-        let debut = '';
-        let fin = '';
-        JSON.parse(req.body.profession).forEach((profession) => {
-            titre = profession.titre;
-            nomSociete = profession.nomSociete;
-            resume = profession.resume;
-            debut = profession.startDate;
-            fin = profession.endDate;
-            allProfessions += `<strong>Titre</strong> : ${titre},<br> 
-        		<strong>Nom de la société</strong> : ${nomSociete},<br>
-        		<strong>Résumé</strong> : ${resume},<br>
-        		<strong>Debut</strong> : ${debut},
-        		<strong>Fin</strong> : ${fin};<br>
-        		<br>`;
-        });
-        return allProfessions
-    }
-
-
-
-    // Creation Data
-    const generateData = (req) => {
-        const competences = (req) => {
-            let competences = [];
-            JSON.parse(req.body.competence).forEach((competence) => {
-                competences.push({
-                    name: competence,
-                })
-            });
-            return competences;
-        }
-        console.log(`\n\n Competences ${JSON.stringify(competences(req))}\n\n`);
-
-        const educations = (req) => {
-            let educations = [];
-            JSON.parse(req.body.education).forEach((education) => {
-                educations.push({
-                    titre: education.titre,
-                    specialisation: education.specialisation,
-                    diplome: education.diplome,
-                    startDate: education.startDate,
-                    endDate: education.endDate,
-                })
-            });
-            return educations;
-        }
-        console.log(`\n\n Educations ${JSON.stringify(educations(req))}\n\n`);
-
-        const professions = (req) => {
-            let professions = [];
-            JSON.parse(req.body.profession).forEach((profession) => {
-                professions.push({
-                    titre: profession.titre,
-                    nomSociete: profession.nomSociete,
-                    resume: profession.resume,
-                    startDate: profession.startDate,
-                    endDate: profession.endDate,
-                })
-            });
-            return professions;
-        }
-        console.log(`\n\n Professions ${JSON.stringify(professions(req))}\n\n`);
-
-        const blobFile = (req.files.cv && req.files.cv[0]) ? {
-            path: req.files.cv[0].originalname,
-            extension: req.files.cv[0].originalname.split('.').pop(),
-            TypeBlobId: 5 // cv
-        } : null
-        console.log(`\n\nblobFile ${JSON.stringify(blobFile)}\n\n`);
-
-        const blobInfos = (req.files.infos && req.files.infos[0]) ? {
-            path: req.files.infos[0].originalname,
-            extension: req.files.infos[0].originalname.split('.').pop(),
-            TypeBlobId: 5 // cv
-        } : null
-        console.log(`\n\nblobInfos ${JSON.stringify(blobInfos)}\n\n`);
-
-        return {
-            competences,
-            educations,
-            professions,
-            blobFile,
-            blobInfos
-        }
-    }
-    // CREATION 
-    const { competences, educations, professions, blobFile, blobInfos } = generateData(req);
-
-    const transaction_spontaneous = await db.sequelize.transaction();
-    const bulkMerge = (objectList, object) => {
-        let result = [];
-        objectList.forEach((item) => {
-            result.push({ ...item, ...object });
-        });
-        return result;
-    }
-
+    
     try {
+    
+  		await legit(req.body.email)
+  		.then(result => {
+    		result.isValid ? console.log('Valid!') : console.log('Invalid!');
+    		//console.log(JSON.stringify(result));
+    		if (!result.isValid) { // if email doesn't exist : resp = false
+        		throw "L'adresse email n'existe pas";
+      		}
+  		})
+  		.catch((err) => { throw err });
+    	
+    	const spontaneous = {
+        	firstName: req.body.firstName,
+        	lastName: req.body.lastName,
+        	birthday: req.body.birthday,
+        	email: req.body.email,
+        	numTel: req.body.numTel,
+        	idSkype: req.body.idSkype,
+        	idWhatsapp: req.body.idWhatsapp,
+        	originCountry: req.body.originCountry,
+        	actualCountry: req.body.actualCountry,
+        	actualCity: req.body.actualCity,
+        	secteur: req.body.secteur,
+    	};
+    	console.log(spontaneous)
+	
+	
+    	const mail = {
+        	body: {
+            	email_recipient: req.body.email,
+            	email_subject: `Dossier de Candidature spontanée déposé - Talenta Sourcing`,
+            	email_content: `Bonjour! :) 
+        		<br>
+        		<br> 
+        		Talenta a bien enregistré votre candidature spontanée et prend en charge son orientation suivant les informations communiquées. 
+        		<br>
+        		<br>  
+        		L'équipe Talenta vous remercie de votre confiance. 
+        		<br>
+        		***************************************************************************************************`
+        	}
+    	}
+	
+    	const getCompetences = () => {
+        	let allCompetences = '';
+        	JSON.parse(req.body.competence).forEach((competence) => {
+            	allCompetences += `${competence}, `
+        	});
+        	return allCompetences
+    	}
+    	const getEducations = () => {
+        	let allEducations = '';
+        	let titre = '';
+        	let specialisation = '';
+        	let diplome = '';
+        	let debut = '';
+        	let fin = '';
+        	JSON.parse(req.body.education).forEach((education) => {
+            	titre = education.titre;
+            	specialisation = education.specialisation;
+            	diplome = education.diplome;
+            	debut = education.startDate;
+            	fin = education.endDate;
+            	allEducations += `<strong>Titre</strong> : ${titre},<br> 
+        			<strong>Specialisation</strong> : ${specialisation},<br>
+        			<strong>Diplome</strong> : ${diplome},<br>
+        			<strong>Debut</strong> : ${debut},
+        			<strong>Fin</strong> : ${fin};<br>
+        			<br>`;
+        	});
+        	return allEducations
+    	}
+    	const getProfessions = () => {
+        	let allProfessions = '';
+        	let titre = '';
+        	let nomSociete = '';
+        	let resume = '';
+        	let debut = '';
+        	let fin = '';
+        	JSON.parse(req.body.profession).forEach((profession) => {
+            	titre = profession.titre;
+            	nomSociete = profession.nomSociete;
+            	resume = profession.resume;
+            	debut = profession.startDate;
+            	fin = profession.endDate;
+            	allProfessions += `<strong>Titre</strong> : ${titre},<br> 
+        			<strong>Nom de la société</strong> : ${nomSociete},<br>
+        			<strong>Résumé</strong> : ${resume},<br>
+        			<strong>Debut</strong> : ${debut},
+        			<strong>Fin</strong> : ${fin};<br>
+        			<br>`;
+        	});
+        	return allProfessions
+    	}
+	
+	
+	
+    	// Creation Data
+    	const generateData = (req) => {
+        	const competences = (req) => {
+            	let competences = [];
+            	JSON.parse(req.body.competence).forEach((competence) => {
+                	competences.push({
+                    	name: competence,
+                	})
+            	});
+            	return competences;
+        	}
+        	console.log(`\n\n Competences ${JSON.stringify(competences(req))}\n\n`);
+	
+        	const educations = (req) => {
+            	let educations = [];
+            	JSON.parse(req.body.education).forEach((education) => {
+                	educations.push({
+                    	titre: education.titre,
+                    	specialisation: education.specialisation,
+                    	diplome: education.diplome,
+                    	startDate: education.startDate,
+                    	endDate: education.endDate,
+                	})
+            	});
+            	return educations;
+        	}
+        	console.log(`\n\n Educations ${JSON.stringify(educations(req))}\n\n`);
+	
+        	const professions = (req) => {
+            	let professions = [];
+            	JSON.parse(req.body.profession).forEach((profession) => {
+                	professions.push({
+                    	titre: profession.titre,
+                    	nomSociete: profession.nomSociete,
+                    	resume: profession.resume,
+                    	startDate: profession.startDate,
+                    	endDate: profession.endDate,
+                	})
+            	});
+            	return professions;
+        	}
+        	console.log(`\n\n Professions ${JSON.stringify(professions(req))}\n\n`);
+	
+        	const blobFile = (req.files.cv && req.files.cv[0]) ? {
+            	path: req.files.cv[0].originalname,
+            	extension: req.files.cv[0].originalname.split('.').pop(),
+            	TypeBlobId: 5 // cv
+        	} : null
+        	console.log(`\n\nblobFile ${JSON.stringify(blobFile)}\n\n`);
+	
+        	const blobInfos = (req.files.infos && req.files.infos[0]) ? {
+            	path: req.files.infos[0].originalname,
+            	extension: req.files.infos[0].originalname.split('.').pop(),
+            	TypeBlobId: 5 // cv
+        	} : null
+        	console.log(`\n\nblobInfos ${JSON.stringify(blobInfos)}\n\n`);
+	
+        	return {
+            	competences,
+            	educations,
+            	professions,
+            	blobFile,
+            	blobInfos
+        	}
+    	}
+    	// CREATION 
+    	const { competences, educations, professions, blobFile, blobInfos } = generateData(req);
+	
+    	const transaction_spontaneous = await db.sequelize.transaction();
+    	const bulkMerge = (objectList, object) => {
+        	let result = [];
+        	objectList.forEach((item) => {
+            	result.push({ ...item, ...object });
+        	});
+        	return result;
+    	}
+
         // SPONTANEOUS CREATION
         const current_spontaneous = await Spontaneous.create(spontaneous, { transaction: transaction_spontaneous });
         await Competence.bulkCreate(bulkMerge(competences(req), { spontaneousId: current_spontaneous.id }), { returning: true, transaction: transaction_spontaneous })

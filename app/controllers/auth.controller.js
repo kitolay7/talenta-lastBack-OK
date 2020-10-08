@@ -5,6 +5,7 @@ const Profile = db.profile;
 const Role = db.role;
 const HttpStatus = require('http-status-codes');
 const { sendMail } = require("../middleware");
+const legit = require('legit');
 
 const Op = db.Sequelize.Op;
 
@@ -19,6 +20,18 @@ exports.register = async (req, res) => {
   // create transaction for users and profiles creation
   const transaction_user_profile = await db.sequelize.transaction();
   try {
+  	
+  	
+  	await legit(req.body.email)
+  	.then(result => {
+    	result.isValid ? console.log('Valid!') : console.log('Invalid!');
+    	//console.log(JSON.stringify(result));
+    	if (!result.isValid) { // if email doesn't exist : resp = false
+        	throw "L'adresse email n'existe pas";
+      	}
+  	})
+  	.catch((err) => { throw err });
+  	
     const current_user = await User.create({
       username: req.body.username,
       email: req.body.email,
@@ -317,50 +330,57 @@ exports.editPW = (req, res) => {
     })
 };
 
-exports.forgotPW = (req, res) => {
+exports.forgotPW = async (req, res) => {
   	console.log(`\n\n\n${req.body}\n\n\n`);
-  	User.findOne({
-    	where: {
-      		email: req.body.email
-    	}
-  	})
-    .then(user => {
-      	if (!user) {
-        	return res
-          	.status(HttpStatus.NOT_FOUND)
-          	.send({ message: "User Not found.", error: true });
-      	}
-      
-    	var token = jwt.sign({ id: user.id }, config.secret, {
-      		expiresIn: 864000 // 24 hours
-    	});
-    	console.log(token)
-    	const url = `${req.headers.origin}/user/reset/${token}`
-    	
-    	const mail = {
-      		body: {
-        		email_recipient: req.body.email,
-        		email_subject: `Réinitialisation de mot de passe pour Talenta Sourcing`,
-        		email_content: `Bonjour! :) 
-        		<br>
-        		<br>Veuillez cliquer sur ce lien pour réinitialiser votre mot de passe : <a href="${url}">${url}</a>
-        		<br>
-        		<br>  
-        		L'équipe Talenta vous remercie de votre confiance. 
-        		<br>
-        	***************************************************************************************************`
+  	try {
+  		await User.findOne({
+    		where: {
+      			email: req.body.email
+    		}
+  		})
+    	.then(user => {
+      		if (!user) {
+        		return res
+          			.status(HttpStatus.NOT_FOUND)
+          			.send({ message: "User Not found.", error: true });
       		}
-    	}
-	
-    	sendMail(mail, res, {});
-	
-        res
-          .status(HttpStatus.OK)
-          .send({
-            id: user.id,
-            error: false
-          });
-      });
+      	
+    		var token = jwt.sign({ id: user.id }, config.secret, {
+      			expiresIn: 864000 // 24 hours
+    		});
+    		console.log(token)
+    		const url = `${req.headers.origin}/user/reset/${token}`
+    		
+    		const mail = {
+      			body: {
+        			email_recipient: req.body.email,
+        			email_subject: `Réinitialisation de mot de passe pour Talenta Sourcing`,
+        			email_content: `Bonjour! :) 
+        			<br>
+        			<br>Veuillez cliquer sur ce lien pour réinitialiser votre mot de passe : <a href="${url}">${url}</a>
+        			<br>
+        			<br>  
+        			L'équipe Talenta vous remercie de votre confiance. 
+        			<br>
+        		***************************************************************************************************`
+      			}
+    		}
+		
+    		sendMail(mail, res, {});
+		
+        	res
+          	.status(HttpStatus.OK)
+          	.send({
+            	id: user.id,
+            	error: false
+          	});
+      	});
+      } catch (err) {
+    	res
+      		.status(HttpStatus.INTERNAL_SERVER_ERROR)
+      		.send({ message: err, error: true });
+    		console.log(">> Error while finding comment: ", err);
+      }
 };
 exports.checkReset = async (req, res) => {
   // console.log(req.headers.origin);
