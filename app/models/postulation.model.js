@@ -2,10 +2,10 @@ const db = require("../models");
 const { QueryTypes } = require('sequelize');
 module.exports = (sequelize, Sequelize) => {
     const Postulation = sequelize.define("postulations", {
-			index:{
-				type: Sequelize.INTEGER,
-				unique:true
-			},
+			// index:{
+			// 	type: Sequelize.INTEGER,
+			// 	unique:true
+			// },
 			testDate: {
 				type: Sequelize.DATE
 			},
