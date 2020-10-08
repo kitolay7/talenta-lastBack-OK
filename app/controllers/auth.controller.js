@@ -74,7 +74,7 @@ exports.register = async (req, res) => {
     });
     console.log(token)
     const roleId = (req.body.roles.includes('ROLE_RECRUTEUR')) ? 1 : 2 ;
-    const url = `http://${req.headers.host}/confirmation/${token}/${roleId}`
+    const url = `https://${req.headers.host}/confirmation/${token}/${roleId}`
     
     const mail = {
       body: {
@@ -286,14 +286,14 @@ exports.updateProfile = async (req, res) => {
 
 exports.confirm = (req, res) => {
   const id = jwt.verify(req.params.token, config.secret);
-  const url = req.headers.host.split(':')[0];
+  // const url = req.headers.host.split(':')[0];
   User.update({ confirmed: true }, { where: { id: id.id } })
   .then(resultat => {
     
      if (req.params.role === 1) {
-   			return res.redirect(`http://${url}:4200/candidat/registration`);
+   			return res.redirect(`${process.env.BASE_URL_CLIENT}candidat/registration`);
  		} else {
-   			return res.redirect(`http://${url}:4200/recruteur/registration`);
+   			return res.redirect(`${process.env.BASE_URL_CLIENT}recruteur/registration`);
  		}
   }).catch(err => { throw err });
 
