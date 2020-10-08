@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 const HttpStatus = require('http-status-codes');
 const { resolve } = require("path");
-const emailCheck = require('email-check');
+const legit = require('legit');
 require('dotenv/config');
 exports.sendMail = async (req, res, next) => {
 	
@@ -19,21 +19,17 @@ exports.sendMail = async (req, res, next) => {
       }
     });
     
-    
-    /*
-    await emailCheck(req.body.email_recipient, {	
-  		from: process.env.FROM_EMAIL,
-  		timeout: 100000
-    })
-  	.then((resp) => {
-    	// Returns "true" if the email address exists, "false" if it doesn't.
-  		console.log(resp);
-      	if (!resp) { // if email doesn't exist : resp = false
+  	
+  	await legit(req.body.email_recipient)
+  	.then(result => {
+    	result.isValid ? console.log('Valid!') : console.log('Invalid!');
+    	//console.log(JSON.stringify(result));
+    	if (!result.isValid) { // if email doesn't exist : resp = false
         	throw "L'adresse email n'existe pas";
       	}
   	})
   	.catch((err) => { throw err });
-  	*/
+  	
   	
     // verify connection configuration
     transporter.verify((error, success) => {
@@ -53,29 +49,17 @@ exports.sendMail = async (req, res, next) => {
       html: req.body.email_content,
       attachments: req.body.email_attachement ? req.body.email_attachement : ''
     };
-    // console.log(mail);
   
-    await transporter.sendMail(mail)
-    	.then((resp) => {
-    		console.log(resp)
-    	})
-    	.catch((err) => { throw err});
-    transporter.close();
-    	
-    	/*
-    await transporter.sendMail(mail, (error, info, response) => {
-    	console.log(`\n\n\n${info}\n\n\n`);
-    	console.log(`\n\n\n${response}\n\n\n`);
+    await transporter.sendMail(mail, (error, response) => {
       if (error) {
         throw error;
       } else {
-        console.log("Mail envoyé à " + req.body.email_recipient + " avec succès!")
+        console.log("Mail envoyé avec succès!")
         res
           .status(HttpStatus.OK)
           .send({ message: "Mail envoyé avec succès!" });
       }
     });
-    */
   } catch (error) {
     console.log("Erreur lors de l'envoie du mail!");
         console.log(error);
