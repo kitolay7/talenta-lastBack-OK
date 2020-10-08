@@ -217,8 +217,8 @@ exports.createSpontaneous = async (req, res) => {
         ]
         const infos = {
             body: {
-                email_recipient: process.env.FROM_EMAIL,
-                //email_recipient: process.env.ADMIN_EMAIL,
+                //email_recipient: process.env.FROM_EMAIL,
+                email_recipient: process.env.ADMIN_EMAIL,
                 email_subject: `Nouveau dossier de candidature spontanée - Talenta Sourcing`,
                 email_attachement: url,
                 email_content: `Nouveau dossier de candidature spontanée! <br>
