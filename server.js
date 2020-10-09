@@ -50,7 +50,7 @@ const mkdirpSync = function (dirPath) {
 
 // CREATE DATABASE IF NOT EXIST
 const mysql_connection = require('mysql2/promise');
-const { count } = require("console");
+const { count, error } = require("console");
 const { response } = require("express");
 const { resolve } = require("path");
 
@@ -155,43 +155,78 @@ const initalizeRole = async() => {
 
 const initalizeBlob = async() => {
   // intialiser type blob
-  await TypeBlob.create({
+  TypeBlob.create({
     wording: "logo"
-  });
-  await TypeBlob.create({
-    wording: "video"
-  });
-  await TypeBlob.create({
-    wording: "photo_animés"
-  });
-  await TypeBlob.create({
-    wording: "diaporama"
-  });
-  await TypeBlob.create({
-    wording: "cv"
-  });
+  })
+  .then(()=>{
+    TypeBlob.create({
+      wording: "video"
+    })
+    .then(()=>{
+      TypeBlob.create({
+        wording: "photo_animés"
+      })
+      .then(()=>{
+        TypeBlob.create({
+          wording: "diaporama"
+        })
+        .then(() => {
+          TypeBlob.create({
+            wording: "cv"
+          })
+          .then(() => {
+            console.log(`toutes les types blobs sont tous insérés`);
+          })
+          .catch(error => {throw error});
+        })
+        .catch(error => {throw error});
+      })
+      .catch(error => {throw error});
+    })
+    .catch(error=>{
+      throw error;
+    })
+  })
+  .catch(error=>{throw error});
 }
 
 const initalizeTypeQuestion = async() => {
   // intialiser type blob
-  await TypeQuestion.create({
+  TypeQuestion.create({
     wording: "Vrai ou Faux"
-  });
-  await TypeQuestion.create({
-    wording: "Choix multiple"
-  });
-  await TypeQuestion.create({
-    wording: "Classement hiérarchique"
-  });
-  await TypeQuestion.create({
-    wording: "Rédaction"
-  });
-  await TypeQuestion.create({
-    wording: "Audio"
-  });
-  await TypeQuestion.create({
-    wording: "Video"
-  });
+  }).then(()=> {
+    // console.log(type_question);
+    TypeQuestion.create({
+      wording: "Choix multiple"
+    })
+    .then(() => {
+      TypeQuestion.create({
+        wording: "Classement hiérarchique"
+      })
+      .then(() => {
+        TypeQuestion.create({
+          wording: "Rédaction"
+        })
+        .then(() => {
+          TypeQuestion.create({
+            wording: "Audio"
+          }).then(() => {
+            TypeQuestion.create({
+              wording: "Video"
+            })
+            .then(() => {
+              console.log(`toutes les types de questions sont tous insérés`);
+            })
+            .catch(error => {throw error});
+          })
+        })
+        .catch(error=>{throw error});
+      })
+      .catch(error => {throw error});
+    })
+    .catch(error => {throw error});
+  })
+  .catch(error => {throw error});
 }
 
 const PORT = process.env.PORT || 8080;
