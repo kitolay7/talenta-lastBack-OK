@@ -824,7 +824,7 @@ exports.updateResponsePostulationMultiple = async (req, res) => {
       .catch(error => {throw error});
       console.log(postulation_note);
       resultNote+=parseInt(postulation_note);
-      await db.postulation.update({note:resultNote, offreId:responseToUpdate[0].offreId,userId:responseToUpdate[0].userId},{where:{[Op.and]:[{offreId:responseToUpdate[0].offreId},{userId:responseToUpdate[0].userId}]}}, {transaction: transaction_update_response_quiz}).catch(error => {throw error});
+      await db.postulation.update({note:resultNote, offreId:responseToUpdate[0].offreId,userId:responseToUpdate[0].userId,noted_main: true},{where:{[Op.and]:[{offreId:responseToUpdate[0].offreId},{userId:responseToUpdate[0].userId}]}}, {transaction: transaction_update_response_quiz}).catch(error => {throw error});
     //   for (let index = 0; index < responseToUpdate.length; index++) {
     //     await ResponseTest.update({pointWin:responseToUpdate[index].pointWin},{where:{id:responseToUpdate[index].id}})
     //     .catch(error => {
