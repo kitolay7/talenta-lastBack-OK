@@ -39,6 +39,10 @@ module.exports = (sequelize, Sequelize) => {
 			},
 			observation: {
 				type: Sequelize.STRING
+			},
+			noted_main:{
+				type:Sequelize.BOOLEAN,
+				defaultValue: false
 			}
     }, {
         timestamps: false,
