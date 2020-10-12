@@ -32,4 +32,5 @@ module.exports = function (app) {
   app.post("/api/auth/forgot", controller.forgotPW );
   app.get("/reset/:token", controller.checkReset );
   app.post("/contact", controller.contact );
+  app.post("/resetpassword", controller.resetPW );
 };
