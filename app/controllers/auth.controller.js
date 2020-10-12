@@ -493,12 +493,16 @@ exports.resetPW = (req, res) => {
         for (let i = 0; i < roles.length; i++) {
           authorities.push("ROLE_" + roles[i].name.toUpperCase());
         }
-      });
-      User.update({
-        password: bcrypt.hashSync(req.body.newPw, 8)
-      }, { where: { id: req.body.id } })
+        User.update({
+          password: bcrypt.hashSync(req.body.newPw, 8)
+        }, { where: { id: req.body.id } })
         res
-        .send({ data: user, role: authorities, message: 'Mot de passe modifié', error: false });
-      
+          .send({ 
+            data: user, 
+            role: authorities, 
+            message: 'Mot de passe modifié', 
+            error: false 
+          });
+      });
     })
 };
