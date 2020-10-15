@@ -45,8 +45,8 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING
         },
         passe: {
-            type: Sequelize.FLOAT,
-            defaultValue: 0.5
+            type: Sequelize.STRING,
+            defaultValue: '0.5'
         },
         publicationDate: {
             type: Sequelize.DATE,
