@@ -109,8 +109,8 @@ db.offre.belongsToMany(db.dossier,{
 db.postulation.belongsTo(db.user);
 db.postulation.belongsTo(db.offre);
 db.postulation.hasMany(db.response_test,{
-  foreignKey:"offreId",
-  foreignKey:"userId",
+  // foreignKey:"offreId",
+  // foreignKey:"userId",
   onDelete:"CASCADE"
 });
 // quiz_to_offer
