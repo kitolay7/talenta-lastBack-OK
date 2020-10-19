@@ -317,7 +317,7 @@ exports.editPW = (req, res) => {
         return res
           .send({
             error: true,
-            message: "Invalid Password!",
+            message: "Mot de passe invalide!",
           });
       } else {
       User.update({
@@ -325,7 +325,7 @@ exports.editPW = (req, res) => {
 
       }, { where: { id: req.body.id } })
         res
-        .send({ message: 'mot de passe modifier', error: false });
+        .send({ message: 'Mot de passe modifié', error: false });
       }
     })
 };
@@ -478,4 +478,31 @@ exports.contact = async (req, res) => {
             		error: true
           		})
     }
+};
+
+exports.resetPW = (req, res) => {
+  console.log(`\n\n\n${req.body}\n\n\n`);
+  User.findOne({
+    where: {
+      id: req.body.id
+    }
+  })
+    .then(user => {
+      var authorities = [];
+      user.getRoles().then(roles => {
+        for (let i = 0; i < roles.length; i++) {
+          authorities.push("ROLE_" + roles[i].name.toUpperCase());
+        }
+        User.update({
+          password: bcrypt.hashSync(req.body.newPw, 8)
+        }, { where: { id: req.body.id } })
+        res
+          .send({ 
+            data: user, 
+            role: authorities, 
+            message: 'Mot de passe modifié', 
+            error: false 
+          });
+      });
+    })
 };
