@@ -67,7 +67,10 @@ db.dossier.belongsTo(db.user, {
 db.question.belongsTo(db.type_question, { foreignKey: "TypeQuestionId" });
 db.question.hasMany(db.criteria_point_question, {foreignKey: "questionId", onDelete:"CASCADE"});
 // db.offre.hasMany(db.question, { as: "questions" });
-db.question.hasMany(db.response_test,{foreignKey:"questionId"});
+db.question.hasMany(db.response_test,{
+  onDelete:"CASCADE",
+  foreignKey:"questionId"
+});
 
 db.offre.hasMany(db.blob, {
   onDelete:"CASCADE",
@@ -95,6 +98,7 @@ db.offre.belongsToMany(db.dossier,{
   as:"folder",
   through:db.dossier_offer,
   foreignKey:"offreId",
+  primaryKey:true,
   otherKey:"dossierId"
 });
 // db.offre.hasMany(db.response_test,{
@@ -105,10 +109,9 @@ db.offre.belongsToMany(db.dossier,{
 db.postulation.belongsTo(db.user);
 db.postulation.belongsTo(db.offre);
 db.postulation.hasMany(db.response_test,{
-  foreignKey:"offreId",
-  otherKey:"userId",
+  // foreignKey:"offreId",
+  // foreignKey:"userId",
   onDelete:"CASCADE"
-    
 });
 // quiz_to_offer
 db.quiz_to_offer.belongsTo(db.quiz);
@@ -148,7 +151,7 @@ db.user.belongsToMany(db.offre,{
   as:"postulator",
   through: db.postulation,
   foreignKey:"userId",
-  otherKey:"offreId"  
+  primaryKey:true
 });
 
 // db.user.hasMany(db.response_test,{
@@ -195,10 +198,12 @@ db.response_test.belongsTo(db.question, {
 db.response_test.belongsTo(db.offre, {
   through:db.postulation,
   foreignKey:"offreId",
+  onDelete:"CASCADE"
 })
 db.response_test.belongsTo(db.user, {
   through:db.postulation,
   foreignKey:"userId",
+  onDelete:"CASCADE"
 });
 db.response_test.hasMany(db.details_note, {
   foreignKey:"responseTestId",
