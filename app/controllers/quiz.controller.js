@@ -12,17 +12,19 @@ const fs = require('fs');
 const HttpStatus = require('http-status-codes');
 const { response } = require("express");
 const options = require("dotenv/lib/env-options");
-const { quiz, question, offre } = require("../models");
+const { quiz, question, offre, dossier } = require("../models");
 const ResponseTest = db.response_test;
 exports.create = async (req, res) => {
     // offres id
     const transaction_quiz = await db.sequelize.transaction();
     try{
         const quiz = await Quiz.create({name:req.body.name,fiche_dir:req.body.fiche_dir,author_dir:req.body.author_dir,offreId:req.body.offer,userId:req.body.idUser,publier:req.body.publier, date_publication:(req.body.publier ? new Date() : null)},{transaction:transaction_quiz});
-        
         if (req.body.offer) {
             await QuizToOffer.create({offreId:req.body.offer,quizzId:quiz.id},{transaction:transaction_quiz});
-            await DossierOffer.create({offreId:req.body.offer,dossierId:req.body.idFolder},{transaction:transaction_quiz});
+            // creation dossier
+            const newDossier = await Dossier.create({titre:req.body.name,fiche:req.body.fiche_dir,auteur:req.body.author_dir,userId:req.body.userId},{transaction:transaction_quiz}).catch(error => {throw error});
+            // console.log(await newDossier);
+            await DossierOffer.create({offreId:req.body.offer,dossierId:newDossier.id},{transaction:transaction_quiz}).catch(error => {throw error});
         }
         const listTrueOrFalseRequest = req.body.listTrueOrFalse || null;
         for(const questionTrueFalseRequest of listTrueOrFalseRequest) {
