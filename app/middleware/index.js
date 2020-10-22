@@ -1,9 +1,10 @@
 const authJwt = require("./authJwt");
 const verifySignUp = require("./verifySignUp");
-const {sendMail, sendMailGroup} = require("./sendMail");
+const {sendMail,sendMailRegister, sendMailGroup} = require("./sendMail");
 module.exports = {
   authJwt,
   verifySignUp,
   sendMail,
+  sendMailRegister,
   sendMailGroup
 };
