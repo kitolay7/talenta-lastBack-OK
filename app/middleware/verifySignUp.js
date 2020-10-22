@@ -5,7 +5,7 @@ const User = db.user;
 const HttpStatus = require('http-status-codes');
 
 
-checkDuplicateUsernameOrEmail = (req, res, next) => {
+checkDuplicateUsernameOrEmail = async (req, res, next) => {
   // Username
   // User.findOne({
   //   where: {
@@ -36,7 +36,8 @@ checkDuplicateUsernameOrEmail = (req, res, next) => {
       }
 
       next();
-    });
+    })
+    .catch(error => {throw error});
   // });
 };
 
