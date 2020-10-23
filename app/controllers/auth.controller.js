@@ -4,7 +4,7 @@ const User = db.user;
 const Profile = db.profile;
 const Role = db.role;
 const HttpStatus = require('http-status-codes');
-const { sendMail } = require("../middleware");
+const { sendMail, sendMailRegister } = require("../middleware");
 const legit = require('legit');
 
 const Op = db.Sequelize.Op;
@@ -45,6 +45,7 @@ exports.register = async (req, res) => {
       }
     })
     if (req.body.roles) {
+      console.log(`\nmakato\n`);
       await current_user.setRoles(all_roles, { transaction: transaction_user_profile }).catch(err => { throw err })
     } else {
       await current_user.setRoles([2], { transaction: transaction_user_profile }).catch(err => { throw err })
@@ -65,51 +66,40 @@ exports.register = async (req, res) => {
       societe: req.body.societe,
       userId: await current_user.id
     }, { transaction: transaction_user_profile });
-    await transaction_user_profile.commit();
-    const response_roles = await current_user.getRoles()
-      .then(roles => { return roles })
-      .catch(err => { throw err });
-    var token = jwt.sign({ id: current_user.id }, config.secret, {
-      expiresIn: 864000 // 24 hours
-    });
-    console.log(token)
-    const roleId = (req.body.roles.includes('ROLE_RECRUTEUR')) ? 1 : 2 ;
-    const url = `https://${req.headers.host}/confirmation/${token}/${roleId}`
     
-    const mail = {
-      body: {
-        email_recipient: req.body.email,
-        email_subject: `Confirmation d'adresse email pour Talenta Sourcing`,
-        email_content: `Bonjour! :) 
-        <br>
-        <br>Veuillez cliquer sur ce lien pour valider votre adresse mail et votre compte : <a href="${url}">${url}</a>
-        <br>
-        <br>  
-        L'équipe Talenta vous remercie de votre confiance. 
-        <br>
-        	***************************************************************************************************`
-      }
-    }
-
-    sendMail(mail, res, {});
-
-    res
-      .status(HttpStatus.CREATED)
-      .send({
-        message: "successfully created",
-        data: {
-          user: { ...current_user.dataValues },
-          profile: { ...current_profile.dataValues },
-          roles: response_roles
-        },
-        accessToken: token,
-        error: false
+    const response_roles = await current_user.getRoles()
+      .then(roles => { 
+        console.log(`ROLES ${JSON.stringify(roles)}`);
+        return roles
       })
+      .catch(err => { throw err });
+    // var token = jwt.sign({ id: current_user.id }, config.secret, {
+    //   expiresIn: 864000 // 24 hours
+    // });
+    // console.log(token);
+
+    // await sendMailRegister(req,token).catch(error => {throw error});
+    await transaction_user_profile.commit()
+      .then(async () => {
+        res
+        .status(HttpStatus.CREATED)
+        .send({
+          message: "successfully created",
+          data: {
+            user: { ...current_user.dataValues },
+            profile: { ...current_profile.dataValues },
+            roles: await response_roles
+          },
+          // accessToken: token,
+          error: false
+        })
+      })
+      .catch(error => {throw error});
   } catch (err) {
     await transaction_user_profile.rollback();
     res
       .status(HttpStatus.INTERNAL_SERVER_ERROR)
-      .send({ message: err, error: true });
+      .send({ message: err.message, error: true });
     console.log(">> Error while finding comment: ", err);
   }
 };
@@ -290,7 +280,7 @@ exports.confirm = (req, res) => {
   User.update({ confirmed: true }, { where: { id: id.id } })
   .then(resultat => {
     
-     if (req.params.role === 1) {
+     if (req.params.role !== 1) {
    			return res.redirect(`${process.env.BASE_URL_CLIENT}candidat/registration`);
  		} else {
    			return res.redirect(`${process.env.BASE_URL_CLIENT}recruteur/registration`);
