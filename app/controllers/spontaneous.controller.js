@@ -16,7 +16,7 @@ require('dotenv/config');
 
 exports.createSpontaneous = async (req, res) => {
 
-    console.log('bodddddddyyyyy' + JSON.stringify(req.files))
+    //console.log('bodddddddyyyyy' + JSON.stringify(req.files))
     
     try {
     
@@ -43,7 +43,7 @@ exports.createSpontaneous = async (req, res) => {
         	actualCity: req.body.actualCity,
         	secteur: req.body.secteur,
     	};
-    	console.log(spontaneous)
+    	//console.log(spontaneous)
 	
 	
     	const mail = {
@@ -127,7 +127,7 @@ exports.createSpontaneous = async (req, res) => {
             	});
             	return competences;
         	}
-        	console.log(`\n\n Competences ${JSON.stringify(competences(req))}\n\n`);
+        	//console.log(`\n\n Competences ${JSON.stringify(competences(req))}\n\n`);
 	
         	const educations = (req) => {
             	let educations = [];
@@ -142,7 +142,7 @@ exports.createSpontaneous = async (req, res) => {
             	});
             	return educations;
         	}
-        	console.log(`\n\n Educations ${JSON.stringify(educations(req))}\n\n`);
+        	//console.log(`\n\n Educations ${JSON.stringify(educations(req))}\n\n`);
 	
         	const professions = (req) => {
             	let professions = [];
@@ -157,21 +157,21 @@ exports.createSpontaneous = async (req, res) => {
             	});
             	return professions;
         	}
-        	console.log(`\n\n Professions ${JSON.stringify(professions(req))}\n\n`);
+        	//console.log(`\n\n Professions ${JSON.stringify(professions(req))}\n\n`);
 	
         	const blobFile = (req.files.cv && req.files.cv[0]) ? {
             	path: req.files.cv[0].originalname,
             	extension: req.files.cv[0].originalname.split('.').pop(),
             	TypeBlobId: 5 // cv
         	} : null
-        	console.log(`\n\nblobFile ${JSON.stringify(blobFile)}\n\n`);
+        	//console.log(`\n\nblobFile ${JSON.stringify(blobFile)}\n\n`);
 	
         	const blobInfos = (req.files.infos && req.files.infos[0]) ? {
             	path: req.files.infos[0].originalname,
             	extension: req.files.infos[0].originalname.split('.').pop(),
             	TypeBlobId: 5 // cv
         	} : null
-        	console.log(`\n\nblobInfos ${JSON.stringify(blobInfos)}\n\n`);
+        	//console.log(`\n\nblobInfos ${JSON.stringify(blobInfos)}\n\n`);
 	
         	return {
             	competences,
