@@ -276,22 +276,37 @@ exports.updateProfile = async (req, res) => {
 
 exports.confirm = (req, res) => {
   const id = jwt.verify(req.params.token, config.secret);
-  // const url = req.headers.host.split(':')[0];
-  User.update({ confirmed: true }, { where: { id: id.id } })
-  .then(resultat => {
-    
-     if (req.params.role !== 1) {
-   			return res.redirect(`${process.env.BASE_URL_CLIENT}candidat/registration`);
- 		} else {
-   			return res.redirect(`${process.env.BASE_URL_CLIENT}recruteur/registration`);
- 		}
-  }).catch(err => { throw err });
+  User.findOne({
+    where: { id: id.id }
+  }).then(user => {
+    if (user === null) {
+        return res
+          .status(HttpStatus.NOT_FOUND)
+          .send({ message: "User Not found.", error: true });
+    }
 
+      var authorities = [];
+      user.getRoles().then(roles => {
+        for (let i = 0; i < roles.length; i++) {
+          authorities.push("ROLE_" + roles[i].name.toUpperCase());
+        }
 
+        User.update({ confirmed: true }, { where: { id: id.id } })
+        .then(resultat => {
+          res
+            .send({ 
+              data: user, 
+              role: authorities, 
+              message: 'Votre compte a été confirmé. Vous pouvez vous connecter maintenant', 
+              error: false 
+            });
+        }).catch(err => { throw err });
+    })
+  })
 };
 
 exports.editPW = (req, res) => {
-  console.log(`\n\n\n${req.body}\n\n\n`);
+  //console.log(`\n\n\n${req.body}\n\n\n`);
   User.findOne({
     where: {
       id: req.body.id
@@ -321,7 +336,7 @@ exports.editPW = (req, res) => {
 };
 
 exports.forgotPW = async (req, res) => {
-  	console.log(`\n\n\n${req.body}\n\n\n`);
+  	//console.log(`\n\n\n${req.body}\n\n\n`);
   	try {
   		await User.findOne({
     		where: {
@@ -338,7 +353,7 @@ exports.forgotPW = async (req, res) => {
     		var token = jwt.sign({ id: user.id }, config.secret, {
       			expiresIn: 864000 // 24 hours
     		});
-    		console.log(token)
+    		//console.log(token)
     		const url = `${req.headers.origin}/user/reset/${token}`
     		
     		const mail = {
@@ -471,7 +486,7 @@ exports.contact = async (req, res) => {
 };
 
 exports.resetPW = (req, res) => {
-  console.log(`\n\n\n${req.body}\n\n\n`);
+  //console.log(`\n\n\n${req.body}\n\n\n`);
   User.findOne({
     where: {
       id: req.body.id
