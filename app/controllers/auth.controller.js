@@ -45,7 +45,6 @@ exports.register = async (req, res) => {
       }
     })
     if (req.body.roles) {
-      console.log(`\nmakato\n`);
       await current_user.setRoles(all_roles, { transaction: transaction_user_profile }).catch(err => { throw err })
     } else {
       await current_user.setRoles([2], { transaction: transaction_user_profile }).catch(err => { throw err })

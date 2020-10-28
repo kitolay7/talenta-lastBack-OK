@@ -3,6 +3,7 @@ const HttpStatus = require('http-status-codes');
 const { resolve } = require("path");
 const legit = require('legit');
 const { error } = require("console");
+const stripHtml = require("string-strip-html");
 require('dotenv/config');
 exports.sendMail = async (req, res, next) => {
 	
@@ -46,7 +47,7 @@ exports.sendMail = async (req, res, next) => {
     let mail = {
       from: process.env.FROM_EMAIL,
       to: req.body.email_recipient,
-      subject: req.body.email_subject,
+      subject: stripHtml(req.body.email_subject).result,
       html: req.body.email_content,
       attachments: req.body.email_attachement ? req.body.email_attachement : ''
     };
@@ -178,6 +179,7 @@ exports.sendMailGroup = async (req,res,next) => {
       }
     });
     const postulations = req.body.data;
+    console.log(`\npostulation to send ${JSON.stringify(postulations)}\n`)
     for (let index = 0; index < postulations.length; index++) {      
       // verify connection configuration
       transporter.verify((error, success) => {
@@ -190,8 +192,15 @@ exports.sendMailGroup = async (req,res,next) => {
       let responseSendMail = await transporter.sendMail({
         from: process.env.FROM_EMAIL,
         to: postulations[index].user.email,
-        subject: postulations[index].subject,
-        html: postulations[index].content
+        subject: stripHtml(postulations[index].subject).result,
+        html: `Bonjour ${postulations[index].user.profile.firstName} ${postulations[index].user.profile.lastName}
+        <br>
+        <br> ${postulations[index].decision ==="Entretien" ? "Felicitation!! Vous avez obtenu la note nécéssaire pour passer l'étape suivante" : (postulations[index].decision ==="En attente" ? "Votre note n'a pas été complet pour le moment":"Malheuresement!! Vous n'avez pas obtenu la note nécéssaire pour passer l'étape suivante")}
+        <br>  
+        <br>  
+        L'équipe Talenta vous remercie de votre confiance. 
+        <br>
+          ***************************************************************************************************`
       })
       .then((info)=> {return {name:`${postulations[index].user.profile.firstName} ${postulations[index].user.profile.lastName}`,info:info}})
       .catch(error => {throw error});
