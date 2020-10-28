@@ -34,7 +34,7 @@ exports.sendMail = async (req, res, next) => {
   	
   	
     // verify connection configuration
-    transporter.verify((error, success) => {
+    await transporter.verify((error, success) => {
       if (error) {
         throw error;
       } else {
