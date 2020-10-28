@@ -21,7 +21,7 @@ exports.sendMail = async (req, res, next) => {
       }
     });
     
-  	
+  	/*
   	await legit(req.body.email_recipient)
   	.then(result => {
     	result.isValid ? console.log('Valid!') : console.log('Invalid!');
@@ -31,7 +31,7 @@ exports.sendMail = async (req, res, next) => {
       	}
   	})
   	.catch((err) => { throw err });
-  	
+  	*/
   	
     // verify connection configuration
     await transporter.verify((error, success) => {
