@@ -45,7 +45,6 @@ exports.register = async (req, res) => {
       }
     })
     if (req.body.roles) {
-      console.log(`\nmakato\n`);
       await current_user.setRoles(all_roles, { transaction: transaction_user_profile }).catch(err => { throw err })
     } else {
       await current_user.setRoles([2], { transaction: transaction_user_profile }).catch(err => { throw err })
@@ -510,4 +509,40 @@ exports.resetPW = (req, res) => {
           });
       });
     })
+};
+
+exports.sendMailCandidat = async (req, res) => {
+    //console.log(`\n\n\n${req}\n\n\n`);
+    
+    const mail = {
+        body: {
+          email_recipient: process.env.FROM_EMAIL,
+          email_subject: req.body.objet,
+          email_content: `${req.body.message}
+            <br> 
+            <br>  
+            L'équipe Talenta vous remercie de votre confiance. 
+            <br>
+            <br> 
+          ***************************************************************************************************`
+        }
+    }
+    //console.log(`\n\n\n${mail}\n\n\n`);
+    try {
+  
+      await sendMail(mail, res, {});
+  
+      res
+          .status(HttpStatus.OK)
+          .send({
+            error: false
+          });
+    } catch (e) {
+      console.log(e);
+      res
+        .send({
+                access: "error",
+                error: true
+              })
+    }
 };

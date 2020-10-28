@@ -33,4 +33,5 @@ module.exports = function (app) {
   app.get("/reset/:token", controller.checkReset );
   app.post("/contact", controller.contact );
   app.post("/resetpassword", controller.resetPW );
+  app.post("/sendMailCandidat", controller.sendMailCandidat );
 };
