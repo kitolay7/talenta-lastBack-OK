@@ -208,11 +208,11 @@ exports.createSpontaneous = async (req, res) => {
             (req.files.cv && req.files.cv[0]) ?
                 {
                     filename: `${req.files.cv[0].filename}`,
-                    path: `http://${req.headers.host}/cv/${req.files.cv[0].filename}`,
+                    path: `https://${req.headers.host}/cv/${req.files.cv[0].filename}`,
                 } : {},
             {
                 filename: `${req.files.infos[0].filename}`,
-                path: `http://${req.headers.host}/cv/${req.files.infos[0].filename}`,
+                path: `https://${req.headers.host}/cv/${req.files.infos[0].filename}`,
             }
         ]
         const infos = {
@@ -236,7 +236,7 @@ exports.createSpontaneous = async (req, res) => {
         			<br> <u>Educations </u>: <br> ${getEducations()},
         			<br> <u>Professions </u>: <br> ${getProfessions()},
                     ${(req.files.cv && req.files.cv[0]) ?
-                        `<br> <u>CV importé </u>: <a href="http://`
+                        `<br> <u>CV importé </u>: <a href="https://`
                         + req.headers.host
                         + `/cv/`
                         + req.files.cv[0].filename
