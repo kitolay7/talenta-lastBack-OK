@@ -618,8 +618,28 @@ exports.findQuestionbyId = (req, res, next) => {
 };
 exports.findAllQuiz = (req,res) => {
   try {
-    Quiz.findAll({include: [{model: db.offre,as:"offerInQuiz"}]})
+
+    db.quiz_to_offer.findAll({include: [
+        {
+            model:db.quiz,
+            where:{userId: req.params.userId}
+        },
+        {
+            model:db.offre
+        }
+    ]})
+
+    // Quiz.findAll({where:{userId: req.params.userId}},
+    //     {
+    //         include: [
+    //             {
+    //                 model: db.quiz_to_offer,
+                    
+    //             }
+    //         ]
+    //     })
     .then(data => {
+        console.log(data);
       res
         .status(HttpStatus.OK)
         .send({data:data, error: false});
