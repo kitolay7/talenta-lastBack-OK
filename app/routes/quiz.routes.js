@@ -72,7 +72,7 @@ module.exports = function (app) {
   app.get("/findFolder/:id", folderController.getOneFolder);
   app.put("/offerFolder", offreControler.updateOffreDossier);
   app.put("/offreRemarque", folderController.updateRemarque);
-  app.get("/quizs",controller.findAllQuiz);
+  app.get("/quizs/:userId",controller.findAllQuiz);
   app.get("/quiz/:quizId", controller.findOneQuizById);
   app.put("/quizs/:quizId/update", controller.updateQuizContent);
   app.get("/users/:userId/offresPublished", offreControler.getOfferByCreatorPublished);
