@@ -4,7 +4,7 @@ const io = require("socket.io-client");
 
 const fs = require('fs');
 const { error, count } = require("console");
-const { postulation, user, profile } = require("../models");
+const { postulation, user, profile, offre } = require("../models");
 const Quiz = db.quiz;
 const offres = db.offre;
 const User = db.user;
@@ -13,7 +13,8 @@ const Postulation = db.postulation;
 const Profile = db.profile;
 const Folder = db.dossier;
 const Op = db.Sequelize.Op;
-const QuizToOffer = db.quiz_to_offer
+const QuizToOffer = db.quiz_to_offer;
+const stripHtml = require("string-strip-html");
 exports.createOffre = async (req, res) => {
     console.log(req.body);
     const offre = {
@@ -246,8 +247,6 @@ exports.findAllOfferbyIdUser = (req, res) => {
             [{
                 model: db.blob,
                 include: [{ model: db.type_blob }],
-
-
             }]
     })
         .then(data => {
@@ -264,7 +263,78 @@ exports.findAllOfferbyIdUser = (req, res) => {
                     error: true
                 });
         });
-};
+    };
+    exports.findCurrentOfferFreebyIdUser = async (req,res) => {
+        let freeCurrentOffer = [];
+        try {     
+        console.log(`params idUser ${req.params.idUser}`)
+        console.log(`params idOffre ${req.params.idOffre}`)
+        const currentOffer = offres.findOne({
+            where:{
+                [Op.and]:[
+                    {userId: req.params.idUser},
+                    {id: req.params.idOffre},
+                ]
+            },
+            include:
+                [{
+                    model: db.blob,
+                    include: [{model: db.type_blob}]
+                }]
+        })
+        .then(currentOffer => { 
+            // currentOffer.titre = stripHtml(currentOffer.titre);    
+            return currentOffer
+        
+        })
+        .catch(error => {
+            throw error
+        });
+        
+        
+        
+        let freeOffer = offres.findAll({
+            where: { 
+                [Op.and]:[
+                    {id:{[Op.not]:req.params.idOffre}},
+                    {userId: req.params.idUser},
+                    {publier: false},
+                    {dossier: false}
+                ]
+            },
+            include:
+                [{
+                    model: db.blob,
+                    include: [{ model: db.type_blob }],
+                }]
+        })
+        .then(freeOffer => {
+            // freeOffer.titre = stripHtml(freeOffer.titre).result;    
+                return freeOffer;
+            })
+        .catch(error => {
+            throw error
+        });
+        
+        freeCurrentOffer = await freeOffer; 
+        freeCurrentOffer.push(await currentOffer);
+        for (let index = 0; index < freeCurrentOffer.length; index++) {
+            freeCurrentOffer[index].titre = stripHtml(freeCurrentOffer[index].titre).result;
+        }
+            res
+                .send({
+                    data:await freeCurrentOffer,
+                    error:false
+                });
+    } catch (error) {
+        res
+                .send({
+                    message:
+                        error.message || "Some error occurred while retrieving tutorials.",
+                    error: true
+                });
+    }
+}
 exports.findAllOfferIdUser = (req, res) => {
     offres.findAll({
         where: { userId: req.params.idUSer },
