@@ -17,7 +17,7 @@ const QuizToOffer = db.quiz_to_offer;
 const stripHtml = require("string-strip-html");
 exports.createOffre = async (req, res) => {
     console.log(req.body);
-    const offre = {
+    let offre = {
         titre: req.body.titre,
         description: req.body.description,
         contexte: req.body.contexte,
@@ -100,6 +100,9 @@ exports.createOffre = async (req, res) => {
         // OFFRE CREATION
         // offre.passe = await parseFloat(offre.passe);
         // console.log(offre);
+        
+        offre.logoPath = blobLogo.path;
+
         const current_offer = await offres.create(offre, { transaction: transaction_offer });
         blobLogo && await db.blob.create({ ...blobLogo, ...{ OffreId: current_offer.id } }, { transaction: transaction_offer });
         blobVideo && await db.blob.create({ ...blobVideo, ...{ OffreId: current_offer.id } }, { transaction: transaction_offer });
@@ -810,6 +813,7 @@ exports.getLastBlobLogo = async (req,res) => {
     try {        
         await db.blob.findOne({
             order: [['id', 'DESC']],
+            where: {TypeBlobId:1},
             attributes:['path'],
             include:[
                 {
