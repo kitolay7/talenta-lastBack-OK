@@ -102,7 +102,7 @@ exports.sendMailRegister = async (currentUser, token) => {
         }
         return 2;
       });
-      const url = `${process.env.BASE_URL_CLIENT}confirmation/${token}/${roleId}`
+      const url = `${process.env.BASE_URL_BACK}confirmation/${token}`
       // const url = `https://${req.headers.host}/confirmation/${token}/${roleId}`
       
       const mail = {
