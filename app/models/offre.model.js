@@ -56,6 +56,9 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.BOOLEAN,
             defaultValue: false
         },
+        logoPath: {
+            type: Sequelize.STRING
+        },
     }, {
         timestamps: true,
         scopes: {
