@@ -101,10 +101,10 @@ exports.createOffre = async (req, res) => {
         // offre.passe = await parseFloat(offre.passe);
         // console.log(offre);
         
-        offre.logoPath = blobLogo.path;
+        offre.logoPath = (blobLogo ? blobLogo.path : null);
 
         const current_offer = await offres.create(offre, { transaction: transaction_offer });
-        blobLogo!==null && await db.blob.create({ ...blobLogo, ...{ OffreId: current_offer.id } }, { transaction: transaction_offer });
+        blobLogo && await db.blob.create({ ...blobLogo, ...{ OffreId: current_offer.id } }, { transaction: transaction_offer });
         blobVideo && await db.blob.create({ ...blobVideo, ...{ OffreId: current_offer.id } }, { transaction: transaction_offer });
         blobPhotoAnimes(req) && await db.blob.bulkCreate(bulkMerge(blobPhotoAnimes(req), { OffreId: current_offer.id }), { returning: true, transaction: transaction_offer })
         blobPhotoDiaporamas(req) && await db.blob.bulkCreate(bulkMerge(blobPhotoDiaporamas(req), { OffreId: current_offer.id }), { returning: true, transaction: transaction_offer });
