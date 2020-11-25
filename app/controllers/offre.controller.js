@@ -245,17 +245,23 @@ exports.findAllOffer = (req, res) => {
 };
 exports.findAllOfferbyIdUser = (req, res) => {
     offres.findAll({
-        where: { userId: req.params.idUSer, publier: false, dossier: false },
+        where: { userId: req.params.idUSer},
         include:
             [{
-                model: db.blob,
-                include: [{ model: db.type_blob }],
-            }]
+                model:db.quiz,
+                as:'quizInOffer',
+                through:db.quiz_to_offer
+            }
+        ],
     })
         .then(data => {
             console.log(data, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+            let result = data;
+            for (let index = 0; index < result.length; index++) {
+                result[index].titre = stripHtml(result[index].titre).result;
+            }
             res
-                .send(data);
+                .send(result);
 
         })
         .catch(err => {
@@ -266,6 +272,15 @@ exports.findAllOfferbyIdUser = (req, res) => {
                     error: true
                 });
         });
+    // db.quiz_to_offer.findAll({
+    //     include:[{
+    //         model: db.offres,
+    //         where: {userId: req.params.idUser}
+    //     },{
+    //         models
+    //     }]
+    //     where:{userId: req.params.idUser}
+    // })
     };
     exports.findCurrentOfferFreebyIdUser = async (req,res) => {
         let freeCurrentOffer = [];
@@ -468,7 +483,7 @@ exports.updateOfferStatusPublished = (req, res) => {
     offres.update(
         {
             publier: req.body.publier,
-            publicationDate: new Date(),
+            publicationDate: req.body.publier ? new Date() : null,
         }, {
         where: { id: req.params.id },
         returning: true
