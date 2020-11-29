@@ -13,6 +13,9 @@ module.exports = (sequelize, Sequelize) => {
     password: {
       type: Sequelize.STRING
     },
+    profile_photo_path: {
+      type: Sequelize.STRING
+    },
     confirmed: {
       type: Sequelize.BOOLEAN,
       defaultValue: false
