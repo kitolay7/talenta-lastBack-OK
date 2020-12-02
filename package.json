@@ -41,6 +41,6 @@
     "string-strip-html": "^6.2.0"
   },
   "engines": {
-    "node": "10.21.0"
+    "node": "13.12.0"
   }
 }
