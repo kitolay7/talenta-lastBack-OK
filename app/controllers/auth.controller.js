@@ -160,7 +160,10 @@ exports.signin = (req, res) => {
   User.findOne({
     where: {
       email: req.body.email
-    }
+    },
+    include:[{
+      model: db.profile
+    }]
   })
     .then(user => {
       if (!user) {
