@@ -18,9 +18,24 @@ module.exports = function (app) {
       if (file.mimetype.includes('application')) {
         cb(null, 'uploads/cv');
       }
+      if (file.mimetype.includes('image')) {
+        cb(null, 'uploads');
+      }
     },
     filename: (req, file, cb) => {
-      cb(null, file.originalname);
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, `${uniqueSuffix} + ${file.originalname}`);
+    }
+  });
+  const fileStorageUpdatingLogoProfile = multer.diskStorage({
+    destination: (req, file, cb) => {
+      if (file.mimetype.includes('image')) {
+        cb(null, 'uploads');
+      }
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, `${uniqueSuffix}-${file.originalname}`);
     }
   });
 
@@ -58,4 +73,7 @@ module.exports = function (app) {
   app.get("/getSpontaneousNonTraiter", spontaneousController.findSpontaneousNonTraiter);
   app.get("/getSpontaneousById/:spontaneousId", spontaneousController.findOneSpontaneous);
   app.put("/updateSpontaneousTraiter/:id", spontaneousController.updateSpontaneousTraiter);
+  app.put('/updateRecruteurProfile/:id', multer({storage: fileStorageUpdatingLogoProfile}).fields([{
+    name: 'logo', maxCount:1
+  }]), controller.updateUserRecruteur);
 };
