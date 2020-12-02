@@ -409,6 +409,10 @@ exports.getOfferByPays = (req, res) => {
                 model: db.blob,
                 include: [{ model: db.type_blob }],
 
+            },{
+                model: db.user,
+                as: 'creator',
+                attributes: ['profile_photo_path'],
             }, {
                 model: db.user,
                 through: db.postulation,
