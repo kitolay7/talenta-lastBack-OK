@@ -2,7 +2,9 @@ const HttpStatus = require('http-status-codes');
 const db = require("../models");
 const { reponse } = require('../models');
 const User = db.user;
-const Profile = db.profile
+const Profile = db.profile;
+const bcrypt = require("bcryptjs");
+
 
 
 exports.allAccess = (req, res) => {
@@ -59,7 +61,9 @@ User.findOne({
             diplomes: response.diplomes,
             specialisations: reponse.specialisations,
             profile: response,
-            error: false
+            error: false,
+            profile_photo_path: current_user.profile_photo_path
+
           });
       })
         .catch(err => {
@@ -82,3 +86,66 @@ exports.moderatorBoard = (req, res) => {
     .status(HttpStatus.OK)
     .send("Moderator Content.");
 };
+
+exports.updateUserRecruteur = (req,res) => {
+  console.log(req.files);
+  try {
+    User.findOne({
+      where: {
+        id: req.params.id
+      }
+    }).then(user => {
+      if(!user){
+        res
+          .status(HttpStatus.NOT_FOUND)
+          .send({ message: "User Not found.", error: true });
+      }
+      const passwordIsValid = bcrypt.compareSync(
+        req.body.password,
+        user.password
+      );
+      if (passwordIsValid) {
+        User.update({
+          username: req.body.username,
+          email: req.body.email,
+          numTel: req.body.numTel,
+          codePostal: req.body.codePostal,
+          societe: req.body.societe,
+          pays: req.body.pays,
+          profile_photo_path: req.files.logo[0].filename
+        },{
+          where:{
+            id: req.params.id
+        },
+          })
+          .then(() => {
+            res.status(HttpStatus.OK).json({
+              message: "user's profile updated",
+              error: false
+            })
+          })
+          .catch((error) => {
+            res.status(HttpStatus.NOT_MODIFIED).json({
+              other: "user's profile isn't updated",
+              error: true
+            })
+           });
+        }
+        else{
+          res.status(HttpStatus.NOT_ACCEPTABLE).json({
+              password: "Mot de passe incorrect",
+              error: true
+          })
+        }
+      })
+    }
+    catch(error){
+      
+    }
+   
+  
+}
+
+exports.updateUserPhoto = (req,res) => {
+
+}
