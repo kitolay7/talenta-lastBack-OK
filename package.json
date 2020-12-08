@@ -41,6 +41,7 @@
     "string-strip-html": "^6.2.0"
   },
   "engines": {
-    "node": "13.12.0"
+    "node": "13.12.0",
+    "yarn": "1.22.5"
   }
 }
