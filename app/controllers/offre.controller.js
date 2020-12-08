@@ -863,7 +863,12 @@ exports.getQuestionsByOffer = async (req, res) => {
             where: { offreId: req.params.offreId },
             include: [{ 
             	model: db.quiz,
-            	include: [{ model: db.question }] 
+            	include: [{ 
+                    model: db.question,
+                    include: [{
+                        model: db.criteria_point_question
+                    }]
+                }] 
             }]
         })
             .then(data => {
