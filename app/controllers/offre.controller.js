@@ -403,7 +403,7 @@ exports.findOneOfferbyId = (req, res) => {
 };
 exports.getOfferByPays = (req, res) => {
     offres.findAll({
-        where: { pays: req.params.pays, archived: false, publier: true },
+        where: { pays: req.params.pays, publier: true },
         include:
             [{
                 model: db.blob,
@@ -417,6 +417,11 @@ exports.getOfferByPays = (req, res) => {
                 model: db.user,
                 through: db.postulation,
                 as: 'offer_postuled'
+            }, {
+                model: db.quiz,
+                through: db.quiz_to_offer,
+                as:"quizInOffer",
+                where: {archiver: false, publier:true}
             }]
     })
         .then(data => {
