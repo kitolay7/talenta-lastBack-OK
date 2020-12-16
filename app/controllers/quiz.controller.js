@@ -13,6 +13,7 @@ const HttpStatus = require('http-status-codes');
 const { response } = require("express");
 const options = require("dotenv/lib/env-options");
 const { quiz, question, offre, dossier } = require("../models");
+const { error } = require("console");
 const ResponseTest = db.response_test;
 exports.create = async (req, res) => {
     // offres id
@@ -181,6 +182,71 @@ exports.findOneByOffer = async (req, res) => {
             });
     })
 };
+
+exports.updateQuizArchive = async (req,res) => {
+    try {
+        Quiz.update({
+            archiver: req.body.archive,
+            publier: req.body.publier
+        },{
+            where:{id:req.params.quizId}
+        })
+        .then(() => {
+            res
+                .status(HttpStatus.OK)
+                .send({message:"quiz updated successfully",error:false})
+        })
+        .catch(error => {
+            res
+                .status(HttpStatus.NOT_FOUND)
+                .send({message:"quiz not found",error:true})
+        })
+
+    } catch (error) {
+        res
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .send({message:error.message,error:true})
+    }
+}
+
+exports.findQuizArchived = async (req,res) => {
+    try {
+
+        db.quiz_to_offer.findAll({include: [
+            {
+                model:db.quiz,
+                where:{userId: req.params.userId,archiver: true}
+            },
+            {
+                model:db.offre
+            }
+        ]})
+    
+        // Quiz.findAll({where:{userId: req.params.userId}},
+        //     {
+        //         include: [
+        //             {
+        //                 model: db.quiz_to_offer,
+                        
+        //             }
+        //         ]
+        //     })
+        .then(data => {
+            console.log(data);
+          res
+            .status(HttpStatus.OK)
+            .send({data:data, error: false});
+        })
+        .catch(error => {
+          throw error;
+        })
+      } catch (error) {
+          console.log(">> Error while finding comment: ", error);
+                res
+                    .status(HttpStatus.NOT_FOUND)
+                    .send({ message: error.message, error: true });
+      }
+}
 
 exports.updateQuizContent = async (req, res) => {
     try {
@@ -622,7 +688,7 @@ exports.findAllQuiz = (req,res) => {
     db.quiz_to_offer.findAll({include: [
         {
             model:db.quiz,
-            where:{userId: req.params.userId}
+            where:{userId: req.params.userId, archiver: false}
         },
         {
             model:db.offre
