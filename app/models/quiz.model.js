@@ -18,6 +18,10 @@ module.exports = (sequelize, Sequelize) => {
     publier: {
       type: Sequelize.BOOLEAN,
       defaultValue: false
+    },
+    archiver: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false
   },
   }, { timestamps: true, });
 
