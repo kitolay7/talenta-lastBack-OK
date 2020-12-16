@@ -105,4 +105,6 @@ module.exports = function (app) {
   app.get("/quiztooffer/:offreId", offreControler.getQuestionsByOffer);
   app.delete("/offres/:id/delete", quizControler.destroyOffre);
   app.get("/users/:idUser/offres/:idOffre/free", offreControler.findCurrentOfferFreebyIdUser);
+  app.put("/quiz/:quizId/updateArchive", quizControler.updateQuizArchive);
+  app.get("/quizzs/:userId/archived", quizControler.findQuizArchived);
 };
