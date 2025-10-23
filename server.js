@@ -1,4 +1,4 @@
-const express = require("express");
+﻿const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const app = express();
@@ -9,11 +9,12 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const Importer = require('mysql-import');
 
+
 app.use(cors());
 app.use(function (req, res, next) {
 
   // Website you wish to allow to connect
-  // res.setHeader('Access-Control-Allow-Origin', 'http://154.126.92.194:4200/');
+  res.setHeader('Access-Control-Allow-Origin', 'localhost:4200');
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
@@ -27,6 +28,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 // in latest body-parser use like below.
 app.use(bodyParser.urlencoded({ extended: true }));
+
+require("./app/routes/admin.settings.routes")(app);
 
 // database
 const db = require("./app/models");
@@ -229,7 +232,7 @@ const initalizeTypeQuestion = async() => {
   .catch(error => {throw error});
 }
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8181;
 const server = http.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });

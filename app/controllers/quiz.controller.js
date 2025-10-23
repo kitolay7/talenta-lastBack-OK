@@ -688,7 +688,7 @@ exports.findAllQuiz = (req,res) => {
     db.quiz_to_offer.findAll({include: [
         {
             model:db.quiz,
-            where:{userId: req.params.userId, archiver: false}
+            where:{[Op.and]:[{userId: req.params.userId}, {archiver: false}]}
         },
         {
             model:db.offre

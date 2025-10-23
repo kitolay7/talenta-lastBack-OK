@@ -295,14 +295,13 @@ exports.confirm = (req, res) => {
 
         User.update({ confirmed: true }, { where: { id: id.id } })
         .then(resultat => {
-          // res
-          //   .send({ 
+          //res.send({ 
           //     data: user, 
-          //     role: authorities, 
-          //     message: 'Votre compte a été confirmé. Vous pouvez vous connecter maintenant', 
-          //     error: false 
-          //   });
-            res.redirect(`${process.env.BASE_URL_CLIENT}`);
+            //   role: authorities, 
+            //   message: 'Votre compte a été confirmé. Vous pouvez vous connecter maintenant', 
+            //   error: false 
+            // });
+            res.redirect(`${process.env.BASE_URL_CLIENT}candidat/registration`);
         }).catch(err => { throw err });
     })
   })

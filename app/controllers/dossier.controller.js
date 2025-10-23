@@ -21,9 +21,9 @@ exports.addFolder =  (req, res) => {
         console.log(">> Error while finding comment: ", err);
     });
   };
-  exports.getAllFolderUser = (req, res) => {
+exports.getAllFolderUser = (req, res) => {
     dossier.findAll({
-        where:{ userId: req.params.idUser},
+        where:{[Op.and]:[ {userId: req.params.idUser}, {archived:true}]},
         include:[{model: db.offre, as:'offres'}]
     })
     .then(data => {

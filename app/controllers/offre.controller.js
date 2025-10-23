@@ -2,6 +2,7 @@ const db = require("../models");
 const HttpStatus = require('http-status-codes');
 const io = require("socket.io-client");
 
+
 const fs = require('fs');
 const { error, count } = require("console");
 const { postulation, user, profile, offre } = require("../models");
@@ -180,6 +181,7 @@ exports.getOfferByCreatorPublished = async (req, res) => {
         await QuizToOffer.findAll({
             include: [
                 { model: db.quiz, where: { userId: req.params.userId } },
+				{ model: offres, where: { publier: true } },
                 { model: offres, include: [{ model: db.dossier, as: "folder" }] }
             ]
         })
@@ -245,7 +247,7 @@ exports.findAllOffer = (req, res) => {
 };
 exports.findAllOfferbyIdUser = (req, res) => {
     offres.findAll({
-        where: { userId: req.params.idUSer},
+        where: {[Op.and]:[{userId: req.params.idUSer}, {archived: false}]},
         include:
             [{
                 model:db.quiz,
@@ -417,12 +419,12 @@ exports.getOfferByPays = (req, res) => {
                 model: db.user,
                 through: db.postulation,
                 as: 'offer_postuled'
-            }, {
+            }/* {
                 model: db.quiz,
                 through: db.quiz_to_offer,
                 as:"quizInOffer",
                 where: {archiver: false, publier:true}
-            }]
+            }*/]
     })
         .then(data => {
             // console.log(data)
@@ -463,6 +465,163 @@ exports.getOfferArchived = (req, res) => {
         });
 }
 
+exports.reUpdateOfferQuizArchive = (req, res) => {
+    //await sequelize.query("UPDATE offres AS o, quizzs AS q, dossier_offers AS d, quiz_to_offers AS t SET o.archived = false, q.archiver = false, o.publier = true, q.publier = true WHERE o.id = d.offreId && d.offreId ="+req.params.offreId+" && q.id = t.quizzId && t.offreId = o.id");
+	offres.update(
+        {
+            publier: req.body.publier,
+            publicationDate: req.body.publier ? new Date() : null,
+			archived: false
+        }, {
+        where: { id:req.params.offreId },
+        returning: true
+    })
+        .then((result) => {
+            // console.log(`\n\n\n${result}\n\n\n`)
+            if (result[1] === 0) throw "Any field is modified"
+            res.status(HttpStatus.OK).json({
+                message: "this offer is reactivate successfully",
+                error: false
+            })
+        })
+        .catch((error) => {
+            // console.log(error);
+            res
+                .status(HttpStatus.NOT_ACCEPTABLE)
+                .send({ message: error, error: true });
+        });
+		
+	Quiz.update(
+        {
+            //publier: req.body.publier,
+            date_publication: req.body.publier ? new Date() : null,
+			archiver: false
+        }, {
+        //where:{[Op.and]:[{offres.id:req.params.offreId},{QuizToOffer.offreId:req.params.offreId}]},
+		where: { id:req.params.offreId },
+        returning: true
+    })
+        .then((result) => {
+            // console.log(`\n\n\n${result}\n\n\n`)
+            if (result[1] === 0) throw "Any field is modified"
+            res.status(HttpStatus.OK).json({
+                message: "this offer is reactivate successfully",
+                error: false
+            })
+        })
+        .catch((error) => {
+            // console.log(error);
+            res
+                .status(HttpStatus.NOT_ACCEPTABLE)
+                .send({ message: error, error: true });
+        });
+	Folder.update(
+        {
+            //publier: req.body.publier,
+            //date_publication: req.body.publier ? new Date() : null,
+			archived: false
+        }, {
+        //where:{[Op.and]:[{offres.id:req.params.offreId},{QuizToOffer.offreId:req.params.offreId}]},
+		where: { id:req.params.offreId },
+        returning: true
+    })
+        .then((result) => {
+            // console.log(`\n\n\n${result}\n\n\n`)
+            if (result[1] === 0) throw "Any field is modified"
+            res.status(HttpStatus.OK).json({
+                message: "this offer is reactivate successfully",
+                error: false
+            })
+        })
+        .catch((error) => {
+            // console.log(error);
+            res
+                .status(HttpStatus.NOT_ACCEPTABLE)
+                .send({ message: error, error: true });
+        });
+	/*	
+	Folder.destroy({
+		where: {
+			id:req.params.folderId
+		}
+	})
+	*/
+	
+}
+
+
+exports.updateOfferQuizArchive = (req, res) => {
+    offres.update(
+        {
+            publier: req.body.publier,
+			archived: req.body.archive
+        }, {
+        where: { id: req.params.offreId },
+        returning: true
+    })
+        .then((result) => {
+            // console.log(`\n\n\n${result}\n\n\n`)
+            if (result[1] === 0) throw "Any field is modified"
+            res.status(HttpStatus.OK).json({
+                message: "this offer is archived successfully",
+                error: false
+            })
+        })
+        .catch((error) => {
+            // console.log(error);
+            res
+                .status(HttpStatus.NOT_ACCEPTABLE)
+                .send({ message: error, error: true });
+        });
+	
+	Quiz.update(
+        {
+            id: req.params.offreId,
+			publier: req.body.publier,
+			archiver: req.body.archive
+        }, {
+        where: { id: req.params.quizzId },
+        returning: true
+    })
+        .then((result) => {
+            // console.log(`\n\n\n${result}\n\n\n`)
+            if (result[1] === 0) throw "Any field is modified"
+            res.status(HttpStatus.OK).json({
+                message: "this quizz is archived successfully",
+                error: false
+            })
+        })
+        .catch((error) => {
+            // console.log(error);
+            res
+                .status(HttpStatus.NOT_ACCEPTABLE)
+                .send({ message: error, error: true });
+        });
+	
+	QuizToOffer.update(
+        {
+            quizzId: req.params.offreId
+			
+        }, {
+        where: { quizzId: req.params.quizzId },
+        returning: true
+    })
+        .then((result) => {
+            // console.log(`\n\n\n${result}\n\n\n`)
+            if (result[1] === 0) throw "Any field is modified"
+            res.status(HttpStatus.OK).json({
+                message: "this quizz is archived successfully",
+                error: false
+            })
+        })
+        .catch((error) => {
+            // console.log(error);
+            res
+                .status(HttpStatus.NOT_ACCEPTABLE)
+                .send({ message: error, error: true });
+        });
+}
+
 exports.updateOfferStatusArchived = (req, res) => {
     offres.update(
         {
@@ -492,6 +651,7 @@ exports.updateOfferStatusPublished = (req, res) => {
     offres.update(
         {
             publier: req.body.publier,
+			canBeArchived: true,
             publicationDate: req.body.publier ? new Date() : null,
         }, {
         where: { id: req.params.id },
@@ -511,7 +671,30 @@ exports.updateOfferStatusPublished = (req, res) => {
                 .status(HttpStatus.NOT_ACCEPTABLE)
                 .send({ message: error, error: true });
         });
-
+	/*
+	Quiz.update(
+        {
+            publier: req.body.publier,
+            date_publication: req.body.publier ? new Date() : null,
+        }, {
+        where: { id: req.params.id },
+        returning: true
+    })
+        .then((result) => {
+            console.log(`\n\n\n${result}\n\n\n`)
+            // if (result[1] === 0) throw "Any field is modified"
+            res.status(HttpStatus.OK).json({
+                message: "this offer is updated successfully",
+                error: false
+            })
+        })
+        .catch((error) => {
+            console.log(error);
+            res
+                .status(HttpStatus.NOT_ACCEPTABLE)
+                .send({ message: error, error: true });
+        });
+	*/
 }
 exports.getOffersByPostulator = (req, res) => {
     db.postulation.findAll({

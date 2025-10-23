@@ -38,6 +38,10 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.BOOLEAN,
             defaultValue: false
         },
+		canBeArchived: {
+            type: Sequelize.BOOLEAN,
+            defaultValue: false
+        },
         post: {
             type: Sequelize.STRING
         },

@@ -46,6 +46,8 @@ module.exports = function (app) {
     name: 'diaporamas', maxCount: 8
   }, {
     name: 'cv', maxCount: 1
+  }, {
+    name: 'test', maxCount: 1
   }]
   ), offreControler.createOffre);
   app.get("/getOffer/:id", offreControler.getOfferById);
@@ -105,6 +107,8 @@ module.exports = function (app) {
   app.get("/quiztooffer/:offreId", offreControler.getQuestionsByOffer);
   app.delete("/offres/:id/delete", quizControler.destroyOffre);
   app.get("/users/:idUser/offres/:idOffre/free", offreControler.findCurrentOfferFreebyIdUser);
+  app.put("/offre/:offreId/:quizzId/updateArchive", offreControler.updateOfferQuizArchive);
+  app.put("/offre/:offreId/reUpdateArchive/:folderId", offreControler.reUpdateOfferQuizArchive);
   app.put("/quiz/:quizId/updateArchive", quizControler.updateQuizArchive);
   app.get("/quizzs/:userId/archived", quizControler.findQuizArchived);
 };

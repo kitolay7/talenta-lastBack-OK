@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    const Dossier = sequelize.define("dossier", {
+    const Dossier = sequelize.define("dossiers", {
       titre: {
         type: Sequelize.STRING
       },
@@ -9,6 +9,10 @@ module.exports = (sequelize, Sequelize) => {
       auteur: {
         type: Sequelize.STRING
       },
+	archived: {
+            type: Sequelize.BOOLEAN,
+            defaultValue: false
+        },
       remarque: {
         type: Sequelize.TEXT,
         defaultValue: null

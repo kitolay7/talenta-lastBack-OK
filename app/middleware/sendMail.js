@@ -43,7 +43,8 @@ exports.sendMail = async (req, res, next) => {
     
     
     let mail = {
-      from: process.env.FROM_EMAIL,
+	  from: process.env.SMTP_USER,
+      //from: process.env.FROM_EMAIL,
       to: req.body.email_recipient,
       subject: stripHtml(req.body.email_subject).result,
       html: req.body.email_content,

@@ -218,4 +218,6 @@ db.details_note.belongsTo(db.response_test,{
 })
 db.ROLES = ["candidat", "admin", "recruteur"];
 
+db.admin_setting = require("./admin_setting.model")(db.sequelize, db.Sequelize);
+
 module.exports = db;

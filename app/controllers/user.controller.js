@@ -4,6 +4,7 @@ const { reponse } = require('../models');
 const User = db.user;
 const Profile = db.profile;
 const bcrypt = require("bcryptjs");
+const offres = db.offre;
 
 
 
@@ -120,13 +121,57 @@ exports.updateUserRecruteur = (req,res) => {
           })
           .then(() => {
             res.status(HttpStatus.OK).json({
-              message: "user's profile updated",
+              //message: "Mise à jour profil effectué",
               error: false
             })
           })
           .catch((error) => {
             res.status(HttpStatus.NOT_MODIFIED).json({
-              other: "user's profile isn't updated",
+              //other: "user's profile isn't updated",
+              error: true
+            })
+           });
+       
+       
+		 Profile.update({          
+          numTel: req.body.numTel,
+          codePostal: req.body.codePostal,
+          societe: req.body.societe,
+          pays: req.body.pays
+        },{
+          where:{
+            userId: req.params.id
+        },
+          })
+          .then(() => {
+            res.status(HttpStatus.OK).json({
+              message: "Mise à jour effectué",
+              error: false
+            })
+          })
+          .catch((error) => {
+            res.status(HttpStatus.NOT_MODIFIED).json({
+              other: "Erreur de mise à jour",
+              error: true
+            })
+           });
+		   
+		offres.update({          
+          logoPath: req.files.logo[0].filename
+        },{
+          where:{
+            userId: req.params.id
+        },
+          })
+          .then(() => {
+            res.status(HttpStatus.OK).json({
+              message: "Mise à jour effectué",
+              error: false
+            })
+          })
+          .catch((error) => {
+            res.status(HttpStatus.NOT_MODIFIED).json({
+              other: "Erreur de mise à jour",
               error: true
             })
            });
