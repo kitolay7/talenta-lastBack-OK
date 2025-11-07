@@ -292,17 +292,80 @@ exports.confirm = (req, res) => {
         for (let i = 0; i < roles.length; i++) {
           authorities.push("ROLE_" + roles[i].name.toUpperCase());
         }
-
+		/*
         User.update({ confirmed: true }, { where: { id: id.id } })
         .then(resultat => {
-          //res.send({ 
-          //     data: user, 
-            //   role: authorities, 
-            //   message: 'Votre compte a été confirmé. Vous pouvez vous connecter maintenant', 
-            //   error: false 
-            // });
-            res.redirect(`${process.env.BASE_URL_CLIENT}candidat/registration`);
-        }).catch(err => { throw err });
+			//res.send({ 
+               //data: user, 
+               //role: authorities, 
+               //message: 'Votre compte a été confirmé. Vous pouvez vous connecter maintenant', 
+               //error: false 
+            //});
+            res.redirect(`${process.env.CLIENT_URL}/#/candidat/registration`);
+			
+			}).catch(err => { throw err });
+			*/
+		User.update({ confirmed: true }, { where: { id: id.id } })
+  .then(() => {
+	  console.log("ID : ", id);
+	// Choisir la route selon la valeur
+    const redirectPath =
+      authorities == 'ROLE_CANDIDAT'
+        ? '/#/candidat/registration'
+        : authorities == 'ROLE_RECRUTEUR'
+          ? '/#/recruteur/registration'
+          : '/#/'; // fallback
+		  
+
+    const target = `${process.env.CLIENT_URL}${redirectPath}`;
+    //const target = `${process.env.CLIENT_URL}/#/candidat/registration`;
+		res.status(200).send(`<!doctype html>
+	<html lang="fr">
+	<head>
+	  <meta charset="utf-8">
+	  <title>Confirmation</title>
+	  <meta name="viewport" content="width=device-width,initial-scale=1">
+	  <style>
+		html,body{height:100%;margin:0;background:#0f172a;}
+		.overlay{display:grid;place-items:center;height:100%;}
+		.card{
+		  width:min(520px,92%);
+		  background:linear-gradient(135deg,#22c55e,#16a34a);
+		  color:#fff;border-radius:18px;padding:28px 24px;
+		  box-shadow:0 20px 60px rgba(0,0,0,.25);
+		  text-align:center; position:relative; overflow:hidden;
+		}
+		.card h1{margin:0 0 10px;font:700 20px/1.2 system-ui,Segoe UI,Roboto,Helvetica,Arial}
+		.card p{margin:0 0 16px;opacity:.95}
+		.spinner{width:28px;height:28px;border:3px solid rgba(255,255,255,.35);
+		  border-top-color:#fff;border-radius:50%;margin:12px auto 0;animation:spin 1s linear infinite}
+		@keyframes spin{to{transform:rotate(360deg)}}
+		.badge{
+		  position:absolute; inset:auto -30px -30px auto; width:160px; height:160px;
+		  background:radial-gradient(closest-side,rgba(255,255,255,.18),transparent 70%);
+		  filter:blur(2px);
+		}
+	  </style>
+	</head>
+	<body>
+	  <div class="overlay">
+		<div class="card">
+		  <div class="badge"></div>
+		  <h1>Votre compte a été confirmé</h1>
+		  <p>Vous pouvez vous connecter maintenant.<br>Redirection en cours…</p>
+		  <div class="spinner"></div>
+		</div>
+	  </div>
+	  <script>
+		setTimeout(function(){ window.location.href = ${JSON.stringify(target)}; }, 2500);
+	  </script>
+	</body>
+	</html>`);
+	  })
+	  .catch(err => { throw err });
+	
+		
+		
     })
   })
 };
@@ -356,7 +419,9 @@ exports.forgotPW = async (req, res) => {
       			expiresIn: 864000 // 24 hours
     		});
     		//console.log(token)
-    		const url = `${req.headers.origin}/user/reset/${token}`
+    		//const url = `${req.headers.origin}/user/reset/${token}` 
+			const clientOrigin = process.env.CLIENT_URL || req.headers.origin;
+			const url = `${clientOrigin}/#/user/reset/${token}`;
     		
     		const mail = {
       			body: {
