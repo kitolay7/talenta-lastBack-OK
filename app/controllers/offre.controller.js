@@ -744,11 +744,13 @@ exports.listingOffreCandidat = (req, res) => {
                 });
         });
 }
+
+/*
 exports.postuleToOffer = async (req, res) => {
     try {
         const offre = await db.offre.findByPk(req.params.offreId)
             .then(offre => {
-                if (!offre) throw "Cet offre n'existe pas";
+                if (!offre) throw "Cette offre n'existe pas";
                 return offre;
             })
             .catch(error => {
@@ -784,7 +786,63 @@ exports.postuleToOffer = async (req, res) => {
                 error: true
             });
     }
+}*/
+
+exports.postuleToOffer = async (req, res) => {
+  try {
+    const offre = await db.offre.findByPk(req.params.offreId)
+      .then(offre => {
+        if (!offre) throw "Cette offre n'existe pas";
+        return offre;
+      })
+      .catch(error => {
+        throw error;
+      });
+
+    // === NOUVEAU : contrôle CV côté back ===
+    const userId = req.body.userId;
+    const profile = await db.profile.findOne({ where: { userId } });
+    if (!profile || !profile.cvPath) {
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .send({
+          message: "Vous devez d'abord télécharger votre CV dans votre profil avant de postuler à une offre.",
+          error: true
+        });
+    }
+    // ======================================
+
+    db.postulation.create({
+      userId: userId,
+      offreId: offre.dataValues.id,
+      // testDate: ...
+    })
+      .then((data) => {
+        res
+          .status(HttpStatus.CREATED)
+          .send({ data: data, message: "Vous avez postulé à cette offre", error: false });
+      })
+      .catch(err => {
+        console.log(err);
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .send({
+            message:
+              err.message || "Some error occurred while retrieving tutorials.",
+            error: true
+          });
+      })
+  } catch (error) {
+    res
+      .status(HttpStatus.NOT_FOUND)
+      .send({
+        message:
+          error.message || "Some error occurred while retrieving tutorials.",
+        error: true
+      });
+  }
 }
+
 
 exports.getUsersByOffer = async (req, res) => {
     try {
@@ -797,7 +855,7 @@ exports.getUsersByOffer = async (req, res) => {
                         attributes: ['id', 'email'],
                         include: [{
                             model: Profile,
-                            attributes: ['firstName', 'lastName']
+                            attributes: ['firstName', 'lastName', 'cvPath', 'cvOriginalName']
                         }]
                     },
                     {
@@ -807,6 +865,7 @@ exports.getUsersByOffer = async (req, res) => {
                 ]
         })
             .then(data => {
+				console.log('getUsersByOffer sample:', JSON.stringify(data[0], null, 2));
                 res
                     .status(HttpStatus.OK)
                     .send({

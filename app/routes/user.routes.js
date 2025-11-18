@@ -38,6 +38,21 @@ module.exports = function (app) {
       cb(null, `${uniqueSuffix}-${file.originalname}`);
     }
   });
+  
+    const fileStorageCv = multer.diskStorage({
+    destination: (req, file, cb) => {
+      if (file.mimetype.includes('application') || file.mimetype.includes('pdf') || file.mimetype.includes('msword')) {
+        cb(null, 'uploads/cv');
+      } else {
+        cb(null, 'uploads');
+      }
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, `${uniqueSuffix}-${file.originalname}`);
+    }
+  });
+
 
   app.get("/api/test/all", controller.allAccess);
 
@@ -76,4 +91,13 @@ module.exports = function (app) {
   app.put('/updateRecruteurProfile/:id', multer({storage: fileStorageUpdatingLogoProfile}).fields([{
     name: 'logo', maxCount:1
   }]), controller.updateUserRecruteur);
+  
+    // Upload / mise à jour du CV candidat
+  app.post(
+    "/users/:id/uploadCv",
+    [authJwt.verifyToken],
+    multer({ storage: fileStorageCv }).single('cv'),
+    controller.uploadCandidateCv
+  );
+  
 };

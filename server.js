@@ -8,7 +8,7 @@ const config = require("./app/config/db.config");
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const Importer = require('mysql-import');
-
+const cvRoutes = require('./app/routes/cv.routes');
 
 app.use(cors());
 app.use(function (req, res, next) {
@@ -28,6 +28,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 // in latest body-parser use like below.
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use('/cv', express.static(path.join(__dirname, 'uploads/cv')));
+
+app.use('/api/cv', cvRoutes);
 
 require("./app/routes/admin.settings.routes")(app);
 

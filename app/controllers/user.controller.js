@@ -45,6 +45,7 @@ User.findOne({
           }
         }).then ((response) => {
           // console.log(response)
+		  /*
           res
           .status(HttpStatus.OK)
           .send({
@@ -65,7 +66,38 @@ User.findOne({
             error: false,
             profile_photo_path: current_user.profile_photo_path
 
-          });
+          });*/
+		 Profile.findOne({
+          where: {
+            userId: req.params.idUser
+          }
+        }).then((response) => {
+          res
+            .status(HttpStatus.OK)
+            .send({
+              id: current_user.id,
+              username: current_user.username,
+              email: current_user.email,
+              roles: authorities,
+              numTel: response.numTel,
+              pays: response.pays,
+              codePostal: response.codePostal,
+              societe: response.societe,
+              metier: response.metierActuel,
+              anneesExperiences: response.anneesExperiences,
+              niveauEtudes: response.niveauEtudes,
+              diplomes: response.diplomes,
+              specialisations: response.specialisations,
+              profile: response,
+              error: false,
+              profile_photo_path: current_user.profile_photo_path,
+              // NEW : infos CV remontées au front
+              hasCv: !!response.cvPath,
+              cvPath: response.cvPath,
+              cvOriginalName: response.cvOriginalName
+            });
+        })
+
       })
         .catch(err => {
           res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: err.message, error: true });
@@ -190,6 +222,50 @@ exports.updateUserRecruteur = (req,res) => {
    
   
 }
+
+exports.uploadCandidateCv = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    if (!req.file) {
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .send({ message: "Aucun fichier CV reçu.", error: true });
+    }
+
+    const user = await User.findOne({ where: { id: userId } });
+    if (!user) {
+      return res
+        .status(HttpStatus.NOT_FOUND)
+        .send({ message: "Utilisateur introuvable.", error: true });
+    }
+
+    let profile = await Profile.findOne({ where: { userId } });
+    if (!profile) {
+      profile = await Profile.create({
+        userId,
+        firstName: '',
+        lastName: '',
+      });
+    }
+
+    profile.cvPath = req.file.filename;
+    profile.cvOriginalName = req.file.originalname;
+    await profile.save();
+
+    return res.status(HttpStatus.OK).send({
+      message: "CV enregistré avec succès.",
+      error: false,
+      cvPath: profile.cvPath,
+      cvOriginalName: profile.cvOriginalName
+    });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .send({ message: error.message || "Erreur lors de l'enregistrement du CV", error: true });
+  }
+};
+
 
 exports.updateUserPhoto = (req,res) => {
 

@@ -35,7 +35,18 @@ module.exports = (sequelize, Sequelize) => {
       },
       societe: {
         type: Sequelize.STRING
+      },
+	  // === NOUVEAU : infos CV du candidat ===
+      cvPath: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      cvOriginalName: {
+        type: Sequelize.STRING,
+        allowNull: true
       }
+      // ============================
+	  
     }, {
       freezeTableName: true,
     });
